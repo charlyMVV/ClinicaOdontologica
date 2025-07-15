@@ -53,7 +53,7 @@ public class AntecedentesController {
         Antecedentes antecedentesdb = antecedentesService.findById(antecedentes.getIdAntecedentes());
 
         if (!antecedentesdb.getCurp().equals(antecedentes.getCurp())) {
-            throw new IllegalArgumentException("La CURP no se puede modificar.");
+            throw new IllegalArgumentException("La CURP  del los antecedentes no se puede modificar.");
         }
 
         antecedentesdb.setDescripcionAntecedentes(antecedentes.getDescripcionAntecedentes());
@@ -63,7 +63,7 @@ public class AntecedentesController {
         return antecedentesService.update(antecedentesdb);
     }
 
-    // Guardar un antecedente
+    
     @PostMapping
     public ResponseEntity<Antecedentes> save(@RequestBody Antecedentes antecedentes) {
         return ResponseEntity.ok(antecedentesService.save(antecedentes));

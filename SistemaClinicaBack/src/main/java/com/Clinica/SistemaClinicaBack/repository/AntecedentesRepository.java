@@ -1,4 +1,3 @@
-
 package com.Clinica.SistemaClinicaBack.repository;
 
 import com.Clinica.SistemaClinicaBack.entity.Antecedentes;
