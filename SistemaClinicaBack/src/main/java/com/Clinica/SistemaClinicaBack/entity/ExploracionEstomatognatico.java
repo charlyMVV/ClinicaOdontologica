@@ -14,23 +14,23 @@ public class ExploracionEstomatognatico {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idEstomatognatico;
-    private int ruidos;
-    private int lateralidad;
-    private int apertura;
-    private int chasquidos;
-    private int crepitacion;
-    private int dificultadAbrirboca;
-    private int dolorAberturaLateralidad;
-    private int fatigaDolorMuscular;
-    private int disminuicionAbertura;
-    private int desviacionAberturaCierre;
+    private boolean ruidos;
+    private boolean lateralidad;
+    private boolean apertura;
+    private boolean chasquidos;
+    private boolean crepitacion;
+    private boolean dificultadAbrirboca;
+    private boolean dolorAberturaLateralidad;
+    private boolean fatigaDolorMuscular;
+    private boolean disminuicionAbertura;
+    private boolean desviacionAberturaCierre;
     @Column(name = "CURP_fk_estomatognatico", unique = true)
     private String curp;
 
     public ExploracionEstomatognatico() {
     }
 
-    public ExploracionEstomatognatico(int idEstomatognatico, int ruidos, int lateralidad, int apertura, int chasquidos, int crepitacion, int dificultadAbrirboca, int dolorAberturaLateralidad, int fatigaDolorMuscular, int disminuicionAbertura, int desviacionAberturaCierre, String curp) {
+    public ExploracionEstomatognatico(int idEstomatognatico, boolean ruidos, boolean lateralidad, boolean apertura, boolean chasquidos, boolean crepitacion, boolean dificultadAbrirboca, boolean dolorAberturaLateralidad, boolean fatigaDolorMuscular, boolean disminuicionAbertura, boolean desviacionAberturaCierre, String curp) {
         this.idEstomatognatico = idEstomatognatico;
         this.ruidos = ruidos;
         this.lateralidad = lateralidad;
@@ -53,83 +53,83 @@ public class ExploracionEstomatognatico {
         this.idEstomatognatico = idEstomatognatico;
     }
 
-    public int getRuidos() {
+    public boolean isRuidos() {
         return ruidos;
     }
 
-    public void setRuidos(int ruidos) {
+    public void setRuidos(boolean ruidos) {
         this.ruidos = ruidos;
     }
 
-    public int getLateralidad() {
+    public boolean isLateralidad() {
         return lateralidad;
     }
 
-    public void setLateralidad(int lateralidad) {
+    public void setLateralidad(boolean lateralidad) {
         this.lateralidad = lateralidad;
     }
 
-    public int getApertura() {
+    public boolean isApertura() {
         return apertura;
     }
 
-    public void setApertura(int apertura) {
+    public void setApertura(boolean apertura) {
         this.apertura = apertura;
     }
 
-    public int getChasquidos() {
+    public boolean isChasquidos() {
         return chasquidos;
     }
 
-    public void setChasquidos(int chasquidos) {
+    public void setChasquidos(boolean chasquidos) {
         this.chasquidos = chasquidos;
     }
 
-    public int getCrepitacion() {
+    public boolean isCrepitacion() {
         return crepitacion;
     }
 
-    public void setCrepitacion(int crepitacion) {
+    public void setCrepitacion(boolean crepitacion) {
         this.crepitacion = crepitacion;
     }
 
-    public int getDificultadAbrirboca() {
+    public boolean isDificultadAbrirboca() {
         return dificultadAbrirboca;
     }
 
-    public void setDificultadAbrirboca(int dificultadAbrirboca) {
+    public void setDificultadAbrirboca(boolean dificultadAbrirboca) {
         this.dificultadAbrirboca = dificultadAbrirboca;
     }
 
-    public int getDolorAberturaLateralidad() {
+    public boolean isDolorAberturaLateralidad() {
         return dolorAberturaLateralidad;
     }
 
-    public void setDolorAberturaLateralidad(int dolorAberturaLateralidad) {
+    public void setDolorAberturaLateralidad(boolean dolorAberturaLateralidad) {
         this.dolorAberturaLateralidad = dolorAberturaLateralidad;
     }
 
-    public int getFatigaDolorMuscular() {
+    public boolean isFatigaDolorMuscular() {
         return fatigaDolorMuscular;
     }
 
-    public void setFatigaDolorMuscular(int fatigaDolorMuscular) {
+    public void setFatigaDolorMuscular(boolean fatigaDolorMuscular) {
         this.fatigaDolorMuscular = fatigaDolorMuscular;
     }
 
-    public int getDisminuicionAbertura() {
+    public boolean isDisminuicionAbertura() {
         return disminuicionAbertura;
     }
 
-    public void setDisminuicionAbertura(int disminuicionAbertura) {
+    public void setDisminuicionAbertura(boolean disminuicionAbertura) {
         this.disminuicionAbertura = disminuicionAbertura;
     }
 
-    public int getDesviacionAberturaCierre() {
+    public boolean isDesviacionAberturaCierre() {
         return desviacionAberturaCierre;
     }
 
-    public void setDesviacionAberturaCierre(int desviacionAberturaCierre) {
+    public void setDesviacionAberturaCierre(boolean desviacionAberturaCierre) {
         this.desviacionAberturaCierre = desviacionAberturaCierre;
     }
 
@@ -140,6 +140,8 @@ public class ExploracionEstomatognatico {
     public void setCurp(String curp) {
         this.curp = curp;
     }
+
+   
     
  
     

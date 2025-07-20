@@ -71,24 +71,24 @@ public class CabezaCuelloController {
             throw new IllegalArgumentException("la curp no se puede modificar.");
         }
         
-        cabezaCuellodb.setExostosis(cabezaCuello.getExostosis());
-        cabezaCuellodb.setEndotosis(cabezaCuello.getEndotosis());
-        cabezaCuellodb.setDolicocefalico(cabezaCuello.getDolicocefalico());
-        cabezaCuellodb.setMesocefalico(cabezaCuello.getMesocefalico());
-        cabezaCuellodb.setBranquicefalico(cabezaCuello.getBranquicefalico());
-        cabezaCuellodb.setAsimetriaTransversal(cabezaCuello.getAsimetriaTransversal());
-        cabezaCuellodb.setAsimetriaLongitudinal(cabezaCuello.getAsimetriaLongitudinal());
-        cabezaCuellodb.setPerfilConcavo(cabezaCuello.getPerfilConcavo());
-        cabezaCuellodb.setPerfilConvexo(cabezaCuello.getPerfilConvexo());
-        cabezaCuellodb.setPerfilRecto(cabezaCuello.getPerfilRecto());
-        cabezaCuellodb.setPielNormal(cabezaCuello.getPielNormal());
-        cabezaCuellodb.setPielPalida(cabezaCuello.getPielPalida());
-        cabezaCuellodb.setPielCianotica(cabezaCuello.getPielCianotica());
-        cabezaCuellodb.setPielEnrojecida(cabezaCuello.getPielEnrojecida());
-        cabezaCuellodb.setMusculosHipotonicos(cabezaCuello.getMusculosHipotonicos());
-        cabezaCuellodb.setMusculosHipertonicos(cabezaCuello.getMusculosHipertonicos());
-        cabezaCuellodb.setMusculosEspasticos(cabezaCuello.getMusculosEspasticos());
-        cabezaCuellodb.setCadenaGanglionar(cabezaCuello.getCadenaGanglionar());
+        cabezaCuellodb.setExostosis(cabezaCuello.isExostosis());
+        cabezaCuellodb.setEndotosis(cabezaCuello.isEndotosis());
+        cabezaCuellodb.setDolicocefalico(cabezaCuello.isDolicocefalico());
+        cabezaCuellodb.setMesocefalico(cabezaCuello.isMesocefalico());
+        cabezaCuellodb.setBranquicefalico(cabezaCuello.isBranquicefalico());
+        cabezaCuellodb.setAsimetriaTransversal(cabezaCuello.isAsimetriaTransversal());
+        cabezaCuellodb.setAsimetriaLongitudinal(cabezaCuello.isAsimetriaLongitudinal());
+        cabezaCuellodb.setPerfilConcavo(cabezaCuello.isPerfilConcavo());
+        cabezaCuellodb.setPerfilConvexo(cabezaCuello.isPerfilConvexo());
+        cabezaCuellodb.setPerfilRecto(cabezaCuello.isPerfilRecto());
+        cabezaCuellodb.setPielNormal(cabezaCuello.isPielNormal());
+        cabezaCuellodb.setPielPalida(cabezaCuello.isPielPalida());
+        cabezaCuellodb.setPielCianotica(cabezaCuello.isPielCianotica());
+        cabezaCuellodb.setPielEnrojecida(cabezaCuello.isPielEnrojecida());
+        cabezaCuellodb.setMusculosHipotonicos(cabezaCuello.isMusculosHipotonicos());
+        cabezaCuellodb.setMusculosHipertonicos(cabezaCuello.isMusculosHipertonicos());
+        cabezaCuellodb.setMusculosEspasticos(cabezaCuello.isMusculosEspasticos());
+        cabezaCuellodb.setCadenaGanglionar(cabezaCuello.isCadenaGanglionar());
         
         
         

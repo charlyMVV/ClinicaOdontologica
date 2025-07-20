@@ -18,8 +18,8 @@ export class Antecedentes {
   }
 
   
-existenAntecedentesPorCurp(curp: string): Observable<boolean> {
+  existenAntecedentesPorCurp(curp: string): Observable<boolean> {
   return this.http.get<boolean>(`${this.api}/existen/${curp}`);
-}
+  }
 
 }

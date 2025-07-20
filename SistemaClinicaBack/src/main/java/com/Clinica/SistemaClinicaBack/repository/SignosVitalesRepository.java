@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SignosVitalesRepository extends JpaRepository<SignosVitales, Integer>{
-    
+    boolean existsByCurp(String curp);
 }

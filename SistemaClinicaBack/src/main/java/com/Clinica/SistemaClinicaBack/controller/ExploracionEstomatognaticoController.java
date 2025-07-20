@@ -73,16 +73,16 @@ public class ExploracionEstomatognaticoController {
             throw new IllegalAccessException("La Curp del estomatognatico no se puede modificar");
         }
         
-        exploracionEstomatognaticodb.setRuidos(exploracionEstomatognatico.getRuidos());
-        exploracionEstomatognaticodb.setLateralidad(exploracionEstomatognatico.getLateralidad());
-        exploracionEstomatognaticodb.setApertura(exploracionEstomatognatico.getApertura());
-        exploracionEstomatognaticodb.setChasquidos(exploracionEstomatognatico.getChasquidos());
-        exploracionEstomatognaticodb.setCrepitacion(exploracionEstomatognatico.getCrepitacion());
-        exploracionEstomatognaticodb.setDificultadAbrirboca(exploracionEstomatognatico.getDificultadAbrirboca());
-        exploracionEstomatognaticodb.setDolorAberturaLateralidad(exploracionEstomatognatico.getDolorAberturaLateralidad());
-        exploracionEstomatognaticodb.setFatigaDolorMuscular(exploracionEstomatognatico.getFatigaDolorMuscular());
-        exploracionEstomatognaticodb.setDisminuicionAbertura(exploracionEstomatognatico.getDisminuicionAbertura());
-        exploracionEstomatognaticodb.setDesviacionAberturaCierre(exploracionEstomatognatico.getDesviacionAberturaCierre());
+        exploracionEstomatognaticodb.setRuidos(exploracionEstomatognatico.isRuidos());
+        exploracionEstomatognaticodb.setLateralidad(exploracionEstomatognatico.isLateralidad());
+        exploracionEstomatognaticodb.setApertura(exploracionEstomatognatico.isApertura());
+        exploracionEstomatognaticodb.setChasquidos(exploracionEstomatognatico.isChasquidos());
+        exploracionEstomatognaticodb.setCrepitacion(exploracionEstomatognatico.isCrepitacion());
+        exploracionEstomatognaticodb.setDificultadAbrirboca(exploracionEstomatognatico.isDificultadAbrirboca());
+        exploracionEstomatognaticodb.setDolorAberturaLateralidad(exploracionEstomatognatico.isDolorAberturaLateralidad());
+        exploracionEstomatognaticodb.setFatigaDolorMuscular(exploracionEstomatognatico.isFatigaDolorMuscular());
+        exploracionEstomatognaticodb.setDisminuicionAbertura(exploracionEstomatognatico.isDisminuicionAbertura());
+        exploracionEstomatognaticodb.setDesviacionAberturaCierre(exploracionEstomatognatico.isDesviacionAberturaCierre());
      
         return exploracionEstomatognaticaService.update(exploracionEstomatognaticodb);
     }

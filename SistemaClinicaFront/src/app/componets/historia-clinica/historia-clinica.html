@@ -293,176 +293,191 @@
         <div class="row g-3 gy-4">
           <div class="col-md-4">
             <label>¿Con que freciencia se lava los dientes?</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="frecuenciaLavadoDientes"
+              name="frecuenciaLavadoDientes">
           </div>
           <div class="col-md-4">
-            <label for="axuliares">¿Utuliza auxiliares de higiene bucal?</label>
-            <select id="auxiliares" class="form-select">
+            <label for="auxiliares">usa auxiliares de higiene bucal?</label>
+            <select id="auxiliares" class="form-select" [(ngModel)]="usaAuxiliaresHigiene" name="usaAuxiliaresHigiene">
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
           </div>
           <div class="col-md-4">
             <label>¿Cuales utiliza?</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="tiposAuxiliaresHigiene" name="tiposAuxiliaresHigiene">
           </div>
           <div class="col-md-2">
             <label>Grupo Sanguineo</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="grupoSanguineo" name="grupoSanguineo">
+
           </div>
           <div class="col-md-2">
             <label>Fator Rh</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="factorRh" name="factorRh">
           </div>
           <div class="col-md-3">
             <label>¿Tiene Cartilla de vacunación?</label>
-            <select id="cartilla" class="form-select">
+            <select id="cartilla" class="form-select" [(ngModel)]="cartillaVacunacion" name="cartillaVacunacion">
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
           </div>
           <div class="col-md-3">
             <label>¿Tiene el esquema Completo?</label>
-            <select id="esquema" class="form-select">
+            <select id="esquema" class="form-select" [(ngModel)]="esquemaCompleto" name="esquemaCompleto">
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
           </div>
           <div class="col-md-2">
             <label>¿Cuál falta?</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="vacunasFaltantes" name="vacunasFaltantes">
           </div>
 
           <div class="col-md-3">
             <label>Antecedentes alergicos</label>
-            <select id="antecedentesAlergicos" class="form-select">
+            <select id="antecedentesAlergicos" class="form-select" [(ngModel)]="antecedentesAlergicos"
+              name="antecedentesAlergicos">
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
           </div>
           <div class="col-md-3">
             <label>¿Cuál?</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="cualAlergicos" name="cualAlergicos">
           </div>
 
-           <div class="col-md-3">
+          <div class="col-md-3">
             <label>Antibioticos</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="antibioticos" name="antibioticos">
           </div>
-          
+
           <div class="col-md-3">
             <label>Analgésicos</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="analgesicos" name="analgesicos">
           </div>
-           <div class="col-md-3">
+          <div class="col-md-3">
             <label>Anestésicos</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="anestesicos" name="anestesicos">
           </div>
           <div class="col-md-3">
             <label>Alimentos</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="alimentos" name="alimentos">
           </div>
           <div class="col-md-3">
             <label>Otras Alergias</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="otrasAlergias" name="otrasAlergias">
           </div>
           <div class="col-md-3">
-            <label></label>
+            <label>¿Consume golosinas entre comidas?</label>
+            <select id="golosinas" class="form-select" [(ngModel)]="golosinas" name="golosinas">
+              <option value="Si">Si</option>
+              <option value="No">No</option>
+            </select>
           </div>
           <div class="col-md-3">
             <label>Adicciones</label>
-            <select id="adicciones" class="form-select">
+            <select id="adicciones" class="form-select" [(ngModel)]="tieneAdicciones" name="tieneAdicciones">
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
           </div>
           <div class="col-md-3">
             <label>Tabaco</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="tabaco" name="tabaco">
           </div>
           <div class="col-md-3">
             <label>Alcohol</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="alcohol" name="alcohol">
           </div>
           <div class="col-md-3">
             <label>Otras adicciones</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="otrasAdicciones" name="otrasAdicciones">
           </div>
 
           <div class="col-md-3">
             <label>¿Ha sido hospitalizado?</label>
-            <select id="hospitalizacion" class="form-select">
+            <select id="hospitalizacion" class="form-select" [(ngModel)]="haSidoHospitalizado"
+              name="haSidoHospitalizado">
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
           </div>
           <div class="col-md-2">
             <label>Fecha</label>
-            <input type="Date" class="form-control">
+            <input type="Date" class="form-control" [(ngModel)]="fechaHospitalizacion" name="fechaHospitalizacion">
           </div>
           <div class="col-md-4">
             <label>Motivo</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="motivoHospitalizacion" name="motivoHospitalizacion">
           </div>
           <div class="col-md-3">
             <label>Padecimiento Actual</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="padecimientoActual" name="padecimientoActual">
           </div>
 
 
           <div class="col-md-3">
             <label>¿Ha sido anestesiado?</label>
-            <select id="anestesiado" class="form-select">
+            <select id="anestesiado" class="form-select" [(ngModel)]="haSidoAnestesiado" name="haSidoAnestesiado">
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
           </div>
           <div class="col-md-3">
             <label>¿Ha recibido transfusión?</label>
-            <select id="transfusion" class="form-select">
+            <select id="transfusion" class="form-select" [(ngModel)]="haRecibidoTransfusion"
+              name="haRecibidoTransfusion">
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
           </div>
           <div class="col-md-3">
             <label>¿Tatuajes o perforaciones?</label>
-            <select id="tatuajesperforaciones" class="form-select">
+            <select id="tatuajesperforaciones" class="form-select" [(ngModel)]="haRecibidoPerforaciones"
+              name="haRecibidoPerforaciones">
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
           </div>
           <div class="col-md-3">
             <label>¿Intervensiones quirurgicas?</label>
-            <select id="quirurgicas" class="form-select">
+            <select id="quirurgicas" class="form-select" [(ngModel)]="tieneIntervenciones" name="tieneIntervenciones">
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
           </div>
           <div class="col-md-4">
             <label>¿Consume algun medicamento?</label>
-            <select id="medicamento" class="form-select">
+            <select id="medicamento" class="form-select" [(ngModel)]="consumeMedicamento" name="consumeMedicamento">
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
           </div>
           <div class="col-md-2">
             <label>¿Discapacidades?</label>
-            <select id="discapacidades" class="form-select">
+            <select id="discapacidades" class="form-select" [(ngModel)]="discapacidad" name="discapacidad">
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
           </div>
           <div class="col-md-2">
             <label>¿Embarazo?</label>
-            <select id="Embarazo" class="form-select">
+            <select id="Embarazo" class="form-select" [(ngModel)]="embarazo" name="embarazo">
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
           </div>
           <div class="col-md-4">
             <label>¿Que parte del cuerpo?</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" [(ngModel)]="parteCuerpo" name="parteCuerpo">
           </div>
+        </div>
+        <div class="text-end mt-4">
+          <button type="submit" class="btn btn-primary" (click)="addAntecedentesNoPatologicos()">
+            Guardar avances
+          </button>
         </div>
       </form>
     </div>
@@ -470,16 +485,35 @@
 
     <!--SignosVitales -->
     <div class="tab-pane fade" id="vitales" role="tabpanel">
-      <div class="row g-3">
-        <div class="col-md-4"><label>Temperatura (°C):</label><input type="text" class="form-control"></div>
-        <div class="col-md-4"><label>Frecuencia Respiratoria:</label><input type="text" class="form-control"></div>
-        <div class="col-md-4"><label>Tensión Arterial:</label><input type="text" class="form-control"></div>
-      </div>
-      <div class="row g-3 mt-2">
-        <div class="col-md-4"><label>Frecuencia Cardíaca:</label><input type="text" class="form-control"></div>
-        <div class="col-md-4"><label>Peso (kg):</label><input type="text" class="form-control"></div>
-        <div class="col-md-4"><label>Talla (cm):</label><input type="text" class="form-control"></div>
-      </div>
+      <form class="tab-content mt-3">
+        <div class="row g-3">
+          <div class="col-md-4"><label>Temperatura (°C):</label>
+            <input type="text" class="form-control" [(ngModel)]="temperatura" name="temperatura">
+          </div>
+          <div class="col-md-4"><label>Frecuencia Respiratoria:</label>
+            <input type="text" class="form-control" [(ngModel)]="frecuenciaRespiratoria" name="frecuenciaRespiratoria">
+          </div>
+          <div class="col-md-4"><label>Tensión Arterial:</label>
+            <input type="text" class="form-control" [(ngModel)]="tensionArterial" name="tensionArterial">
+          </div>
+        </div>
+        <div class="row g-3 mt-2">
+          <div class="col-md-4"><label>Frecuencia Cardíaca:</label>
+            <input type="text" class="form-control" [(ngModel)]="frecuenciaCardiaca" name="frecuenciaCardiaca">
+          </div>
+          <div class="col-md-4"><label>Peso (kg):</label>
+            <input type="text" class="form-control" [(ngModel)]="peso" name="peso">
+          </div>
+          <div class="col-md-4"><label>Talla (cm):</label>
+            <input type="text" class="form-control" [(ngModel)]="talla" name="talla">
+          </div>
+        </div>
+        <div class="text-end mt-4">
+          <button type="submit" class="btn btn-primary" (click)="addSignosVitales()">
+            Guardar avances
+          </button>
+        </div>
+      </form>
     </div>
 
 
@@ -495,7 +529,7 @@
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="exostosis" name="exostosis">
+                <input class="form-check-input" type="checkbox" id="exostosis" name="exostosis" [(ngModel)]="cabezaCuello.exostosis" name="exostosis">
                 <label class="form-check-label fw-semibold" for="exostosis">
                   Exostosis
                 </label>
@@ -503,7 +537,7 @@
             </div>
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="endotosis" name="endotosis">
+                <input class="form-check-input" type="checkbox" id="endotosis" name="endotosis" [(ngModel)]="cabezaCuello.endotosis" name="endotosis">
                 <label class="form-check-label fw-semibold" for="endotosis">
                   Endotosis
                 </label>
@@ -519,7 +553,7 @@
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="dolicocefalico" name="dolicocefalico">
+                <input class="form-check-input" type="checkbox" id="dolicocefalico" name="dolicocefalico" [(ngModel)]="cabezaCuello.dolicocefalico">
                 <label class="form-check-label fw-semibold" for="dolicocefalico">
                   Dolicocefálico
                 </label>
@@ -527,7 +561,7 @@
             </div>
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="mesocefalico" name="mesocefalico">
+                <input class="form-check-input" type="checkbox" id="mesocefalico" name="mesocefalico" [(ngModel)]="cabezaCuello.mesocefalico" >
                 <label class="form-check-label fw-semibold" for="mesocefalico">
                   Mesocefálico
                 </label>
@@ -535,7 +569,7 @@
             </div>
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="branquicefalico" name="branquicefalico">
+                <input class="form-check-input" type="checkbox" id="branquicefalico" name="branquicefalico" [(ngModel)]="cabezaCuello.branquicefalico" >
                 <label class="form-check-label fw-semibold" for="branquicefalico">
                   Braquicefálico
                 </label>
@@ -551,7 +585,7 @@
           <div class="row g-3 mb-3">
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="asimetriaTransversal" name="asimetriaTransversal">
+                <input class="form-check-input" type="checkbox" id="asimetriaTransversal" name="asimetriaTransversal" [(ngModel)]="cabezaCuello.asimetriaTransversal">
                 <label class="form-check-label fw-semibold" for="asimetriaTransversal">
                   Transversales
                 </label>
@@ -559,7 +593,7 @@
             </div>
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="asimetriaLongitudinal" name="asimetriaLongitudinal">
+                <input class="form-check-input" type="checkbox" id="asimetriaLongitudinal" name="asimetriaLongitudinal" [(ngModel)]="cabezaCuello.asimetriaLongitudinal">
                 <label class="form-check-label fw-semibold" for="asimetriaLongitudinal">
                   Longitudinales
                 </label>
@@ -572,7 +606,7 @@
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="concavo" name="concavo">
+                <input class="form-check-input" type="checkbox" id="concavo" name="perfilConcavo" [(ngModel)]="cabezaCuello.perfilConcavo">
                 <label class="form-check-label fw-semibold" for="concavo">
                   Cóncavo
                 </label>
@@ -580,7 +614,7 @@
             </div>
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="convexo" name="convexo">
+                <input class="form-check-input" type="checkbox" id="convexo" name="perfilConvexo" [(ngModel)]="cabezaCuello.perfilConvexo">
                 <label class="form-check-label fw-semibold" for="convexo">
                   Convexo
                 </label>
@@ -588,7 +622,7 @@
             </div>
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="recto" name="recto">
+                <input class="form-check-input" type="checkbox" id="recto" name="perfilRecto" [(ngModel)]="cabezaCuello.perfilRecto">
                 <label class="form-check-label fw-semibold" for="recto">
                   Recto
                 </label>
@@ -602,7 +636,7 @@
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="normal" name="normal">
+                <input class="form-check-input" type="checkbox" id="normal" name="pielNormal" [(ngModel)]="cabezaCuello.pielNormal" >
                 <label class="form-check-label fw-semibold" for="normal">
                   Normal
                 </label>
@@ -610,7 +644,7 @@
             </div>
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="palida" name="palida">
+                <input class="form-check-input" type="checkbox" id="palida" name="pielPalida" [(ngModel)]="cabezaCuello.pielPalida" >
                 <label class="form-check-label fw-semibold" for="palida">
                   Pálida
                 </label>
@@ -618,7 +652,7 @@
             </div>
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="cianotica" name="cianotica">
+                <input class="form-check-input" type="checkbox" id="cianotica" name="pielCianotica" [(ngModel)]="cabezaCuello.pielCianotica">
                 <label class="form-check-label fw-semibold" for="cianotica">
                   Cianótica
                 </label>
@@ -626,7 +660,7 @@
             </div>
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="enrojecida" name="enrojecida">
+                <input class="form-check-input" type="checkbox" id="enrojecida" name="pielEnrojecida" [(ngModel)]="cabezaCuello.pielEnrojecida" >
                 <label class="form-check-label fw-semibold" for="enrojecida">
                   Enrojecida
                 </label>
@@ -642,7 +676,7 @@
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="hipotonicos" name="hipotonicos">
+                <input class="form-check-input" type="checkbox" id="hipotonicos" name="musculosHipotonicos" [(ngModel)]="cabezaCuello.musculosHipotonicos" >
                 <label class="form-check-label fw-semibold" for="hipotonicos">
                   Hipotónicos
                 </label>
@@ -650,7 +684,7 @@
             </div>
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="hipertonicos" name="hipertonicos">
+                <input class="form-check-input" type="checkbox" id="hipertonicos" name="musculosHipertonicos" [(ngModel)]="cabezaCuello.musculosHipertonicos">
                 <label class="form-check-label fw-semibold" for="hipertonicos">
                   Hipertónicos
                 </label>
@@ -658,7 +692,7 @@
             </div>
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="espasticos" name="espasticos">
+                <input class="form-check-input" type="checkbox" id="espasticos" name="musculosEspasticos" [(ngModel)]="cabezaCuello.musculosEspasticos" >
                 <label class="form-check-label fw-semibold" for="espasticos">
                   Espásticos
                 </label>
@@ -673,13 +707,18 @@
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <div class="form-check p-3 border rounded bg-light shadow-sm h-100">
-                <input class="form-check-input" type="checkbox" id="cadenaGanglionar" name="cadenaGanglionar">
+                <input class="form-check-input" type="checkbox" id="cadenaGanglionar" name="cadenaGanglionar" [(ngModel)]="cabezaCuello.cadenaGanglionar" >
                 <label class="form-check-label fw-semibold" for="cadenaGanglionar">
                   ¿Se palpa cadena ganglionar?
                 </label>
               </div>
             </div>
           </div>
+        </div>
+        <div class="text-end mt-4">
+          <button type="submit" class="btn btn-primary" (click)="addCabezaCuello()">
+            Guardar avances
+          </button>
         </div>
       </form>
     </div>

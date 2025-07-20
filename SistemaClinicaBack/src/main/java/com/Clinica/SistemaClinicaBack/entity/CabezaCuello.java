@@ -15,31 +15,31 @@ public class CabezaCuello {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idExploracionCabezacuello;
-    private int exostosis;
-    private int endotosis;      
-    private int dolicocefalico;
-    private int mesocefalico;
-    private int branquicefalico;       
-    private int asimetriaTransversal;       
-    private int asimetriaLongitudinal;       
-    private int perfilConcavo;       
-    private int perfilConvexo;       
-    private int perfilRecto;
-    private int pielNormal;
-    private int pielPalida;       
-    private int pielCianotica;       
-    private int pielEnrojecida;      
-    private int musculosHipotonicos;
-    private int musculosHipertonicos;      
-    private int musculosEspasticos;        
-    private int cadenaGanglionar;
+    private boolean exostosis;
+    private boolean endotosis;      
+    private boolean dolicocefalico;
+    private boolean mesocefalico;
+    private boolean branquicefalico;       
+    private boolean asimetriaTransversal;       
+    private boolean asimetriaLongitudinal;       
+    private boolean perfilConcavo;       
+    private boolean perfilConvexo;       
+    private boolean perfilRecto;
+    private boolean pielNormal;
+    private boolean pielPalida;       
+    private boolean pielCianotica;       
+    private boolean pielEnrojecida;      
+    private boolean musculosHipotonicos;
+    private boolean musculosHipertonicos;      
+    private boolean musculosEspasticos;        
+    private boolean cadenaGanglionar;
     @Column(unique = true, name = "CURP_fk_exploracion")
     private String curp;
 
     public CabezaCuello() {
     }
 
-    public CabezaCuello(int idExploracionCabezacuello, int exostosis, int endotosis, int dolicocefalico, int mesocefalico, int branquicefalico, int asimetriaTransversal, int asimetriaLongitudinal, int perfilConcavo, int perfilConvexo, int perfilRecto, int pielNormal, int pielPalida, int pielCianotica, int pielEnrojecida, int musculosHipotonicos, int musculosHipertonicos, int musculosEspasticos, int cadenaGanglionar, String curp) {
+    public CabezaCuello(int idExploracionCabezacuello, boolean exostosis, boolean endotosis, boolean dolicocefalico, boolean mesocefalico, boolean branquicefalico, boolean asimetriaTransversal, boolean asimetriaLongitudinal, boolean perfilConcavo, boolean perfilConvexo, boolean perfilRecto, boolean pielNormal, boolean pielPalida, boolean pielCianotica, boolean pielEnrojecida, boolean musculosHipotonicos, boolean musculosHipertonicos, boolean musculosEspasticos, boolean cadenaGanglionar, String curp) {
         this.idExploracionCabezacuello = idExploracionCabezacuello;
         this.exostosis = exostosis;
         this.endotosis = endotosis;
@@ -61,10 +61,6 @@ public class CabezaCuello {
         this.cadenaGanglionar = cadenaGanglionar;
         this.curp = curp;
     }
-    
-    
-
-    
 
     public int getIdExploracionCabezacuello() {
         return idExploracionCabezacuello;
@@ -74,149 +70,147 @@ public class CabezaCuello {
         this.idExploracionCabezacuello = idExploracionCabezacuello;
     }
 
-    public int getExostosis() {
+    public boolean isExostosis() {
         return exostosis;
     }
 
-    public void setExostosis(int exostosis) {
+    public void setExostosis(boolean exostosis) {
         this.exostosis = exostosis;
     }
 
-    public int getEndotosis() {
+    public boolean isEndotosis() {
         return endotosis;
     }
 
-    public void setEndotosis(int endotosis) {
+    public void setEndotosis(boolean endotosis) {
         this.endotosis = endotosis;
     }
 
-    public int getDolicocefalico() {
+    public boolean isDolicocefalico() {
         return dolicocefalico;
     }
 
-    public void setDolicocefalico(int dolicocefalico) {
+    public void setDolicocefalico(boolean dolicocefalico) {
         this.dolicocefalico = dolicocefalico;
     }
 
-    
-
-    public int getMesocefalico() {
+    public boolean isMesocefalico() {
         return mesocefalico;
     }
 
-    public void setMesocefalico(int mesocefalico) {
+    public void setMesocefalico(boolean mesocefalico) {
         this.mesocefalico = mesocefalico;
     }
 
-    public int getBranquicefalico() {
+    public boolean isBranquicefalico() {
         return branquicefalico;
     }
 
-    public void setBranquicefalico(int branquicefalico) {
+    public void setBranquicefalico(boolean branquicefalico) {
         this.branquicefalico = branquicefalico;
     }
 
-    public int getAsimetriaTransversal() {
+    public boolean isAsimetriaTransversal() {
         return asimetriaTransversal;
     }
 
-    public void setAsimetriaTransversal(int asimetriaTransversal) {
+    public void setAsimetriaTransversal(boolean asimetriaTransversal) {
         this.asimetriaTransversal = asimetriaTransversal;
     }
 
-    public int getAsimetriaLongitudinal() {
+    public boolean isAsimetriaLongitudinal() {
         return asimetriaLongitudinal;
     }
 
-    public void setAsimetriaLongitudinal(int asimetriaLongitudinal) {
+    public void setAsimetriaLongitudinal(boolean asimetriaLongitudinal) {
         this.asimetriaLongitudinal = asimetriaLongitudinal;
     }
 
-    public int getPerfilConcavo() {
+    public boolean isPerfilConcavo() {
         return perfilConcavo;
     }
 
-    public void setPerfilConcavo(int perfilConcavo) {
+    public void setPerfilConcavo(boolean perfilConcavo) {
         this.perfilConcavo = perfilConcavo;
     }
 
-    public int getPerfilConvexo() {
+    public boolean isPerfilConvexo() {
         return perfilConvexo;
     }
 
-    public void setPerfilConvexo(int perfilConvexo) {
+    public void setPerfilConvexo(boolean perfilConvexo) {
         this.perfilConvexo = perfilConvexo;
     }
 
-    public int getPerfilRecto() {
+    public boolean isPerfilRecto() {
         return perfilRecto;
     }
 
-    public void setPerfilRecto(int perfilRecto) {
+    public void setPerfilRecto(boolean perfilRecto) {
         this.perfilRecto = perfilRecto;
     }
 
-    public int getPielNormal() {
+    public boolean isPielNormal() {
         return pielNormal;
     }
 
-    public void setPielNormal(int pielNormal) {
+    public void setPielNormal(boolean pielNormal) {
         this.pielNormal = pielNormal;
     }
 
-    public int getPielPalida() {
+    public boolean isPielPalida() {
         return pielPalida;
     }
 
-    public void setPielPalida(int pielPalida) {
+    public void setPielPalida(boolean pielPalida) {
         this.pielPalida = pielPalida;
     }
 
-    public int getPielCianotica() {
+    public boolean isPielCianotica() {
         return pielCianotica;
     }
 
-    public void setPielCianotica(int pielCianotica) {
+    public void setPielCianotica(boolean pielCianotica) {
         this.pielCianotica = pielCianotica;
     }
 
-    public int getPielEnrojecida() {
+    public boolean isPielEnrojecida() {
         return pielEnrojecida;
     }
 
-    public void setPielEnrojecida(int pielEnrojecida) {
+    public void setPielEnrojecida(boolean pielEnrojecida) {
         this.pielEnrojecida = pielEnrojecida;
     }
 
-    public int getMusculosHipotonicos() {
+    public boolean isMusculosHipotonicos() {
         return musculosHipotonicos;
     }
 
-    public void setMusculosHipotonicos(int musculosHipotonicos) {
+    public void setMusculosHipotonicos(boolean musculosHipotonicos) {
         this.musculosHipotonicos = musculosHipotonicos;
     }
 
-    public int getMusculosHipertonicos() {
+    public boolean isMusculosHipertonicos() {
         return musculosHipertonicos;
     }
 
-    public void setMusculosHipertonicos(int musculosHipertonicos) {
+    public void setMusculosHipertonicos(boolean musculosHipertonicos) {
         this.musculosHipertonicos = musculosHipertonicos;
     }
 
-    public int getMusculosEspasticos() {
+    public boolean isMusculosEspasticos() {
         return musculosEspasticos;
     }
 
-    public void setMusculosEspasticos(int musculosEspasticos) {
+    public void setMusculosEspasticos(boolean musculosEspasticos) {
         this.musculosEspasticos = musculosEspasticos;
     }
 
-    public int getCadenaGanglionar() {
+    public boolean isCadenaGanglionar() {
         return cadenaGanglionar;
     }
 
-    public void setCadenaGanglionar(int cadenaGanglionar) {
+    public void setCadenaGanglionar(boolean cadenaGanglionar) {
         this.cadenaGanglionar = cadenaGanglionar;
     }
 
@@ -227,8 +221,13 @@ public class CabezaCuello {
     public void setCurp(String curp) {
         this.curp = curp;
     }
+
     
     
-            
-            
+    
+    
+
+    
+
+    
 }

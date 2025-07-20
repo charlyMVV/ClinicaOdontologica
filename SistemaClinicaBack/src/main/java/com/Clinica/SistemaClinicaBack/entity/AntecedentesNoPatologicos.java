@@ -34,9 +34,10 @@ public class AntecedentesNoPatologicos {
     private String anestesicos;       
     private String alimentos;
     private String otrasAlergias;
+    private String golosinas;
     private String tieneAdicciones;
     private String tabaco;
-    private String Alcohol;
+    private String alcohol;
     private String otrasAdicciones;
     private String haSidoHospitalizado;
     private Date fechaHospitalizacion;
@@ -54,7 +55,7 @@ public class AntecedentesNoPatologicos {
     public AntecedentesNoPatologicos() {
     }
 
-    public AntecedentesNoPatologicos(int idAntecedentesNoPatologicos, String curp, String frecuenciaLavadoDientes, String usaAuxiliaresHigiene, String tiposAuxiliaresHigiene, String grupoSanguineo, String factorRh, String cartillaVacunacion, String esquemaCompleto, String vacunasFaltantes, String AntecedentesAlergicos, String cualAlergicos, String antibioticos, String analgesicos, String anestesicos, String alimentos, String otrasAlergias, String tieneAdicciones, String tabaco, String Alcohol, String otrasAdicciones, String haSidoHospitalizado, Date fechaHospitalizacion, String motivoHospitalizacion, String padecimientoActual, String haSidoAnestesiado, String haRecibidoTransfusion, String haRecibidoPerforaciones, String consumeMedicamento, String embarazo, String discapacidad, String tieneIntervenciones, String parteCuerpo) {
+    public AntecedentesNoPatologicos(int idAntecedentesNoPatologicos, String curp, String frecuenciaLavadoDientes, String usaAuxiliaresHigiene, String tiposAuxiliaresHigiene, String grupoSanguineo, String factorRh, String cartillaVacunacion, String esquemaCompleto, String vacunasFaltantes, String AntecedentesAlergicos, String cualAlergicos, String antibioticos, String analgesicos, String anestesicos, String alimentos, String otrasAlergias, String golosinas, String tieneAdicciones, String tabaco, String alcohol, String otrasAdicciones, String haSidoHospitalizado, Date fechaHospitalizacion, String motivoHospitalizacion, String padecimientoActual, String haSidoAnestesiado, String haRecibidoTransfusion, String haRecibidoPerforaciones, String consumeMedicamento, String embarazo, String discapacidad, String tieneIntervenciones, String parteCuerpo) {
         this.idAntecedentesNoPatologicos = idAntecedentesNoPatologicos;
         this.curp = curp;
         this.frecuenciaLavadoDientes = frecuenciaLavadoDientes;
@@ -72,9 +73,10 @@ public class AntecedentesNoPatologicos {
         this.anestesicos = anestesicos;
         this.alimentos = alimentos;
         this.otrasAlergias = otrasAlergias;
+        this.golosinas = golosinas;
         this.tieneAdicciones = tieneAdicciones;
         this.tabaco = tabaco;
-        this.Alcohol = Alcohol;
+        this.alcohol = alcohol;
         this.otrasAdicciones = otrasAdicciones;
         this.haSidoHospitalizado = haSidoHospitalizado;
         this.fechaHospitalizacion = fechaHospitalizacion;
@@ -89,6 +91,16 @@ public class AntecedentesNoPatologicos {
         this.tieneIntervenciones = tieneIntervenciones;
         this.parteCuerpo = parteCuerpo;
     }
+
+    public String getGolosinas() {
+        return golosinas;
+    }
+
+    public void setGolosinas(String golosinas) {
+        this.golosinas = golosinas;
+    }
+
+   
 
     public int getIdAntecedentesNoPatologicos() {
         return idAntecedentesNoPatologicos;
@@ -243,12 +255,14 @@ public class AntecedentesNoPatologicos {
     }
 
     public String getAlcohol() {
-        return Alcohol;
+        return alcohol;
     }
 
-    public void setAlcohol(String Alcohol) {
-        this.Alcohol = Alcohol;
+    public void setAlcohol(String alcohol) {
+        this.alcohol = alcohol;
     }
+    
+    
 
     public String getOtrasAdicciones() {
         return otrasAdicciones;

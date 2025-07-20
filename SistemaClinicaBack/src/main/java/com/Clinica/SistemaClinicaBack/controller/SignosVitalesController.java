@@ -1,8 +1,10 @@
 package com.Clinica.SistemaClinicaBack.controller;
 
 import com.Clinica.SistemaClinicaBack.entity.SignosVitales;
+import com.Clinica.SistemaClinicaBack.repository.SignosVitalesRepository;
 import com.Clinica.SistemaClinicaBack.service.SignosVitalesService;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,10 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class SignosVitalesController {
 
     private final SignosVitalesService signosVitalesService;
+    private final SignosVitalesRepository signosVitalesRepository;
 
-    public SignosVitalesController(SignosVitalesService signosVitalesService) {
+    public SignosVitalesController(SignosVitalesService signosVitalesService, SignosVitalesRepository signosVitalesRepository) {
         this.signosVitalesService = signosVitalesService;
+        this.signosVitalesRepository = signosVitalesRepository;
     }
+
+  
 
     @PostMapping
     public SignosVitales save(@RequestBody SignosVitales signosVitales) {
@@ -57,6 +63,13 @@ public class SignosVitalesController {
         svdb.setTalla(signosVitales.getTalla());
         
         return updateSignosVitales(svdb);
+    }
+    
+    
+       @GetMapping("/existen/{curp}")
+    public ResponseEntity<Boolean> existenAntecedentesNoPatologicosPorCurp(@PathVariable String curp) {  
+        boolean existen = signosVitalesRepository.existsByCurp(curp);
+        return ResponseEntity.ok(existen);
     }
 
 }
