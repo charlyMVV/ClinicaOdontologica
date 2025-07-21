@@ -13,7 +13,7 @@ export class Estomatognaticoservice {
   constructor(private http:HttpClient) { }
 
   createEstomatognatico(estomatognatico : Estomatognatico) : Observable<Estomatognatico>{
-    return this.http.post<Estomatognatico>(this.api,Cabezacuello);
+    return this.http.post<Estomatognatico>(this.api,estomatognatico);
 
   }
 

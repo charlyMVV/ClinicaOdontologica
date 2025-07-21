@@ -68,11 +68,11 @@ public class TutorController {
             throw new IllegalArgumentException("La CURP  del los antecedentes no se puede modificar.");
         }
         
-        tutordb.setNombre(tutor.getNombre());
-        tutordb.setEdad(tutor.getEdad());
-        tutordb.setDomicilio(tutor.getDomicilio());
-        tutordb.setTelefonoCasa(tutor.getTelefonoCasa());
-        tutordb.setCelular(tutor.getCelular());
+        tutordb.setNombreTutor(tutor.getNombreTutor());
+        tutordb.setEdadTutor(tutor.getEdadTutor());
+        tutordb.setDomicilioTutor(tutor.getDomicilioTutor());
+        tutordb.setTelefonoCasaTutor(tutor.getTelefonoCasaTutor());
+        tutordb.setCelularTutor(tutor.getCelularTutor());
         
         
         return tutorService.update(tutordb);

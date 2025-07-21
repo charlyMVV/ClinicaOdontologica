@@ -14,6 +14,15 @@ import { CabezacuelloService } from '../../service/cabezacuelloservice';
 import { Cabezacuello } from '../../cabezacuello';
 import { Estomatognaticoservice } from '../../service/estomatognaticoservice';
 import { Estomatognatico } from '../../estomatognatico';
+import { TejidosblandosService } from '../../service/tejidosblandosservice';
+import { Tejidosblandos } from '../../tejidosblandos';
+import { Tutorservice } from '../../service/tutorservice';
+import { Tutor } from '../../tutor';
+import { Diagnosticotratamientoservice } from '../../service/diagnosticotratamientoservice';
+import { Diagnosticotratamiento } from '../../diagnosticotratamiento';
+import { EvolucionService } from '../../service/evolucionservice';
+import { Evolucion } from '../../evolucion';
+
 
 
 
@@ -97,44 +106,84 @@ export class HistoriaClinica implements OnInit {
   talla: string = '';
 
   //cabezacuello
-  cabezaCuello ={
-      
-  exostosis: false,
-  endotosis: false,
-  dolicocefalico: false,
-  mesocefalico: false,
-  branquicefalico: false,
-  asimetriaTransversal: false,
-  asimetriaLongitudinal: false,
-  perfilConcavo: false,
-  perfilConvexo: false,
-  perfilRecto: false,
-  pielNormal: false,
-  pielPalida: false,
-  pielCianotica: false,
-  pielEnrojecida: false,
-  musculosHipotonicos: false,
-  musculosHipertonicos: false,
-  musculosEspasticos: false,
-  cadenaGanglionar: false
+  cabezaCuello = {
+
+    exostosis: false,
+    endotosis: false,
+    dolicocefalico: false,
+    mesocefalico: false,
+    branquicefalico: false,
+    asimetriaTransversal: false,
+    asimetriaLongitudinal: false,
+    perfilConcavo: false,
+    perfilConvexo: false,
+    perfilRecto: false,
+    pielNormal: false,
+    pielPalida: false,
+    pielCianotica: false,
+    pielEnrojecida: false,
+    musculosHipotonicos: false,
+    musculosHipertonicos: false,
+    musculosEspasticos: false,
+    cadenaGanglionar: false
 
   }
 
   //estomatognatico
 
   estomatognatico = {
-    ruidos : false,
-    lateralidad : false,
-    apertura : false,
-    chasquidos : false,
+    ruidos: false,
+    lateralidad: false,
+    apertura: false,
+    chasquidos: false,
     crepitacion: false,
-    dificultadAbrirboca : false,
-    dolorAberturaLateralidad : false,
-    fatigaDolorMuscular : false,
-    disminuicionAbertura : false,
-    desviacionAberturaCierre : false,
+    dificultadAbrirboca: false,
+    dolorAberturaLateralidad: false,
+    fatigaDolorMuscular: false,
+    disminuicionAbertura: false,
+    desviacionAberturaCierre: false,
   }
-  
+
+  // Tejidois blandos
+
+  ganglios: string = '';
+  glandulasSalivales: string = '';
+  labioExterno: string = '';
+  bordeBermellon: string = '';
+  labioInterno: string = '';
+  comisuras: string = '';
+  carrillos: string = '';
+  fondoDeSaco: string = '';
+  frenillos: string = '';
+  lenguaTercioMedio: string = '';
+  paladarDuro: string = '';
+  paladarBlando: string = '';
+  istmoBucofaringe: string = '';
+  lenguaDorso: string = '';
+  lenguaBordes: string = '';
+  lenguaVentral: string = '';
+  pisoBoca: string = '';
+  dientes: string = '';
+  mucosaAlveolar: string = '';
+  encia: string = '';
+
+  //tutor
+  nombreTutor: string = '';
+  edadTutor: string = '';
+  domicilioTutor: string = '';
+  telefonoCasaTutor: string = '';
+  celularTutor: string = '';
+
+  //diagnostico y tratamiento
+  interpretacionRx: string = '';
+  diagnostico: string = '';
+  resumenTratamiento: string = '';
+
+  //evolucion
+  fecha :string = '';
+  comentarioControl : string = '';
+
+
 
 
   antecedentesHeredofamiliaresList = [
@@ -180,8 +229,12 @@ export class HistoriaClinica implements OnInit {
     private antecedentesService: Antecedentes,
     private nopatologicosService: NopatologicosService,
     private signosvitalesService: signosvitalesService,
-    private cabezacuelloService: CabezacuelloService, 
-    private estomatognaticoService : Estomatognaticoservice
+    private cabezacuelloService: CabezacuelloService,
+    private estomatognaticoService: Estomatognaticoservice,
+    private tejidosblandosService: TejidosblandosService,
+    private tutorService: Tutorservice,
+    private diagnosticotratamientoService: Diagnosticotratamientoservice,
+    private evolucionService: EvolucionService
 
   ) { }
 
@@ -583,136 +636,368 @@ export class HistoriaClinica implements OnInit {
 
 
   addCabezaCuello() {
-  if (!this.curp || this.curp.trim() === '') {
-    Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
-    return;
-  }
+    if (!this.curp || this.curp.trim() === '') {
+      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      return;
+    }
 
-  this.cabezacuelloService.existenCabezaCuelloPorCurp(this.curp).subscribe({
-    next: (existe) => {
-      if (existe) {
+    this.cabezacuelloService.existenCabezaCuelloPorCurp(this.curp).subscribe({
+      next: (existe) => {
+        if (existe) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Atención',
+            text: 'Ya existen registros de Cabeza y Cuello para esta CURP.',
+          });
+        } else {
+          const cabezaCuello = new Cabezacuello(
+            this.cabezaCuello.exostosis,
+            this.cabezaCuello.endotosis,
+            this.cabezaCuello.dolicocefalico,
+            this.cabezaCuello.mesocefalico,
+            this.cabezaCuello.branquicefalico,
+            this.cabezaCuello.asimetriaTransversal,
+            this.cabezaCuello.asimetriaLongitudinal,
+            this.cabezaCuello.perfilConcavo,
+            this.cabezaCuello.perfilConvexo,
+            this.cabezaCuello.perfilRecto,
+            this.cabezaCuello.pielNormal,
+            this.cabezaCuello.pielPalida,
+            this.cabezaCuello.pielCianotica,
+            this.cabezaCuello.pielEnrojecida,
+            this.cabezaCuello.musculosHipotonicos,
+            this.cabezaCuello.musculosHipertonicos,
+            this.cabezaCuello.musculosEspasticos,
+            this.cabezaCuello.cadenaGanglionar,
+            this.curp
+          );
+
+          console.log(cabezaCuello);
+
+          this.cabezacuelloService.createExploracionCabezaCuello(cabezaCuello).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: '¡Guardado!',
+                text: 'Los datos de Cabeza y Cuello fueron guardados exitosamente.',
+              });
+            },
+            error: (err) => {
+              console.error(err);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al guardar los datos de Cabeza y Cuello.',
+              });
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error(err);
         Swal.fire({
-          icon: 'warning',
-          title: 'Atención',
-          text: 'Ya existen registros de Cabeza y Cuello para esta CURP.',
-        });
-      } else {
-        const cabezaCuello = new Cabezacuello(
-          this.cabezaCuello.exostosis,
-          this.cabezaCuello.endotosis,
-          this.cabezaCuello.dolicocefalico,
-          this.cabezaCuello.mesocefalico,
-          this.cabezaCuello.branquicefalico,
-          this.cabezaCuello.asimetriaTransversal,
-          this.cabezaCuello.asimetriaLongitudinal,
-          this.cabezaCuello.perfilConcavo,
-          this.cabezaCuello.perfilConvexo,
-          this.cabezaCuello.perfilRecto,
-          this.cabezaCuello.pielNormal,
-          this.cabezaCuello.pielPalida,
-          this.cabezaCuello.pielCianotica,
-          this.cabezaCuello.pielEnrojecida,
-          this.cabezaCuello.musculosHipotonicos,
-          this.cabezaCuello.musculosHipertonicos,
-          this.cabezaCuello.musculosEspasticos,
-          this.cabezaCuello.cadenaGanglionar,
-          this.curp
-        );
-
-        console.log(cabezaCuello);
-
-        this.cabezacuelloService.createExploracionCabezaCuello(cabezaCuello).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: '¡Guardado!',
-              text: 'Los datos de Cabeza y Cuello fueron guardados exitosamente.',
-            });
-          },
-          error: (err) => {
-            console.error(err);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Ocurrió un error al guardar los datos de Cabeza y Cuello.',
-            });
-          }
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo verificar si ya existen registros para la CURP.',
         });
       }
-    },
-    error: (err) => {
-      console.error(err);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se pudo verificar si ya existen registros para la CURP.',
-      });
-    }
-  });
-}
-
-
-addEstomatognatico() {
-  if (!this.curp || this.curp.trim() === '') {
-    Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
-    return;
+    });
   }
 
-  this.estomatognaticoService.existenEstomatognaticoCurp(this.curp).subscribe({
-    next: (existe) => {
-      if (existe) {
+
+  addEstomatognatico() {
+    if (!this.curp || this.curp.trim() === '') {
+      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      return;
+    }
+
+    this.estomatognaticoService.existenEstomatognaticoCurp(this.curp).subscribe({
+      next: (existe) => {
+        if (existe) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Atención',
+            text: 'Ya existen registros del sistema estomatognático para esta CURP.',
+          });
+        } else {
+          const estomatognatico = new Estomatognatico(
+            this.estomatognatico.ruidos,
+            this.estomatognatico.lateralidad,
+            this.estomatognatico.apertura,
+            this.estomatognatico.chasquidos,
+            this.estomatognatico.crepitacion,
+            this.estomatognatico.dificultadAbrirboca,
+            this.estomatognatico.dolorAberturaLateralidad,
+            this.estomatognatico.fatigaDolorMuscular,
+            this.estomatognatico.disminuicionAbertura,
+            this.estomatognatico.desviacionAberturaCierre,
+            this.curp
+          );
+
+          console.log(estomatognatico);
+
+          this.estomatognaticoService.createEstomatognatico(estomatognatico).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: '¡Guardado!',
+                text: 'Los datos del sistema estomatognático fueron guardados exitosamente.',
+              });
+            },
+            error: (err) => {
+              console.error(err);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al guardar los datos del sistema estomatognático.',
+              });
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error(err);
         Swal.fire({
-          icon: 'warning',
-          title: 'Atención',
-          text: 'Ya existen registros del sistema estomatognático para esta CURP.',
-        });
-      } else {
-        const estomatognatico = new Estomatognatico(
-          this.estomatognatico.ruidos,
-          this.estomatognatico.lateralidad,
-          this.estomatognatico.apertura,
-          this.estomatognatico.chasquidos,
-          this.estomatognatico.crepitacion,
-          this.estomatognatico.dificultadAbrirboca,
-          this.estomatognatico.dolorAberturaLateralidad,
-          this.estomatognatico.fatigaDolorMuscular,
-          this.estomatognatico.disminuicionAbertura,
-          this.estomatognatico.desviacionAberturaCierre,
-          this.curp
-        );
-
-        console.log(estomatognatico);
-
-        this.estomatognaticoService.createEstomatognatico(estomatognatico).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: '¡Guardado!',
-              text: 'Los datos del sistema estomatognático fueron guardados exitosamente.',
-            });
-          },
-          error: (err) => {
-            console.error(err);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Ocurrió un error al guardar los datos del sistema estomatognático.',
-            });
-          }
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo verificar si ya existen registros del sistema estomatognático para la CURP.',
         });
       }
-    },
-    error: (err) => {
-      console.error(err);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se pudo verificar si ya existen registros del sistema estomatognático para la CURP.',
-      });
+    });
+  }
+
+  addTejidosBlandos() {
+    if (!this.curp || this.curp.trim() === '') {
+      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      return;
     }
-  });
-}
+
+    this.tejidosblandosService.existenTejidosBlandosPorCurp(this.curp).subscribe({
+      next: (existe) => {
+        if (existe) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Atención',
+            text: 'Ya existen registros de tejidos blandos para esta CURP.',
+          });
+        } else {
+          const tejidosBlandos = new Tejidosblandos(
+            this.ganglios,
+            this.glandulasSalivales,
+            this.labioExterno,
+            this.bordeBermellon,
+            this.labioInterno,
+            this.comisuras,
+            this.carrillos,
+            this.fondoDeSaco,
+            this.frenillos,
+            this.lenguaTercioMedio,
+            this.paladarDuro,
+            this.paladarBlando,
+            this.istmoBucofaringe,
+            this.lenguaDorso,
+            this.lenguaBordes,
+            this.lenguaVentral,
+            this.pisoBoca,
+            this.dientes,
+            this.mucosaAlveolar,
+            this.encia,
+            this.curp
+          );
+
+          console.log(tejidosBlandos);
+
+          this.tejidosblandosService.createTejidosBlandos(tejidosBlandos).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: '¡Guardado!',
+                text: 'Los datos de tejidos blandos fueron guardados exitosamente.',
+              });
+            },
+            error: (err) => {
+              console.error(err);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al guardar los datos de tejidos blandos.',
+              });
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo verificar si ya existen registros de tejidos blandos para la CURP.',
+        });
+      }
+    });
+  }
+
+  addTutor() {
+    if (!this.curp || this.curp.trim() === '') {
+      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      return;
+    }
 
 
+    this.tutorService.existeTutorPorCurp(this.curp).subscribe({
+      next: (existe) => {
+        if (existe) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Atención',
+            text: 'Ya existen registros de tutor para esta CURP.',
+          });
+        } else {
+          const tutor = new Tutor(
+            this.nombreTutor,
+            this.edadTutor,
+            this.domicilioTutor,
+            this.telefonoCasaTutor,
+            this.celularTutor,
+            this.curp
+          );
+
+          this.tutorService.createTutor(tutor).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: '¡Guardado!',
+                text: 'Los datos del tutor fueron guardados exitosamente.',
+              });
+            },
+            error: (err) => {
+              console.error(err);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al guardar los datos del tutor.',
+              });
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo verificar si ya existen registros del tutor para la CURP.',
+        });
+      }
+    });
+  }
+
+
+  addDiagnosticoTratamiento() {
+    if (!this.curp || this.curp.trim() === '') {
+      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      return;
+    }
+
+
+    this.diagnosticotratamientoService.existenDiagnosticoTratamientoCurp(this.curp).subscribe({
+      next: (existe) => {
+        if (existe) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Atención',
+            text: 'Ya existen registros de diagnostico para esta CURP.',
+          });
+        } else {
+          const diagnostico = new Diagnosticotratamiento(
+            this.interpretacionRx,
+            this.diagnostico,
+            this.resumenTratamiento,
+            this.curp
+          );
+
+          this.diagnosticotratamientoService.createDiagnosticoTratamiento(diagnostico).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: '¡Guardado!',
+                text: 'Los datos del tutor fueron guardados exitosamente.',
+              });
+            },
+            error: (err) => {
+              console.error(err);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al guardar los datos del tutor.',
+              });
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo verificar si ya existen registros del tutor para la CURP.',
+        });
+      }
+    });
+  }
+
+addEvolucion() {
+    if (!this.curp || this.curp.trim() === '') {
+      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      return;
+    }
+
+
+    this.evolucionService.existenEvolucionPorCurp(this.curp).subscribe({
+      next: (existe) => {
+        if (existe) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Atención',
+            text: 'Ya existen registros de evolucion y diagnostico para esta CURP.',
+          });
+        } else {
+          const evolucion = new Evolucion(
+            this.fecha,
+            this.comentarioControl,
+            this.curp,
+            
+          );
+
+          this.evolucionService.createEvolucion(evolucion).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: '¡Guardado!',
+                text: 'Los datos del diagnostico y tratamiento fueron guardados exitosamente.',
+              });
+            },
+            error: (err) => {
+              console.error(err);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al guardar los datos del diagnostico y tratamiento.',
+              });
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo verificar si ya existen registros del diagnostico y tratamiento para la CURP.',
+        });
+      }
+    });
+  }
+ 
 
 }

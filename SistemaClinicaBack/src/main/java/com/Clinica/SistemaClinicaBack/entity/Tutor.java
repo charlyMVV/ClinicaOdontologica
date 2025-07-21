@@ -15,24 +15,24 @@ public class Tutor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idTutor;
-    private String nombre;
-    private String edad;
-    private String domicilio;
-    private String telefonoCasa;
-    private String celular;
+    private String nombreTutor;
+    private String edadTutor;
+    private String domicilioTutor;
+    private String telefonoCasaTutor;
+    private String celularTutor;
     @Column(name = "CURP_fk_tutor", unique = true)
     private String curp;
 
     public Tutor() {
     }
 
-    public Tutor(int idTutor, String nombre, String edad, String domicilio, String telefonoCasa, String celular, String curp) {
+    public Tutor(int idTutor, String nombreTutor, String edadTutor, String domicilioTutor, String telefonoCasaTutor, String celularTutor, String curp) {
         this.idTutor = idTutor;
-        this.nombre = nombre;
-        this.edad = edad;
-        this.domicilio = domicilio;
-        this.telefonoCasa = telefonoCasa;
-        this.celular = celular;
+        this.nombreTutor = nombreTutor;
+        this.edadTutor = edadTutor;
+        this.domicilioTutor = domicilioTutor;
+        this.telefonoCasaTutor = telefonoCasaTutor;
+        this.celularTutor = celularTutor;
         this.curp = curp;
     }
 
@@ -44,44 +44,44 @@ public class Tutor {
         this.idTutor = idTutor;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getNombreTutor() {
+        return nombreTutor;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setNombreTutor(String nombreTutor) {
+        this.nombreTutor = nombreTutor;
     }
 
-    public String getEdad() {
-        return edad;
+    public String getEdadTutor() {
+        return edadTutor;
     }
 
-    public void setEdad(String edad) {
-        this.edad = edad;
+    public void setEdadTutor(String edadTutor) {
+        this.edadTutor = edadTutor;
     }
 
-    public String getDomicilio() {
-        return domicilio;
+    public String getDomicilioTutor() {
+        return domicilioTutor;
     }
 
-    public void setDomicilio(String domicilio) {
-        this.domicilio = domicilio;
+    public void setDomicilioTutor(String domicilioTutor) {
+        this.domicilioTutor = domicilioTutor;
     }
 
-    public String getTelefonoCasa() {
-        return telefonoCasa;
+    public String getTelefonoCasaTutor() {
+        return telefonoCasaTutor;
     }
 
-    public void setTelefonoCasa(String telefonoCasa) {
-        this.telefonoCasa = telefonoCasa;
+    public void setTelefonoCasaTutor(String telefonoCasaTutor) {
+        this.telefonoCasaTutor = telefonoCasaTutor;
     }
 
-    public String getCelular() {
-        return celular;
+    public String getCelularTutor() {
+        return celularTutor;
     }
 
-    public void setCelular(String celular) {
-        this.celular = celular;
+    public void setCelularTutor(String celularTutor) {
+        this.celularTutor = celularTutor;
     }
 
     public String getCurp() {
@@ -91,6 +91,8 @@ public class Tutor {
     public void setCurp(String curp) {
         this.curp = curp;
     }
+
+    
     
     
     
