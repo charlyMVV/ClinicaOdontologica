@@ -44,7 +44,7 @@ public class PacienteController {
     }
     
     //localhost:8080/api/periodo/"id"
-    @DeleteMapping
+    @DeleteMapping("/{idPaciente}")
     public void deletById(@PathVariable("idPaciente")Integer id){
         pacienteservice.deleteById(id);
     }

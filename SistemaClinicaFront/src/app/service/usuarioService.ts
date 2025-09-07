@@ -10,7 +10,7 @@ export class UsuarioService {
 
   private apiPeriodo = 'http://localhost:8080/api/periodo';
   private api: string = "http://localhost:8080/api/usuarios";
-  
+
 
   constructor(private http: HttpClient) { }
 
@@ -24,12 +24,12 @@ export class UsuarioService {
   }
 
   actualizarUsuario(usuario: Usuario): Observable<Usuario> {
-  return this.http.put<Usuario>(`${this.api}`, usuario);
-}
+    return this.http.put<Usuario>(`${this.api}`, usuario);
+  }
 
-updatePeriodo(periodo: any): Observable<any> {
-  return this.http.put(`${this.apiPeriodo }/${periodo.idPeriodo}`, periodo);
-}
+  updatePeriodo(periodo: any): Observable<any> {
+    return this.http.put(`${this.apiPeriodo}/${periodo.idPeriodo}`, periodo);
+  }
 
 
 

@@ -4,7 +4,8 @@ export class Usuario {
         public matricula : string,
         public usuario : string,
         public contrasena : string,
-        public periodo : string){
+        public periodo : string,
+        public roles : string){
 
     }
 }

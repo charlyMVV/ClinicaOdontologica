@@ -1,12 +1,11 @@
-<div class="w-100  shadow-sm"
-     style="position: sticky; top: 0; z-index: 1000; background-color: #0374d1  ;">
+<div class="w-100  shadow-sm" style="position: sticky; top: 0; z-index: 1000; background-color: #0374d1  ;">
   <div class="container-fluid d-flex justify-content-end align-items-center px-4 py-2">
     <span class="me-3 fw-semibold text-white">
       👋 Bienvenido, {{ nombreUsuarioLogueado }}
     </span>
     <button class="btn btn-sm d-flex align-items-center gap-1"
-            style="background-color: rgba(255, 0, 0, 0.829); color: white; font-weight: bold ; border: none;"
-            (click)="logout()">
+      style="background-color: rgba(255, 0, 0, 0.829); color: white; font-weight: bold ; border: none;"
+      (click)="logout()">
       <i class="bi bi-box-arrow-right"></i> Cerrar sesión
     </button>
   </div>
@@ -17,13 +16,14 @@
 <body>
 
 
-<div class="card-opciones">
+  <div class="card-opciones">
 
     <h3>Gestión de Historia Clínica</h3>
     <p class="mb-4">Selecciona una opción para continuar:</p>
     <div class="d-grid gap-3">
-        <a class="btn btn-opcion btn-nueva" (click)="MenuSubmitHc()">📝 Ingresar nueva historia clínica</a>
-        <a class="btn btn-opcion btn-nueva" (click)="AdministradorSumbit()">📂 Panel de administrador </a>
-        <a class="btn btn-opcion btn-nueva" (click)="MenuSubmitMisHc()">📂 Continuar con historia existente</a>
+      <a class="btn btn-opcion btn-nueva" (click)="MenuSubmitHc()">📝 Ingresar nueva historia clínica</a>
+      <a *ngIf="authService.isAdmin()" class="btn btn-opcion btn-nueva" (click)="AdministradorSumbit()"> 📂 Panel de administrador</a>
+
+      <a class="btn btn-opcion btn-nueva" (click)="MenuSubmitMisHc()">📂 Continuar con historia existente</a>
     </div>
-</div>
+  </div>

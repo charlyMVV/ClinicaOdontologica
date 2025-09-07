@@ -14,6 +14,7 @@ import { Mishc } from './componets/mishc/mishc';
 
 
 
+
 @NgModule({
   declarations: [
     App,
@@ -23,6 +24,7 @@ import { Mishc } from './componets/mishc/mishc';
     Menu,
     HistoriaClinica,
     Mishc,
+    
     
     
   ],

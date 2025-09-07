@@ -26,6 +26,7 @@ export class UsuariosList implements OnInit {
   usuario: string = '';
   contrasena: string = '';
   periodo: string = '';
+  roles: string = '';
 
   modoEdicion: boolean = false;
   usuarios: Usuario[] = [];
@@ -104,7 +105,6 @@ export class UsuariosList implements OnInit {
     this.usuarioService.getUsuarioList().subscribe(
       data => {
         this.usuarios = data;
-        console.log(this.usuarios);
       },
       error => {
         console.error('Error al obtener usuarios:', error);
@@ -150,7 +150,8 @@ export class UsuariosList implements OnInit {
           this.matricula,
           this.usuario,
           this.contrasena,
-          this.periodo
+          this.periodo,
+          this.roles
         );
 
         this.usuarioService.createUsuario(nuevoUsuario).subscribe(
@@ -235,7 +236,8 @@ export class UsuariosList implements OnInit {
           this.matricula,
           this.usuario,
           this.contrasena,
-          this.periodo
+          this.periodo,
+          this.roles
         );
 
         this.usuarioService.actualizarUsuario(usuarioActualizado).subscribe(
@@ -268,7 +270,7 @@ export class UsuariosList implements OnInit {
     this.periodoService.getPeriodos().subscribe(
       data => {
         this.periodos = data;
-        console.log('Periodos cargados:', data);
+        
       },
       error => {
         console.error('Error al cargar periodos:', error);

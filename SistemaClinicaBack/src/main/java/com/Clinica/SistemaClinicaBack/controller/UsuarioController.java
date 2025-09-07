@@ -1,9 +1,11 @@
 package com.Clinica.SistemaClinicaBack.controller;
 
 import com.Clinica.SistemaClinicaBack.entity.Usuario;
+import com.Clinica.SistemaClinicaBack.repository.UsuarioRepository;
 import com.Clinica.SistemaClinicaBack.service.UsuarioService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
 
 
 
@@ -13,11 +15,14 @@ import java.util.List;
 public class UsuarioController {
 
     private final UsuarioService usuarioservice;
+    private final UsuarioRepository usuarioRepository;
 
-    public UsuarioController(UsuarioService usuarioservice) {
+    public UsuarioController(UsuarioService usuarioservice, UsuarioRepository usuarioRepository) {
         this.usuarioservice = usuarioservice;
+        this.usuarioRepository = usuarioRepository;
     }
     
+
      
 
     @PostMapping
@@ -34,7 +39,13 @@ public class UsuarioController {
     public Usuario findById(@PathVariable("matricula") String id) {
         return usuarioservice.findById(id);
     }
-
+    
+    @GetMapping("/findByRol/{roles}")
+    public  ResponseEntity<Boolean> findByRol(@PathVariable("roles") String roles){
+            boolean existen = usuarioRepository.existsByRoles(roles);
+            return ResponseEntity.ok(existen);
+    }
+    
     @DeleteMapping("/{matricula}")
     public void deleteById(@PathVariable("matricula") String id) {
         usuarioservice.deleteById(id);

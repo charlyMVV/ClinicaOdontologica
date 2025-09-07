@@ -13,15 +13,17 @@ export class LoginComponent {
   usuario = '';
   contrasena = '';
   mensaje = '';
+  roles = '';
 
   constructor(private authService: AuthService, private router: Router) {}
 
   loginSubmit() {
-  this.authService.login(this.usuario, this.contrasena).subscribe({
+  this.authService.login(this.usuario, this.contrasena, this.roles).subscribe({
     next: (resp) => {
       if (resp.mensaje === 'Login correcto') {
         sessionStorage.setItem('usuario', this.usuario);
-        sessionStorage.setItem('nombre', resp.nombre);  // 👈 Guarda el nombre
+        sessionStorage.setItem('nombre', resp.nombre); 
+        sessionStorage.setItem('roles', resp.roles);
         this.router.navigate(['/menu']);
       }
     },

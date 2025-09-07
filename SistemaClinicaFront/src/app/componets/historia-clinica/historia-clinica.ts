@@ -22,6 +22,13 @@ import { Diagnosticotratamientoservice } from '../../service/diagnosticotratamie
 import { Diagnosticotratamiento } from '../../diagnosticotratamiento';
 import { EvolucionService } from '../../service/evolucionservice';
 import { Evolucion } from '../../evolucion';
+import { ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import SignaturePad from 'signature_pad';
+import { HttpClient } from '@angular/common/http';
+import { FirmaService } from '../../service/firmaservice';
+import { Firma } from '../../firma';
+import { Fotosinicioservice } from '../../service/fotosinicioservice';
+import { Fotosinicio } from '../../fotosinicio';
 
 
 
@@ -180,8 +187,19 @@ export class HistoriaClinica implements OnInit {
   resumenTratamiento: string = '';
 
   //evolucion
-  fecha :string = '';
-  comentarioControl : string = '';
+  fecha: string = '';
+  comentarioControl: string = '';
+
+  @ViewChild('canvas') canvasRef!: ElementRef<HTMLCanvasElement>;
+  private signaturePad!: SignaturePad;
+
+  firmas: Firma[] = [];
+
+  foto = new Fotosinicio('', '');
+  previewUrl: string | ArrayBuffer | null = null;
+
+  listaFotos: Fotosinicio[] = [];
+  previews: string[] = [];
 
 
 
@@ -212,11 +230,17 @@ export class HistoriaClinica implements OnInit {
 
   datosEditados = true;
   nombreUsuarioLogueado: string = '';
+  nombrePacienteLogueado: string = '';
+
   DatosPacientes: any;
 
   ngOnInit(): void {
-
+    localStorage.clear();
     this.nombreUsuarioLogueado = sessionStorage.getItem('nombre') || 'Usuario';
+
+
+    this.cargarFirmas();
+
 
   }
 
@@ -234,7 +258,9 @@ export class HistoriaClinica implements OnInit {
     private tejidosblandosService: TejidosblandosService,
     private tutorService: Tutorservice,
     private diagnosticotratamientoService: Diagnosticotratamientoservice,
-    private evolucionService: EvolucionService
+    private evolucionService: EvolucionService,
+    private firmaService: FirmaService,
+    private fotosInicioService: Fotosinicioservice
 
   ) { }
 
@@ -270,6 +296,8 @@ export class HistoriaClinica implements OnInit {
           this.ultimaConsulta
         );
 
+
+
         console.log(datospaciente);
 
         this.datosService.createDatosPaciente(datospaciente).subscribe({
@@ -298,9 +326,21 @@ export class HistoriaClinica implements OnInit {
     });
   }
 
+  listDatosPaciente() {
+    this.datosService.getDatosPaciente().subscribe(
+      data => {
+        this.DatosPacientes = data;
+        console.log(data);
+      },
+      error => {
+        console.error('Error al obtener usuarios:', error);
+      }
+    );
+  }
+
   addAntecedentesPersonales() {
     if (!this.curp || this.curp.trim() === '') {
-      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      console.error('No se ha especificado la CURP del paciente.');
       return;
     }
 
@@ -314,102 +354,51 @@ export class HistoriaClinica implements OnInit {
         .map((a) => `- ${a.descripcionAntecedentes}`)
         .join('\n');
 
-      Swal.fire({
-        title: 'Faltan datos',
-        text: `Debes completar todas las respuestas antes de guardar:\n${listaDescripciones}`,
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
+      console.warn('Faltan respuestas en:', listaDescripciones);
       return;
     }
 
-    Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Se guardarán los antecedentes personales del paciente.',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, guardar',
-      cancelButtonText: 'Cancelar'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const peticiones = this.antecedentesPersonales.map((antecedente) => {
-          return this.antecedentesService.createAntecedentesHeredofamiliares({
-            ...antecedente,
-            curp: this.curp
-          });
-        });
+    const peticiones = this.antecedentesPersonales.map((antecedente) => {
+      return this.antecedentesService.createAntecedentesHeredofamiliares({
+        ...antecedente,
+        curp: this.curp
+      });
+    });
 
-        forkJoin(peticiones).subscribe({
-          next: () => {
-            Swal.fire({
-              title: '¡Guardado!',
-              text: 'Todos los antecedentes personales fueron guardados exitosamente.',
-              icon: 'success',
-              confirmButtonText: 'OK'
-            });
-          },
-          error: (err) => {
-            console.error(err);
-            Swal.fire({
-              title: 'Error',
-              text: 'Ocurrió un error al guardar uno o más antecedentes.',
-              icon: 'error',
-              confirmButtonText: 'OK'
-            });
-          }
-        });
+    forkJoin(peticiones).subscribe({
+      next: () => {
+        console.log('Antecedentes personales guardados correctamente.');
+      },
+      error: (err) => {
+        console.error('Error al guardar antecedentes personales:', err);
       }
     });
   }
+
 
 
   addAntecedentesHeredofamiliares() {
     if (!this.curp || this.curp.trim() === '') {
-      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      console.error('No se ha especificado la CURP del paciente.');
       return;
     }
 
-    Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Se guardarán los antecedentes heredofamiliares del paciente.',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, guardar',
-      cancelButtonText: 'Cancelar'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const peticiones = this.antecedentesHeredofamiliaresList.map((antecedente) => {
-          return this.antecedentesService.createAntecedentesHeredofamiliares({
-            ...antecedente,
-            curp: this.curp
-          });
-        });
+    const peticiones = this.antecedentesHeredofamiliaresList.map((antecedente) => {
+      return this.antecedentesService.createAntecedentesHeredofamiliares({
+        ...antecedente,
+        curp: this.curp
+      });
+    });
 
-        forkJoin(peticiones).subscribe({
-          next: () => {
-            Swal.fire({
-              title: '¡Guardado!',
-              text: 'Todos los antecedentes heredofamiliares fueron guardados exitosamente.',
-              icon: 'success',
-              confirmButtonText: 'OK'
-            });
-          },
-          error: (err) => {
-            console.error(err);
-            Swal.fire({
-              title: 'Error',
-              text: 'Ocurrió un error al guardar uno o más antecedentes.',
-              icon: 'error',
-              confirmButtonText: 'OK'
-            });
-          }
-        });
+    forkJoin(peticiones).subscribe({
+      next: () => {
+        console.log('Antecedentes heredofamiliares guardados correctamente.');
+      },
+      error: (err) => {
+        console.error('Error al guardar antecedentes heredofamiliares:', err);
       }
     });
   }
-
-
-
 
 
   puedeSalir(): Promise<boolean> {
@@ -480,156 +469,101 @@ export class HistoriaClinica implements OnInit {
 
   addAntecedentesNoPatologicos() {
     if (!this.curp || this.curp.trim() === '') {
-      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      console.error('No se ha especificado la CURP del paciente.');
       return;
     }
 
     this.nopatologicosService.existenAntecedentesPorCurp(this.curp).subscribe({
       next: (existe) => {
         if (existe) {
-          Swal.fire({
-            title: 'Atención',
-            text: 'Ya existen antecedentes no patológicos registrados con esta CURP.',
-            icon: 'warning',
-            confirmButtonText: 'OK'
-          });
+          console.warn('Ya existen antecedentes no patológicos con esta CURP.');
         } else {
-          Swal.fire({
-            title: '¿Estás seguro?',
-            text: 'Revise que todos los antecedentes no patológicos sean correctos.',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, guardar',
-            cancelButtonText: 'Cancelar'
-          }).then((result) => {
-            if (result.isConfirmed) {
-              let antecedentesNoPatologicos = new Nopatologicos(
-                this.curp,
-                this.frecuenciaLavadoDientes,
-                this.usaAuxiliaresHigiene,
-                this.tiposAuxiliaresHigiene,
-                this.grupoSanguineo,
-                this.factorRh,
-                this.cartillaVacunacion,
-                this.esquemaCompleto,
-                this.vacunasFaltantes,
-                this.antecedentesAlergicos,
-                this.cualAlergicos,
-                this.antibioticos,
-                this.analgesicos,
-                this.anestesicos,
-                this.alimentos,
-                this.otrasAlergias,
-                this.tieneAdicciones,
-                this.golosinas,
-                this.tabaco,
-                this.alcohol,
-                this.otrasAdicciones,
-                this.haSidoHospitalizado,
-                this.fechaHospitalizacion,
-                this.motivoHospitalizacion,
-                this.padecimientoActual,
-                this.haSidoAnestesiado,
-                this.haRecibidoTransfusion,
-                this.haRecibidoPerforaciones,
-                this.consumeMedicamento,
-                this.embarazo,
-                this.discapacidad,
-                this.tieneIntervenciones,
-                this.parteCuerpo
-              );
+          const antecedentesNoPatologicos = new Nopatologicos(
+            this.curp,
+            this.frecuenciaLavadoDientes,
+            this.usaAuxiliaresHigiene,
+            this.tiposAuxiliaresHigiene,
+            this.grupoSanguineo,
+            this.factorRh,
+            this.cartillaVacunacion,
+            this.esquemaCompleto,
+            this.vacunasFaltantes,
+            this.antecedentesAlergicos,
+            this.cualAlergicos,
+            this.antibioticos,
+            this.analgesicos,
+            this.anestesicos,
+            this.alimentos,
+            this.otrasAlergias,
+            this.tieneAdicciones,
+            this.golosinas,
+            this.tabaco,
+            this.alcohol,
+            this.otrasAdicciones,
+            this.haSidoHospitalizado,
+            this.fechaHospitalizacion,
+            this.motivoHospitalizacion,
+            this.padecimientoActual,
+            this.haSidoAnestesiado,
+            this.haRecibidoTransfusion,
+            this.haRecibidoPerforaciones,
+            this.consumeMedicamento,
+            this.embarazo,
+            this.discapacidad,
+            this.tieneIntervenciones,
+            this.parteCuerpo
+          );
 
-              this.nopatologicosService.createAntecedentesnoPatologicos(antecedentesNoPatologicos).subscribe({
-                next: () => {
-                  Swal.fire({
-                    title: '¡Guardado!',
-                    text: 'Los antecedentes no patológicos fueron guardados exitosamente.',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                  });
-                },
-                error: (err) => {
-                  console.error(err);
-                  Swal.fire({
-                    title: 'Error',
-                    text: 'Ocurrió un error al guardar los antecedentes no patológicos.',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                  });
-                }
-              });
+          this.nopatologicosService.createAntecedentesnoPatologicos(antecedentesNoPatologicos).subscribe({
+            next: () => {
+              console.log('Antecedentes no patológicos guardados correctamente.');
+            },
+            error: (err) => {
+              console.error('Error al guardar antecedentes no patológicos:', err);
             }
           });
         }
       },
       error: (err) => {
-        console.error(err);
-        Swal.fire('Error', 'No se pudo verificar si existen antecedentes.', 'error');
+        console.error('Error al verificar existencia de antecedentes no patológicos:', err);
       }
     });
   }
 
+
   addSignosVitales() {
     if (!this.curp || this.curp.trim() === '') {
-      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      console.error('No se ha especificado la CURP del paciente.');
       return;
     }
 
     this.signosvitalesService.existenSignosVitalesPorCurp(this.curp).subscribe({
       next: (existe) => {
         if (existe) {
-          Swal.fire({
-            title: 'Atención',
-            text: 'Ya existen signos vitales registrados con esta CURP.',
-            icon: 'warning',
-            confirmButtonText: 'OK'
-          });
+          console.warn('Ya existen signos vitales registrados con esta CURP.');
         } else {
-          Swal.fire({
-            title: '¿Estás seguro?',
-            text: 'Se guardarán los signos vitales del paciente.',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, guardar',
-            cancelButtonText: 'Cancelar'
-          }).then((result) => {
-            if (result.isConfirmed) {
-              const signosVitales = {
-                temperatura: this.temperatura,
-                frecuenciaRespiratoria: this.frecuenciaRespiratoria,
-                tensionArterial: this.tensionArterial,
-                frecuenciaCardiaca: this.frecuenciaCardiaca,
-                peso: this.peso,
-                talla: this.talla,
-                curp: this.curp
-              };
+          const signosVitales = {
+            temperatura: this.temperatura,
+            frecuenciaRespiratoria: this.frecuenciaRespiratoria,
+            tensionArterial: this.tensionArterial,
+            frecuenciaCardiaca: this.frecuenciaCardiaca,
+            peso: this.peso,
+            talla: this.talla,
+            curp: this.curp
+          };
 
-              this.signosvitalesService.createSignosVitales(signosVitales).subscribe({
-                next: () => {
-                  Swal.fire({
-                    title: '¡Guardado!',
-                    text: 'Los signos vitales fueron guardados exitosamente.',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                  });
-                },
-                error: (err) => {
-                  console.error(err);
-                  Swal.fire({
-                    title: 'Error',
-                    text: 'Ocurrió un error al guardar los signos vitales.',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                  });
-                }
-              });
+          this.signosvitalesService.createSignosVitales(signosVitales).subscribe({
+            next: () => {
+              console.log('Signos vitales guardados correctamente.');
+            },
+            error: (err) => {
+              console.error('Error al guardar signos vitales:', err);
             }
           });
         }
       },
       error: (err) => {
-        console.error(err);
-        Swal.fire('Error', 'No se pudo verificar si existen signos vitales.', 'error');
+        console.error('Error al verificar existencia de signos vitales:', err);
       }
     });
   }
@@ -637,18 +571,14 @@ export class HistoriaClinica implements OnInit {
 
   addCabezaCuello() {
     if (!this.curp || this.curp.trim() === '') {
-      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      console.error('No se ha especificado la CURP del paciente.');
       return;
     }
 
     this.cabezacuelloService.existenCabezaCuelloPorCurp(this.curp).subscribe({
       next: (existe) => {
         if (existe) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Atención',
-            text: 'Ya existen registros de Cabeza y Cuello para esta CURP.',
-          });
+          console.warn('Ya existen registros de Cabeza y Cuello para esta CURP.');
         } else {
           const cabezaCuello = new Cabezacuello(
             this.cabezaCuello.exostosis,
@@ -676,49 +606,30 @@ export class HistoriaClinica implements OnInit {
 
           this.cabezacuelloService.createExploracionCabezaCuello(cabezaCuello).subscribe({
             next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: '¡Guardado!',
-                text: 'Los datos de Cabeza y Cuello fueron guardados exitosamente.',
-              });
+              console.log('Datos de Cabeza y Cuello guardados exitosamente.');
             },
             error: (err) => {
-              console.error(err);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al guardar los datos de Cabeza y Cuello.',
-              });
+              console.error('Error al guardar datos de Cabeza y Cuello:', err);
             }
           });
         }
       },
       error: (err) => {
-        console.error(err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo verificar si ya existen registros para la CURP.',
-        });
+        console.error('No se pudo verificar si ya existen registros para la CURP:', err);
       }
     });
   }
 
-
   addEstomatognatico() {
     if (!this.curp || this.curp.trim() === '') {
-      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      console.error('No se ha especificado la CURP del paciente.');
       return;
     }
 
     this.estomatognaticoService.existenEstomatognaticoCurp(this.curp).subscribe({
       next: (existe) => {
         if (existe) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Atención',
-            text: 'Ya existen registros del sistema estomatognático para esta CURP.',
-          });
+          console.warn('Ya existen registros del sistema estomatognático para esta CURP.');
         } else {
           const estomatognatico = new Estomatognatico(
             this.estomatognatico.ruidos,
@@ -738,48 +649,33 @@ export class HistoriaClinica implements OnInit {
 
           this.estomatognaticoService.createEstomatognatico(estomatognatico).subscribe({
             next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: '¡Guardado!',
-                text: 'Los datos del sistema estomatognático fueron guardados exitosamente.',
-              });
+              console.log('Datos del sistema estomatognático guardados exitosamente.');
             },
             error: (err) => {
-              console.error(err);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al guardar los datos del sistema estomatognático.',
-              });
+              console.error('Error al guardar datos del sistema estomatognático:', err);
             }
           });
         }
       },
       error: (err) => {
-        console.error(err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo verificar si ya existen registros del sistema estomatognático para la CURP.',
-        });
+        console.error('No se pudo verificar si ya existen registros del sistema estomatognático para la CURP:', err);
       }
     });
   }
 
+
+
+
   addTejidosBlandos() {
     if (!this.curp || this.curp.trim() === '') {
-      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      console.error('No se ha especificado la CURP del paciente.');
       return;
     }
 
     this.tejidosblandosService.existenTejidosBlandosPorCurp(this.curp).subscribe({
       next: (existe) => {
         if (existe) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Atención',
-            text: 'Ya existen registros de tejidos blandos para esta CURP.',
-          });
+          console.warn('Ya existen registros de tejidos blandos para esta CURP.');
         } else {
           const tejidosBlandos = new Tejidosblandos(
             this.ganglios,
@@ -809,49 +705,30 @@ export class HistoriaClinica implements OnInit {
 
           this.tejidosblandosService.createTejidosBlandos(tejidosBlandos).subscribe({
             next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: '¡Guardado!',
-                text: 'Los datos de tejidos blandos fueron guardados exitosamente.',
-              });
+              console.log('Datos de tejidos blandos guardados exitosamente.');
             },
             error: (err) => {
-              console.error(err);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al guardar los datos de tejidos blandos.',
-              });
+              console.error('Error al guardar datos de tejidos blandos:', err);
             }
           });
         }
       },
       error: (err) => {
-        console.error(err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo verificar si ya existen registros de tejidos blandos para la CURP.',
-        });
+        console.error('No se pudo verificar si ya existen registros de tejidos blandos para la CURP:', err);
       }
     });
   }
 
   addTutor() {
     if (!this.curp || this.curp.trim() === '') {
-      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      console.error('No se ha especificado la CURP del paciente.');
       return;
     }
-
 
     this.tutorService.existeTutorPorCurp(this.curp).subscribe({
       next: (existe) => {
         if (existe) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Atención',
-            text: 'Ya existen registros de tutor para esta CURP.',
-          });
+          console.warn('Ya existen registros de tutor para esta CURP.');
         } else {
           const tutor = new Tutor(
             this.nombreTutor,
@@ -864,30 +741,16 @@ export class HistoriaClinica implements OnInit {
 
           this.tutorService.createTutor(tutor).subscribe({
             next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: '¡Guardado!',
-                text: 'Los datos del tutor fueron guardados exitosamente.',
-              });
+              console.log('Datos del tutor guardados exitosamente.');
             },
             error: (err) => {
-              console.error(err);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al guardar los datos del tutor.',
-              });
+              console.error('Error al guardar datos del tutor:', err);
             }
           });
         }
       },
       error: (err) => {
-        console.error(err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo verificar si ya existen registros del tutor para la CURP.',
-        });
+        console.error('No se pudo verificar si ya existen registros del tutor para la CURP:', err);
       }
     });
   }
@@ -895,19 +758,14 @@ export class HistoriaClinica implements OnInit {
 
   addDiagnosticoTratamiento() {
     if (!this.curp || this.curp.trim() === '') {
-      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      console.error('No se ha especificado la CURP del paciente.');
       return;
     }
-
 
     this.diagnosticotratamientoService.existenDiagnosticoTratamientoCurp(this.curp).subscribe({
       next: (existe) => {
         if (existe) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Atención',
-            text: 'Ya existen registros de diagnostico para esta CURP.',
-          });
+          console.warn('Ya existen registros de diagnóstico para esta CURP.');
         } else {
           const diagnostico = new Diagnosticotratamiento(
             this.interpretacionRx,
@@ -918,86 +776,174 @@ export class HistoriaClinica implements OnInit {
 
           this.diagnosticotratamientoService.createDiagnosticoTratamiento(diagnostico).subscribe({
             next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: '¡Guardado!',
-                text: 'Los datos del tutor fueron guardados exitosamente.',
-              });
+              console.log('Datos de diagnóstico y tratamiento guardados exitosamente.');
             },
             error: (err) => {
-              console.error(err);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al guardar los datos del tutor.',
-              });
+              console.error('Error al guardar diagnóstico y tratamiento:', err);
             }
           });
         }
       },
       error: (err) => {
-        console.error(err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo verificar si ya existen registros del tutor para la CURP.',
-        });
+        console.error('Error al verificar registros de diagnóstico para la CURP:', err);
       }
     });
   }
 
-addEvolucion() {
+  addEvolucion() {
     if (!this.curp || this.curp.trim() === '') {
-      Swal.fire('Error', 'No se ha especificado la CURP del paciente.', 'error');
+      console.error('No se ha especificado la CURP del paciente.');
       return;
     }
-
 
     this.evolucionService.existenEvolucionPorCurp(this.curp).subscribe({
       next: (existe) => {
         if (existe) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Atención',
-            text: 'Ya existen registros de evolucion y diagnostico para esta CURP.',
-          });
+          console.warn('Ya existen registros de evolución y diagnóstico para esta CURP.');
         } else {
           const evolucion = new Evolucion(
             this.fecha,
             this.comentarioControl,
-            this.curp,
-            
+            this.curp
           );
 
           this.evolucionService.createEvolucion(evolucion).subscribe({
             next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: '¡Guardado!',
-                text: 'Los datos del diagnostico y tratamiento fueron guardados exitosamente.',
-              });
+              console.log('Datos de evolución guardados exitosamente.');
             },
             error: (err) => {
-              console.error(err);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al guardar los datos del diagnostico y tratamiento.',
-              });
+              console.error('Error al guardar evolución:', err);
             }
           });
         }
       },
       error: (err) => {
-        console.error(err);
+        console.error('Error al verificar registros de evolución para la CURP:', err);
+      }
+    });
+  }
+
+  ngAfterViewInit() {
+    this.signaturePad = new SignaturePad(this.canvasRef.nativeElement);
+  }
+
+  addFirma() {
+    if (this.signaturePad.isEmpty()) {
+      console.warn('Firma vacía: Por favor, firma antes de guardar.');
+      return;
+    }
+
+    if (!this.curp || this.curp.trim() === '') {
+      console.error('CURP faltante: Por favor, ingresa la CURP.');
+      return;
+    }
+
+    const firmaBase64 = this.signaturePad.toDataURL();
+    const nuevaFirma = new Firma(firmaBase64, this.curp);
+
+    this.firmaService.guardarFirma(nuevaFirma).subscribe({
+      next: () => {
+        console.log('Firma guardada correctamente.');
+        this.signaturePad.clear();
+      },
+      error: () => {
+        console.error('Error al guardar la firma.');
+      }
+    });
+  }
+
+
+  limpiarFirma() {
+    this.signaturePad.clear();
+  }
+
+  cargarFirmas() {
+    this.firmaService.obtenerFirmas().subscribe({
+      next: (data) => this.firmas = data,
+      error: () => alert('No se pudieron cargar las firmas')
+    });
+  }
+
+  onFileChange(event: any): void {
+    const files: FileList = event.target.files;
+
+    this.listaFotos = []; // Limpiar anteriores
+    this.previews = [];
+
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        this.listaFotos.push(new Fotosinicio(base64, this.curp));
+        this.previews.push(base64); // Para mostrar previews opcional
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  addFotosInicio(): void {
+    if (!this.curp || this.listaFotos.length === 0) {
+      return;
+    }
+
+    // Asignar CURP a cada imagen
+    this.listaFotos = this.listaFotos.map(f => new Fotosinicio(f.fotos, this.curp));
+
+    console.log('Enviando fotos:', this.listaFotos);
+
+    this.fotosInicioService.guardarMultiplesFotos(this.listaFotos).subscribe({
+      next: (res: any) => {
+        this.listaFotos = [];
+        this.previews = [];
+        this.curp = '';
+      },
+      error: (err) => {
+        console.error('Error al guardar imágenes', err);
+      }
+    });
+  }
+
+  enviarHC() {
+    if (!this.curp || this.curp.trim() === '') {
+      Swal.fire({
+        icon: 'error',
+        title: 'CURP faltante',
+        text: 'Por favor, ingresa la CURP antes de guardar.'
+      });
+      return;
+    }
+
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Se guardarán todos los datos del expediente clínico.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, guardar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.addDatosPaciente();
+        this.addAntecedentesPersonales();
+        this.addAntecedentesHeredofamiliares();
+        this.addAntecedentesNoPatologicos();
+        this.addSignosVitales();
+        this.addCabezaCuello();
+        this.addEstomatognatico();
+        this.addTejidosBlandos();
+        this.addTutor();
+        this.addDiagnosticoTratamiento();
+        this.addEvolucion();
+        this.addFotosInicio();
+        this.addFirma();
+
         Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo verificar si ya existen registros del diagnostico y tratamiento para la CURP.',
+          icon: 'success',
+          title: 'Expediente guardado',
+          text: 'Todos los datos han sido enviados correctamente.'
         });
       }
     });
   }
- 
+
 
 }

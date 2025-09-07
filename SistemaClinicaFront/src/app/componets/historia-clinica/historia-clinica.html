@@ -89,6 +89,12 @@
       </button>
     </li>
     <li class="nav-item" role="presentation">
+      <button class="nav-link" id="fotosInicio-tab" data-bs-toggle="tab" data-bs-target="#fotosInicio" type="button"
+        role="tab">
+       📷 Fotos
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
       <button class="nav-link" id="autorizacion-tab" data-bs-toggle="tab" data-bs-target="#autorizacion" type="button"
         role="tab">
         ✅ Autorización
@@ -205,6 +211,9 @@
         <div class="text-end mt-4">
           <button type="submit" class="btn btn-primary" (click)="addDatosPaciente()">
             Guardar avances
+          </button>
+          <button type="submit" class="btn btn-primary" (click)="listDatosPaciente()">
+            mostrar
           </button>
         </div>
       </form>
@@ -1125,7 +1134,8 @@
 
       <div class="mb-3">
         <label for="evolucionTexto" class="form-label fw-semibold">Evolución del paciente</label>
-        <textarea id="evolucionTexto" class="form-control" rows="9" [(ngModel)]="comentarioControl" name="comentarioControl"></textarea>
+        <textarea id="evolucionTexto" class="form-control" rows="9" [(ngModel)]="comentarioControl"
+          name="comentarioControl"></textarea>
       </div>
       <div class="text-end mt-4">
         <button type="submit" class="btn btn-primary" (click)="addEvolucion()">
@@ -1138,9 +1148,9 @@
     <!-- Contenido del tab Autorización -->
     <div class="tab-pane fade" id="autorizacion" role="tabpanel" aria-labelledby="autorizacion-tab">
       <div class="authorization-box">
-        <p class="mb-4">
-          Por la presente autorizo a <input type="text" class="form-control d-inline w-auto"
-            placeholder="Nombre del alumno" /> y/o asociados a realizar el tratamiento informado en la presente
+        <p class="mb-4 text-center">
+          Por la presente autorizo a {{ nombreUsuarioLogueado }} y/o asociados a realizar el tratamiento informado en la
+          presente
           HISTORIA CLÍNICA. He conversado con el profesional sobre la naturaleza y el propósito del tratamiento,
           sobre
           la posibilidad de complicaciones, riesgos y posibles métodos alternativos. Autorizo a proveer los
@@ -1148,25 +1158,57 @@
           adicionales que considere razonables, incluyendo la administración de anestésicos, prácticas de Rx y otros
           métodos de diagnóstico.
         </p>
-        <p class="mb-4">
+        <p class="mb-4 text-center">
           Si el paciente fuera menor de edad, la firma al pie es del padre, madre o tutor responsable.
         </p>
+
         <div class="text-center mb-3">
           <strong>AUTORIZO</strong>
         </div>
-        <div class="signature-box d-flex justify-content-center mb-3">
-          <canvas id="signatureCanvas" width="500" height="200"></canvas>
+        <div class="#firmaCanvas signature-box d-flex justify-content-center mb-3">
+          <canvas #canvas width="400" height="200" style="border: 1px solid #000;"></canvas>
+          <br />
         </div>
         <div class="text-center mt-2 mb-3">
-          <label for="nombreFirma" class="form-label">Nombre completo</label>
-          <input type="text" class="form-control w-50 mx-auto" id="nombreFirma" placeholder="Ej. Juan Pérez">
+          <strong for="nombreFirma" class="form-label"> Paciente: {{nombrePaciente || 'nombrePacienteLogueado'}}
+          </strong>
+
         </div>
         <div class="d-flex justify-content-center gap-2">
-          <button id="clearCanvas" class="btn btn-secondary" type="button">Limpiar Firma</button>
-          <button id="submitForm" class="btn btn-primary" type="button">Enviar Historia Clínica</button>
+          <button (click)="limpiarFirma()" id="clearCanvas" class="btn btn-secondary" type="button">Limpiar
+            Firma</button>
+          <button (click)="enviarHC()" id="submitForm" class="btn btn-primary" type="button">Enviar Historia
+            Clínica</button>
         </div>
       </div>
     </div>
+
+
+    <div class="tab-pane fade" id="fotosInicio" role="tabpanel" aria-labelledby="fotosInicio-tab">
+      <div class="card shadow p-4">
+        <h4 class="text-center mb-4">Subir Foto del Paciente</h4>
+
+        <div class="mb-3">
+          <label for="fotoPaciente" class="form-label">Selecciona una imagen</label>
+          <input class="form-control" type="file" id="fotoPaciente" accept="image/*" (change)="onFileChange($event)"
+            multiple />
+        </div>
+        <!-- Imagen de previsualización -->
+        <div class="text-center d-flex flex-wrap gap-3 justify-content-center mt-3" *ngIf="previews.length > 0">
+  <div *ngFor="let img of previews">
+    <img [src]="img" alt="Previsualización" class="img-thumbnail" style="max-height: 150px" />
+  </div>
+</div>
+
+        <div class="d-grid mt-4">
+          <button type="button" class="btn btn-primary" (click)="addFotosInicio()">
+            Guardar Imagen
+          </button>
+        </div>
+      </div>
+    </div>
+
+
 
     <footer>
       © 2025 Consultorio Escolar IESIT. Todos los derechos reservados.

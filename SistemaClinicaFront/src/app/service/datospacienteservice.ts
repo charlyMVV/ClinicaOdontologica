@@ -17,5 +17,10 @@ export class Datospacienteservice {
     return this.http.post<DatosPacientes>(this.api,datospacientes);
   }
 
+  getDatosPaciente(): Observable<DatosPacientes[]>{
+    return this.http.get<DatosPacientes[]>(this.api);
+  }
+
+  
 
 }

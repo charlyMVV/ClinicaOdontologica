@@ -14,9 +14,10 @@ import Swal from 'sweetalert2';
 export class Menu {
 
   nombreUsuarioLogueado: string = '';
+AuthService: any;
 
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(public authService: AuthService, private router: Router) { }
 
   ngOnInit(): void {
 
