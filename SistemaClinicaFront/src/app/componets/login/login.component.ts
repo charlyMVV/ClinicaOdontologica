@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { AuthService } from '../../service/auth';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
+import { jwtDecode } from 'jwt-decode'; // ✅ Importación correcta
 
 @Component({
   selector: 'app-login',
@@ -10,38 +11,40 @@ import Swal from 'sweetalert2';
   standalone: false
 })
 export class LoginComponent {
-  usuario = '';
-  contrasena = '';
-  mensaje = '';
-  roles = '';
+  username = '';
+  password = '';
 
   constructor(private authService: AuthService, private router: Router) {}
 
   loginSubmit() {
-  this.authService.login(this.usuario, this.contrasena, this.roles).subscribe({
-    next: (resp) => {
-      if (resp.mensaje === 'Login correcto') {
-        sessionStorage.setItem('usuario', this.usuario);
-        sessionStorage.setItem('nombre', resp.nombre); 
-        sessionStorage.setItem('roles', resp.roles);
-        this.router.navigate(['/menu']);
+    this.authService.login(this.username, this.password).subscribe({
+      next: (resp) => {
+        if (resp.token) {
+          sessionStorage.setItem('token', resp.token);
+
+          const decoded: any = jwtDecode(resp.token);
+
+          sessionStorage.setItem('username', decoded.nombreUsuario);
+          sessionStorage.setItem('role', decoded.role);
+
+          this.router.navigate(['/menu']);
+        }
+      },
+      error: (err) => {
+        if (err.status === 401) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Credenciales incorrectas',
+            text: 'El usuario o la contraseña no son válidos',
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error del servidor',
+            text: 'No se pudo procesar la solicitud',
+          });
+        }
       }
-    },
-    error: (err) => {
-      if (err.status === 401) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Credenciales incorrectas',
-          text: 'El usuario o la contraseña no son válidos',
-        });
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error del servidor',
-          text: 'No se pudo procesar la solicitud',
-        });
-      }
-    }
-  });
-}
+    });
+  }
 }

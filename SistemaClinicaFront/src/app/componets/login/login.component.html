@@ -15,12 +15,12 @@
     <form (ngSubmit)="loginSubmit()" #loginForm="ngForm">
       <div class="mb-3 text-start">
         <label for="usuario" class="form-label">Usuario</label>
-        <input type="text" [(ngModel)]="usuario" name="usuario" id="usuario" class="form-control" required placeholder="Ingrese su nombre de usuario" >
+        <input type="text" [(ngModel)]="username" name="usuario" id="usuario" class="form-control" required placeholder="Ingrese su nombre de usuario" >
       </div>
 
       <div class="mb-3 text-start">
         <label for="contrasena" class="form-label">Contraseña</label>
-        <input type="password" [(ngModel)]="contrasena" name="contrasena" id="contrasena" class="form-control" required placeholder="Ingrese su contraseña" >
+        <input type="password" [(ngModel)]="password" name="contrasena" id="contrasena" class="form-control" required placeholder="Ingrese su contraseña" >
       </div>
 
       <button type="submit" class="btn btn-login w-100">Iniciar sesión</button>

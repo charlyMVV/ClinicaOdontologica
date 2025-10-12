@@ -14,13 +14,14 @@ export class AuthService {
 
 
 
-  login(usuario: string, contrasena: string, roles: string) {
-    return this.http.post<{ mensaje: string, nombre: string, roles: string }>(
-      'http://localhost:8080/api/auth/login',
-      { usuario, contrasena, roles },
-      { withCredentials: true }
-    );
-  }
+  login(username: string, password: string) {
+  return this.http.post<{ token: string }>(
+    'http://localhost:8080/auth/login',
+    { username, password },
+    { withCredentials: true }
+  );
+}
+
   
   logout() {
     return this.http.get(`${this.apiUrl}/logout`, {
@@ -30,8 +31,8 @@ export class AuthService {
   }
 
   isAdmin(): boolean {
-    const roles = sessionStorage.getItem('roles');
-    return roles === 'administrador';
+    const roles = sessionStorage.getItem('role');
+    return roles === 'ADMIN';
   }
 
 

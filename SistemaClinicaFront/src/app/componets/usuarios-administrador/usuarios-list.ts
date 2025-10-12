@@ -23,10 +23,9 @@ export class UsuariosList implements OnInit {
   filtroEstudiantes: string = '';
   matricula: string = '';
   nombreUsuario: string = '';
-  usuario: string = '';
-  contrasena: string = '';
+  username: string = '';
+  password: string = '';
   periodo: string = '';
-  roles: string = '';
 
   modoEdicion: boolean = false;
   usuarios: Usuario[] = [];
@@ -43,7 +42,7 @@ export class UsuariosList implements OnInit {
   ngOnInit(): void {
     this.listUsuarios();
     this.obtenerPeriodos();
-    this.nombreUsuarioLogueado = sessionStorage.getItem('nombre') || 'Usuario';
+    this.nombreUsuarioLogueado = sessionStorage.getItem('nombre') || 'username';
 
   }
   
@@ -124,7 +123,7 @@ export class UsuariosList implements OnInit {
       return;
     }
 
-    if (!this.matricula || !this.nombreUsuario || !this.usuario || !this.contrasena || !this.periodo) {
+    if (!this.matricula || !this.nombreUsuario || !this.username || !this.username || !this.periodo) {
       Swal.fire({
         icon: 'warning',
         title: 'Campos incompletos',
@@ -148,10 +147,9 @@ export class UsuariosList implements OnInit {
         const nuevoUsuario = new Usuario(
           this.nombreUsuario,
           this.matricula,
-          this.usuario,
-          this.contrasena,
-          this.periodo,
-          this.roles
+          this.username,
+          this.password,
+          this.periodo
         );
 
         this.usuarioService.createUsuario(nuevoUsuario).subscribe(
@@ -185,9 +183,8 @@ export class UsuariosList implements OnInit {
     return this.usuarios.filter(us =>
       us.matricula.toLowerCase().includes(filtro) ||
       us.nombreUsuario.toLowerCase().includes(filtro) ||
-      us.usuario.toLowerCase().includes(filtro) ||
-      us.contrasena.toLowerCase().includes(filtro) ||
-      us.periodo.toLowerCase().includes(filtro)
+      us.username.toLowerCase().includes(filtro) ||
+      us.password.toLowerCase().includes(filtro) 
     );
   }
 
@@ -195,22 +192,21 @@ export class UsuariosList implements OnInit {
     this.modoEdicion = true;
     this.matricula = usuario.matricula;
     this.nombreUsuario = usuario.nombreUsuario;
-    this.usuario = usuario.usuario;
-    this.contrasena = usuario.contrasena;
-    this.periodo = usuario.periodo;
+    this.username = usuario.username;
+    this.password = usuario.password;
   }
 
   resetForm(): void {
     this.nombreUsuario = '';
     this.matricula = '';
-    this.usuario = '';
-    this.contrasena = '';
+    this.username = '';
+    this.password = '';
     this.periodo = '';
     this.modoEdicion = false;
   }
 
   actualizarUsuario(): void {
-    if (!this.matricula || !this.nombreUsuario || !this.usuario || !this.contrasena || !this.periodo) {
+    if (!this.matricula || !this.nombreUsuario || !this.username || !this.password || !this.periodo) {
       Swal.fire({
         icon: 'warning',
         title: 'Campos incompletos',
@@ -234,10 +230,9 @@ export class UsuariosList implements OnInit {
         const usuarioActualizado = new Usuario(
           this.nombreUsuario,
           this.matricula,
-          this.usuario,
-          this.contrasena,
-          this.periodo,
-          this.roles
+          this.username,
+          this.password,
+          this.periodo
         );
 
         this.usuarioService.actualizarUsuario(usuarioActualizado).subscribe(

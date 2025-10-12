@@ -14,18 +14,18 @@ import Swal from 'sweetalert2';
 export class Menu {
 
   nombreUsuarioLogueado: string = '';
-AuthService: any;
+  AuthService: any;
 
 
   constructor(public authService: AuthService, private router: Router) { }
 
   ngOnInit(): void {
 
-    this.nombreUsuarioLogueado = sessionStorage.getItem('nombre') || 'Usuario';
+    this.nombreUsuarioLogueado = sessionStorage.getItem('username') || 'username';
   }
 
   AdministradorSumbit(){
-    this.router.navigate(['administrador']);
+    this.router.navigate(['ADMIN']);
   }
 
   MenuSubmitHc() {
