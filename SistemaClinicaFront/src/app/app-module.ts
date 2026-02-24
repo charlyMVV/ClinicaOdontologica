@@ -10,9 +10,8 @@ import { LoginComponent } from './components/login/login.component';
 import { Menu } from './components/menu/menu.component';
 import { HistoriaClinica } from './components/historia-clinica/historia-clinica';
 import { Mishc } from './components/mishc/mishc';
-
-
-
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './auth.interceptor'; 
 
 
 @NgModule({
@@ -35,8 +34,9 @@ import { Mishc } from './components/mishc/mishc';
     AppRoutingModule      
   ],
   providers: [
-    provideBrowserGlobalErrorListeners()
-  ],
+  provideBrowserGlobalErrorListeners(),
+  { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+],
   bootstrap: [App]
 })
 export class AppModule { }

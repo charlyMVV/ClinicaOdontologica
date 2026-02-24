@@ -296,8 +296,6 @@ export class HistoriaClinica implements OnInit {
           this.ultimaConsulta
         );
 
-
-
         console.log(datospaciente);
 
         this.datosService.createDatosPaciente(datospaciente).subscribe({
