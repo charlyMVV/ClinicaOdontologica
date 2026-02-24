@@ -4,12 +4,12 @@ import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { UsuariosList } from './componets/usuarios-administrador/usuarios-list';
-import { UsuarioAdd } from './componets/usuario-add/usuario-add';
-import { LoginComponent } from './componets/login/login.component';
-import { Menu } from './componets/menu/menu.component';
-import { HistoriaClinica } from './componets/historia-clinica/historia-clinica';
-import { Mishc } from './componets/mishc/mishc';
+import { UsuariosList } from './components/usuarios-administrador/usuarios-list';
+import { UsuarioAdd } from './components/usuario-add/usuario-add';
+import { LoginComponent } from './components/login/login.component';
+import { Menu } from './components/menu/menu.component';
+import { HistoriaClinica } from './components/historia-clinica/historia-clinica';
+import { Mishc } from './components/mishc/mishc';
 
 
 

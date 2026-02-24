@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { LoginComponent } from './componets/login/login.component';
-import { UsuariosList } from './componets/usuarios-administrador/usuarios-list';
+import { LoginComponent } from './components/login/login.component';
+import { UsuariosList } from './components/usuarios-administrador/usuarios-list';
 import { AuthGuard } from './guards/auth-guard';
-import { Menu } from './componets/menu/menu.component';
-import { HistoriaClinica } from './componets/historia-clinica/historia-clinica';
+import { Menu } from './components/menu/menu.component';
+import { HistoriaClinica } from './components/historia-clinica/historia-clinica';
 import { ConfirmarSalidaGuard } from './guards/confirmar-salida-guard';
-import { Mishc } from './componets/mishc/mishc';
+import { Mishc } from './components/mishc/mishc';
 
 const routes: Routes = [
   { path: '', component: LoginComponent },

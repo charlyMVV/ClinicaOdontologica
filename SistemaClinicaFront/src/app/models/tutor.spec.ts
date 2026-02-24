@@ -1,0 +1,7 @@
+import { Tutor } from './models/tutor';
+
+describe('Tutor', () => {
+  it('should create an instance', () => {
+    expect(new Tutor()).toBeTruthy();
+  });
+});
