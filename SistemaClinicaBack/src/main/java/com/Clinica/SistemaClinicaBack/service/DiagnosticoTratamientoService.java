@@ -22,4 +22,6 @@ public interface DiagnosticoTratamientoService {
     void deleteById(Integer id);
     
     DiagnosticoTratamiento update(DiagnosticoTratamiento diagnosticoTratamiento);
+
+    DiagnosticoTratamiento findByCurp(String curp);
 }

@@ -19,4 +19,8 @@ export class TejidosblandosService {
   existenTejidosBlandosPorCurp(curp: string): Observable<boolean> {
     return this.http.get<boolean>(`${this.api}/existen/${curp}`);
 }
+
+updateTejidosBlandos(curp: string, tejidosBlandos: Tejidosblandos): Observable<Tejidosblandos> {
+  return this.http.put<Tejidosblandos>(`${this.api}/curp/${curp}`, tejidosBlandos);
+}
 }

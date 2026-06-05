@@ -46,6 +46,17 @@ public class PacienteServiceImp implements PacienteService{
         return pacienterepository.save(paciente);
     }
 
- 
+    @Override
+    public Paciente findByCURP(String curp) {
+        return pacienterepository.findByCurp(curp)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existe paciente con CURP: " + curp
+                ));
+    }
+
+    @Override
+    public boolean existsByCURP(String curp) {
+        return pacienterepository.existsByCurp(curp);
+    }
     
 }

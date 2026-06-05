@@ -75,4 +75,25 @@ public class AntecedentesController {
         return ResponseEntity.ok(existen);
     }
 
+    @PostMapping("/upsert")
+    public Antecedentes upsertAntecedente(@RequestBody Antecedentes antecedente) {
+
+        Antecedentes antecedentedb = antecedentesRepository
+                .findByCurpAndDescripcionAntecedentesAndTipoAntecedentes(
+                        antecedente.getCurp(),
+                        antecedente.getDescripcionAntecedentes(),
+                        antecedente.getTipoAntecedentes()
+                )
+                .orElse(null);
+
+        if (antecedentedb == null) {
+            return antecedentesService.save(antecedente);
+        }
+
+        antecedentedb.setRespuesta(antecedente.getRespuesta());
+        antecedentedb.setDetalle(antecedente.getDetalle());
+
+        return antecedentesService.update(antecedentedb);
+    }
+
 }

@@ -16,6 +16,7 @@ public interface SignosVitalesService {
     void deleteById(Integer id);
     
     SignosVitales update(SignosVitales signosVitales);
-    
+
+    SignosVitales findByCurp(String curp);
     
 }

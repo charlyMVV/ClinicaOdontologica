@@ -17,6 +17,8 @@ public interface ExploracionEstomatognaticoService {
     ExploracionEstomatognatico findById(Integer id);
     
     void deleteById(Integer id);
+
+    ExploracionEstomatognatico findByCurp(String curp);
     
     ExploracionEstomatognatico update(ExploracionEstomatognatico exploracionEstomatognatico);
     

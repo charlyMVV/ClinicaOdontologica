@@ -46,7 +46,14 @@ public class AntecedentesNoPatologicosImpl implements AntecedentesNoPatologicosS
     public AntecedentesNoPatologicos update(AntecedentesNoPatologicos antecedentesNoPatologicos) {
         return antecedentesNoPatologicosRepository.save(antecedentesNoPatologicos);
     }
-    
+
+    @Override
+    public AntecedentesNoPatologicos findByCurp(String curp) {
+        return antecedentesNoPatologicosRepository.findByCurp(curp)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existen antecedentes no patológicos para la CURP: " + curp
+                ));
+    }
     
     
 }

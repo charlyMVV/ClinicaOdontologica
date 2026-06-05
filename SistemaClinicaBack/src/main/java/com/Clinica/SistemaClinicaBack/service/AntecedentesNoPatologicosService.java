@@ -22,5 +22,6 @@ public interface AntecedentesNoPatologicosService {
     void deleteById(Integer id);
     
     AntecedentesNoPatologicos update(AntecedentesNoPatologicos antecedentesNoPatologicos);
-    
+
+    AntecedentesNoPatologicos findByCurp(String curp);
 }

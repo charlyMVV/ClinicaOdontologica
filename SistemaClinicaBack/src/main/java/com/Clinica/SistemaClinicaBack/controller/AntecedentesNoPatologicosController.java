@@ -52,49 +52,53 @@ public class AntecedentesNoPatologicosController {
     public void deleteById(@PathVariable("idAntecedentesNoPatologicos")Integer id){
         antecedentesNoPatologicosService.deleteById(id);
     }
-   
-    //localhost:8080/api/antecedentes
-    @PutMapping
-    public AntecedentesNoPatologicos updateAntecedentesNoPatologicos(@RequestBody AntecedentesNoPatologicos antecedentesNoPatologicos){
-       
-    AntecedentesNoPatologicos antecedentesNoPatologicosdb = antecedentesNoPatologicosService.findById(antecedentesNoPatologicos.getIdAntecedentesNoPatologicos());
-        
-    if(!antecedentesNoPatologicosdb.getCurp().equals(antecedentesNoPatologicos.getCurp())) {
+
+    @PutMapping("/curp/{curp}")
+    public AntecedentesNoPatologicos updateAntecedentesNoPatologicos(
+            @PathVariable String curp,
+            @RequestBody AntecedentesNoPatologicos antecedentesNoPatologicos) {
+
+        AntecedentesNoPatologicos antecedentesNoPatologicosdb =
+                antecedentesNoPatologicosService.findByCurp(curp);
+
+        if (!antecedentesNoPatologicosdb.getCurp().equals(curp)) {
             throw new IllegalArgumentException("La CURP no se puede modificar.");
         }
-        
-    antecedentesNoPatologicosdb.setFrecuenciaLavadoDientes(antecedentesNoPatologicos.getFrecuenciaLavadoDientes());
-    antecedentesNoPatologicosdb.setUsaAuxiliaresHigiene(antecedentesNoPatologicos.getUsaAuxiliaresHigiene());
-    antecedentesNoPatologicosdb.setTiposAuxiliaresHigiene(antecedentesNoPatologicos.getTiposAuxiliaresHigiene());
-    antecedentesNoPatologicosdb.setGrupoSanguineo(antecedentesNoPatologicos.getGrupoSanguineo());
-    antecedentesNoPatologicosdb.setFactorRh(antecedentesNoPatologicos.getFactorRh());
-    antecedentesNoPatologicosdb.setEsquemaCompleto(antecedentesNoPatologicos.getEsquemaCompleto());
-    antecedentesNoPatologicosdb.setVacunasFaltantes(antecedentesNoPatologicos.getVacunasFaltantes());
-    antecedentesNoPatologicosdb.setAntecedentesAlergicos(antecedentesNoPatologicos.getAntecedentesAlergicos());
-    antecedentesNoPatologicosdb.setCualAlergicos(antecedentesNoPatologicos.getCualAlergicos());
-    antecedentesNoPatologicosdb.setAntibioticos(antecedentesNoPatologicos.getAntibioticos());   
-    antecedentesNoPatologicosdb.setAnalgesicos(antecedentesNoPatologicos.getAnalgesicos());
-    antecedentesNoPatologicosdb.setAnestesicos(antecedentesNoPatologicos.getAnestesicos());
-    antecedentesNoPatologicosdb.setAlimentos(antecedentesNoPatologicos.getAlimentos());
-    antecedentesNoPatologicosdb.setOtrasAlergias(antecedentesNoPatologicos.getOtrasAlergias());
-    antecedentesNoPatologicosdb.setTieneAdicciones(antecedentesNoPatologicos.getTieneAdicciones());
-    antecedentesNoPatologicosdb.setTabaco(antecedentesNoPatologicos.getTabaco());
-    antecedentesNoPatologicosdb.setAlcohol(antecedentesNoPatologicos.getAlcohol());
-    antecedentesNoPatologicosdb.setOtrasAdicciones(antecedentesNoPatologicos.getOtrasAdicciones());
-    antecedentesNoPatologicosdb.setHaSidoHospitalizado(antecedentesNoPatologicos.getHaSidoHospitalizado());
-    antecedentesNoPatologicosdb.setFechaHospitalizacion(antecedentesNoPatologicos.getFechaHospitalizacion());
-    antecedentesNoPatologicosdb.setMotivoHospitalizacion(antecedentesNoPatologicos.getMotivoHospitalizacion());
-    antecedentesNoPatologicosdb.setPadecimientoActual(antecedentesNoPatologicos.getPadecimientoActual());
-    antecedentesNoPatologicosdb.setHaSidoAnestesiado(antecedentesNoPatologicos.getHaSidoAnestesiado());
-    antecedentesNoPatologicosdb.setHaRecibidoTransfusion(antecedentesNoPatologicos.getHaRecibidoTransfusion());
-    antecedentesNoPatologicosdb.setHaRecibidoPerforaciones(antecedentesNoPatologicos.getHaRecibidoPerforaciones());
-    antecedentesNoPatologicosdb.setConsumeMedicamento(antecedentesNoPatologicos.getConsumeMedicamento());
-    antecedentesNoPatologicosdb.setEmbarazo(antecedentesNoPatologicos.getEmbarazo());
-    antecedentesNoPatologicosdb.setDiscapacidad(antecedentesNoPatologicos.getDiscapacidad());
-    antecedentesNoPatologicosdb.setTieneIntervenciones(antecedentesNoPatologicos.getTieneIntervenciones());
-    antecedentesNoPatologicosdb.setParteCuerpo(antecedentesNoPatologicos.getParteCuerpo());
-    
-    return antecedentesNoPatologicosService.update(antecedentesNoPatologicosdb);
+
+        antecedentesNoPatologicosdb.setFrecuenciaLavadoDientes(antecedentesNoPatologicos.getFrecuenciaLavadoDientes());
+        antecedentesNoPatologicosdb.setUsaAuxiliaresHigiene(antecedentesNoPatologicos.getUsaAuxiliaresHigiene());
+        antecedentesNoPatologicosdb.setTiposAuxiliaresHigiene(antecedentesNoPatologicos.getTiposAuxiliaresHigiene());
+        antecedentesNoPatologicosdb.setGrupoSanguineo(antecedentesNoPatologicos.getGrupoSanguineo());
+        antecedentesNoPatologicosdb.setFactorRh(antecedentesNoPatologicos.getFactorRh());
+        antecedentesNoPatologicosdb.setCartillaVacunacion(antecedentesNoPatologicos.getCartillaVacunacion());
+        antecedentesNoPatologicosdb.setEsquemaCompleto(antecedentesNoPatologicos.getEsquemaCompleto());
+        antecedentesNoPatologicosdb.setVacunasFaltantes(antecedentesNoPatologicos.getVacunasFaltantes());
+        antecedentesNoPatologicosdb.setAntecedentesAlergicos(antecedentesNoPatologicos.getAntecedentesAlergicos());
+        antecedentesNoPatologicosdb.setCualAlergicos(antecedentesNoPatologicos.getCualAlergicos());
+        antecedentesNoPatologicosdb.setAntibioticos(antecedentesNoPatologicos.getAntibioticos());
+        antecedentesNoPatologicosdb.setAnalgesicos(antecedentesNoPatologicos.getAnalgesicos());
+        antecedentesNoPatologicosdb.setAnestesicos(antecedentesNoPatologicos.getAnestesicos());
+        antecedentesNoPatologicosdb.setAlimentos(antecedentesNoPatologicos.getAlimentos());
+        antecedentesNoPatologicosdb.setOtrasAlergias(antecedentesNoPatologicos.getOtrasAlergias());
+        antecedentesNoPatologicosdb.setTieneAdicciones(antecedentesNoPatologicos.getTieneAdicciones());
+        antecedentesNoPatologicosdb.setGolosinas(antecedentesNoPatologicos.getGolosinas());
+        antecedentesNoPatologicosdb.setTabaco(antecedentesNoPatologicos.getTabaco());
+        antecedentesNoPatologicosdb.setAlcohol(antecedentesNoPatologicos.getAlcohol());
+        antecedentesNoPatologicosdb.setOtrasAdicciones(antecedentesNoPatologicos.getOtrasAdicciones());
+        antecedentesNoPatologicosdb.setHaSidoHospitalizado(antecedentesNoPatologicos.getHaSidoHospitalizado());
+        antecedentesNoPatologicosdb.setFechaHospitalizacion(antecedentesNoPatologicos.getFechaHospitalizacion());
+        antecedentesNoPatologicosdb.setMotivoHospitalizacion(antecedentesNoPatologicos.getMotivoHospitalizacion());
+        antecedentesNoPatologicosdb.setPadecimientoActual(antecedentesNoPatologicos.getPadecimientoActual());
+        antecedentesNoPatologicosdb.setHaSidoAnestesiado(antecedentesNoPatologicos.getHaSidoAnestesiado());
+        antecedentesNoPatologicosdb.setHaRecibidoTransfusion(antecedentesNoPatologicos.getHaRecibidoTransfusion());
+        antecedentesNoPatologicosdb.setHaRecibidoPerforaciones(antecedentesNoPatologicos.getHaRecibidoPerforaciones());
+        antecedentesNoPatologicosdb.setConsumeMedicamento(antecedentesNoPatologicos.getConsumeMedicamento());
+        antecedentesNoPatologicosdb.setEmbarazo(antecedentesNoPatologicos.getEmbarazo());
+        antecedentesNoPatologicosdb.setDiscapacidad(antecedentesNoPatologicos.getDiscapacidad());
+        antecedentesNoPatologicosdb.setTieneIntervenciones(antecedentesNoPatologicos.getTieneIntervenciones());
+        antecedentesNoPatologicosdb.setParteCuerpo(antecedentesNoPatologicos.getParteCuerpo());
+
+        return antecedentesNoPatologicosService.update(antecedentesNoPatologicosdb);
     }
     
     @GetMapping("/existen/{curp}")

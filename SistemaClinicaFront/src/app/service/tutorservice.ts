@@ -12,11 +12,15 @@ export class Tutorservice {
 
   constructor(private http:HttpClient) { }
 
-  createTutor(tutor :  Tutor) : Observable<Tutor>{
+    createTutor(tutor :  Tutor) : Observable<Tutor>{
     return this.http.post<Tutor>(this.api,tutor);
   }
 
   existeTutorPorCurp(curp : string):Observable<boolean>{
     return this.http.get<boolean>(`${this.api}/existen/${curp}`);
+  }
+
+  updateTutor(curp: string, tutor: Tutor): Observable<Tutor> {
+    return this.http.put<Tutor>(`${this.api}/curp/${curp}`, tutor);
   }
 }

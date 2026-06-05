@@ -1,6 +1,7 @@
 package com.Clinica.SistemaClinicaBack.controller;
 
 import com.Clinica.SistemaClinicaBack.entity.FotosInicio;
+import com.Clinica.SistemaClinicaBack.repository.FotosInicioRepository;
 import com.Clinica.SistemaClinicaBack.service.FotosInicioService;
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -32,9 +34,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class FotosInicioController {
 
     private final FotosInicioService FotosInicioService;
+    private final FotosInicioRepository fotosInicioRepository;
 
-    public FotosInicioController(FotosInicioService FotosInicioService) {
+    public FotosInicioController(FotosInicioService FotosInicioService, FotosInicioRepository fotosInicioRepository) {
         this.FotosInicioService = FotosInicioService;
+        this.fotosInicioRepository = fotosInicioRepository;
     }
 
     //localhost:8080/api/pacientes
@@ -59,7 +63,13 @@ public class FotosInicioController {
     }
 
     @PostMapping("/multiples")
+    @Transactional
     public ResponseEntity<?> guardarMultiples(@RequestBody List<FotosInicio> fotos) {
+        if (!fotos.isEmpty()) {
+            String curp = fotos.get(0).getCurp();
+            fotosInicioRepository.deleteByCurp(curp);
+        }
+
         for (FotosInicio f : fotos) {
             FotosInicioService.save(f);
         }

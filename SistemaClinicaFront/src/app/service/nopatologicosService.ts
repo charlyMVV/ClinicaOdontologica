@@ -22,4 +22,7 @@ export class NopatologicosService {
   existenAntecedentesPorCurp(curp: string): Observable<boolean> {
     return this.http.get<boolean>(`${this.api}/existen/${curp}`);
   }
+  updateAntecedentesnoPatologicos(curp: string,antecedentesNoPatologicos: Nopatologicos): Observable<Nopatologicos> {
+  return this.http.put<Nopatologicos>(`${this.api}/curp/${curp}`,  antecedentesNoPatologicos);
+}
 }

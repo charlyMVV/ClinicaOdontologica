@@ -1,15 +1,13 @@
 <div class="d-flex justify-content-end align-items-center bg-light px-4 py-2 border-bottom shadow-sm"
     style="position: sticky; top: 0; z-index: 1000;">
     <span class="me-3 fw-semibold text-primary">
-        👋 Bienvenido, {{ nombreUsuarioLogueado }}
+        Bienvenido, {{ nombreUsuarioLogueado }}
     </span>
 
-    <!-- Botón de regresar al menú -->
     <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1 me-2" (click)="volverAlMenu()">
         <i class="bi bi-arrow-left-circle"></i> Menú
     </button>
 
-    <!-- Botón de cerrar sesión -->
     <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1" (click)="logout()">
         <i class="bi bi-box-arrow-right"></i> Cerrar sesión
     </button>
@@ -19,30 +17,35 @@
     <h2>Continuar Historia Clínica</h2>
 
     <input type="text" id="buscadorHistorias" class="form-control search-bar"
-        placeholder="Buscar por nombre del paciente, tipo de historia o fecha">
+        placeholder="Buscar por nombre del paciente o CURP" [(ngModel)]="filtroPacientes" name="filtroPacientes">
 
-    <div class="table-responsive">
+    <div *ngIf="cargandoPacientes" class="text-center text-muted py-4">
+        Cargando pacientes...
+    </div>
+
+    <div class="table-responsive" *ngIf="!cargandoPacientes">
         <table class="table table-bordered align-middle" id="tablaHistorias">
             <thead>
                 <tr>
                     <th>Nombre del Paciente</th>
-                    <th>Tipo de Historia</th>
-                    <th>Fecha</th>
+                    <th>CURP</th>
                     <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>Laura Morales</td>
-                    <td>Periodoncia</td>
-                    <td>2025-05-28</td>
-                    <td><button class="btn btn-continuar btn-sm">📝 Continuar</button></td>
+                <tr *ngFor="let paciente of pacientesFiltrados">
+                    <td>{{ paciente.nombrePaciente }}</td>
+                    <td>{{ paciente.curp }}</td>
+                    <td>
+                        <button class="btn btn-continuar btn-sm" type="button" (click)="continuarHistoria(paciente)">
+                            Continuar
+                        </button>
+                    </td>
                 </tr>
-                <tr>
-                    <td>Pedro Ramírez</td>
-                    <td>Operatoria Dental</td>
-                    <td>2025-06-01</td>
-                    <td><button class="btn btn-continuar btn-sm">📝 Continuar</button></td>
+                <tr *ngIf="pacientesFiltrados.length === 0">
+                    <td colspan="3" class="text-center text-muted py-4">
+                        No hay pacientes para mostrar.
+                    </td>
                 </tr>
             </tbody>
         </table>

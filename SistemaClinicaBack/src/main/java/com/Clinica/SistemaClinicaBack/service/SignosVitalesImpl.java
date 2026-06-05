@@ -48,4 +48,11 @@ public class SignosVitalesImpl implements SignosVitalesService {
         return signosVitalesRepository.save(signosVitales);
     }
 
+    @Override
+    public SignosVitales findByCurp(String curp) {
+        return signosVitalesRepository.findByCurp(curp)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existen signos vitales para la CURP: " + curp
+                ));
+    }
 }

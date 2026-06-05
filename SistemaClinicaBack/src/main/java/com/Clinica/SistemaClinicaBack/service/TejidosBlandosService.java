@@ -19,6 +19,7 @@ public interface TejidosBlandosService {
     void deleteById(Integer id);
     
     TejidosBlandos update(TejidosBlandos tejidosBlandos);
-    
+
+    TejidosBlandos findByCurp(String curp);
     
 }

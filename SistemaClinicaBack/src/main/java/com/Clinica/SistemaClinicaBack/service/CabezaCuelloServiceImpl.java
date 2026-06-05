@@ -50,4 +50,11 @@ public class CabezaCuelloServiceImpl implements CabezaCuelloService {
         return cabezaCuelloRepository.save(cabezaCuello);
     }
 
+    @Override
+    public CabezaCuello findByCurp(String curp) {
+        return cabezaCuelloRepository.findByCurp(curp)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existe exploración de cabeza y cuello para la CURP: " + curp
+                ));
+    }
 }

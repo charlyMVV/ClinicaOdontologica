@@ -49,20 +49,26 @@ public class SignosVitalesController {
     public void deleteById(@PathVariable("idSignosVitales") Integer id){
         signosVitalesService.deleteById(id);
     }
-    
-    @PutMapping
-    public SignosVitales updateSignosVitales(@RequestBody SignosVitales signosVitales){
-        
-        SignosVitales svdb = signosVitalesService.findById(signosVitales.getIdSignosVitales());
-        
+
+    @PutMapping("/curp/{curp}")
+    public SignosVitales updateSignosVitales(
+            @PathVariable String curp,
+            @RequestBody SignosVitales signosVitales) {
+
+        SignosVitales svdb = signosVitalesService.findByCurp(curp);
+
+        if (!svdb.getCurp().equals(curp)) {
+            throw new IllegalArgumentException("La CURP no se puede modificar.");
+        }
+
         svdb.setTemperatura(signosVitales.getTemperatura());
         svdb.setFrecuenciaRespiratoria(signosVitales.getFrecuenciaRespiratoria());
         svdb.setTensionArterial(signosVitales.getTensionArterial());
         svdb.setFrecuenciaCardiaca(signosVitales.getFrecuenciaCardiaca());
         svdb.setPeso(signosVitales.getPeso());
         svdb.setTalla(signosVitales.getTalla());
-        
-        return updateSignosVitales(svdb);
+
+        return signosVitalesService.update(svdb);
     }
     
     

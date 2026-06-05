@@ -8,17 +8,21 @@ import { Cabezacuello } from '../cabezacuello';
   providedIn: 'root'
 })
 export class Estomatognaticoservice {
-  private api : string = 'http://localhost:8080/api/estomatognatico'
+  private api: string = 'http://localhost:8080/api/estomatognatico'
 
-  constructor(private http:HttpClient) { }
+  constructor(private http: HttpClient) { }
 
-  createEstomatognatico(estomatognatico : Estomatognatico) : Observable<Estomatognatico>{
-    return this.http.post<Estomatognatico>(this.api,estomatognatico);
+  createEstomatognatico(estomatognatico: Estomatognatico): Observable<Estomatognatico> {
+    return this.http.post<Estomatognatico>(this.api, estomatognatico);
 
   }
 
   existenEstomatognaticoCurp(curp: string): Observable<boolean> {
     return this.http.get<boolean>(`${this.api}/existen/${curp}`);
+  }
+
+  updateEstomatognatico(curp: string, estomatognatico: Estomatognatico): Observable<Estomatognatico> {
+    return this.http.put<Estomatognatico>(`${this.api}/curp/${curp}`, estomatognatico);
   }
 
 }

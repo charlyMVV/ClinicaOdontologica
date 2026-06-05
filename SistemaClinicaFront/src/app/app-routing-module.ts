@@ -12,6 +12,7 @@ const routes: Routes = [
   { path: '', component: LoginComponent },
   { path: 'administrador', component: UsuariosList, canActivate: [AuthGuard], canDeactivate: [ConfirmarSalidaGuard], }, //  protege esta ruta
   {path : 'menu', component: Menu, canActivate: [AuthGuard]},
+  {path : 'hc/:curp', component: HistoriaClinica, canActivate : [AuthGuard], canDeactivate: [ConfirmarSalidaGuard]},
   {path : 'hc', component: HistoriaClinica, canActivate : [AuthGuard], canDeactivate: [ConfirmarSalidaGuard]},
   {path : 'mishc', component: Mishc, canActivate: [AuthGuard], canDeactivate: [ConfirmarSalidaGuard]},
 

@@ -8,6 +8,7 @@ import com.Clinica.SistemaClinicaBack.entity.EvolucionPaciente;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 /**
  *
  * @author charly michel
@@ -16,4 +17,6 @@ import org.springframework.stereotype.Repository;
 public interface EvolucionPacienteRepository extends JpaRepository<EvolucionPaciente, Integer>{
       
     boolean existsByCurp(String curp);
+
+    Optional<EvolucionPaciente> findByCurp(String curp);
 }

@@ -46,7 +46,14 @@ public class EvolucionPacienteServiceImpl  implements EvolucionPacienteService{
     public EvolucionPaciente update(EvolucionPaciente evolucionPaciente) {
         return evolucionPacienteRepository.save(evolucionPaciente);
     }
-    
+
+    @Override
+    public EvolucionPaciente findByCurp(String curp) {
+        return evolucionPacienteRepository.findByCurp(curp)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existe evolución para la CURP: " + curp
+                ));
+    }
     
     
 }

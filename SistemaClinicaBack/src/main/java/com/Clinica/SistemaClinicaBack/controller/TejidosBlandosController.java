@@ -59,13 +59,15 @@ public class TejidosBlandosController {
         return ResponseEntity.ok(existen);
     }
 
-    @PutMapping
-    public TejidosBlandos updateTejidosBlandos(@RequestBody TejidosBlandos tejidosBlandos) {
+    @PutMapping("/curp/{curp}")
+    public TejidosBlandos updateTejidosBlandos(
+            @PathVariable String curp,
+            @RequestBody TejidosBlandos tejidosBlandos) {
 
-        TejidosBlandos tejidosBlandosdb = tejidosBlandosService.findById(tejidosBlandos.getIdTejidosBlandos());
+        TejidosBlandos tejidosBlandosdb = tejidosBlandosService.findByCurp(curp);
 
-        if (!tejidosBlandosdb.getCurp().equals(tejidosBlandos.getCurp())) {
-            throw new IllegalArgumentException("La CURP  del los tejidos blandos no se puede modificar.");
+        if (!tejidosBlandosdb.getCurp().equals(curp)) {
+            throw new IllegalArgumentException("La CURP de tejidos blandos no se puede modificar.");
         }
 
         tejidosBlandosdb.setGanglios(tejidosBlandos.getGanglios());
@@ -88,8 +90,8 @@ public class TejidosBlandosController {
         tejidosBlandosdb.setDientes(tejidosBlandos.getDientes());
         tejidosBlandosdb.setMucosaAlveolar(tejidosBlandos.getMucosaAlveolar());
         tejidosBlandosdb.setEncia(tejidosBlandos.getEncia());
-        
+
         return tejidosBlandosService.update(tejidosBlandosdb);
-    }
+    }   
 
 }

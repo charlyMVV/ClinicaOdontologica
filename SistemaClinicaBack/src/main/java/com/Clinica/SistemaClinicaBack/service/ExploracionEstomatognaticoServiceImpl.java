@@ -19,8 +19,6 @@ public class ExploracionEstomatognaticoServiceImpl implements ExploracionEstomat
     public ExploracionEstomatognaticoServiceImpl(ExploracionEstomatognaticoRepository exploracionEstomatognaticoRepository) {
         this.exploracionEstomatognaticoRepository = exploracionEstomatognaticoRepository;
     }
-    
-
 
     @Override
     public ExploracionEstomatognatico save(ExploracionEstomatognatico exploracionEstomatognatico) {
@@ -49,7 +47,14 @@ public class ExploracionEstomatognaticoServiceImpl implements ExploracionEstomat
     public ExploracionEstomatognatico update(ExploracionEstomatognatico exploracionEstomatognatico) {
         return exploracionEstomatognaticoRepository.save(exploracionEstomatognatico);
     }
-    
+
+    @Override
+    public ExploracionEstomatognatico findByCurp(String curp) {
+        return exploracionEstomatognaticoRepository.findByCurp(curp)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "La exploracion Estomatognatica con CURP: " + curp + " no se encuentra"
+                ));
+    }
     
     
     

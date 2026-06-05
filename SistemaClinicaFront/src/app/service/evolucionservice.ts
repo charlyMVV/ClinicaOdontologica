@@ -20,4 +20,8 @@ export class EvolucionService {
     return this.http.get<boolean>(`${this.api}/existen/${curp}`);
   }
 
+  updateEvolucion(curp: string, evolucion: Evolucion): Observable<Evolucion> {
+    return this.http.put<Evolucion>(`${this.api}/curp/${curp}`, evolucion);
+  }
+
 }

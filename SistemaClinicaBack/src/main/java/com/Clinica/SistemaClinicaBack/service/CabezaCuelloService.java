@@ -17,4 +17,6 @@ public interface CabezaCuelloService  {
     void deleteById(Integer id);
     
     CabezaCuello update(CabezaCuello cabezaCuello);
+
+    CabezaCuello findByCurp(String curp);
 }

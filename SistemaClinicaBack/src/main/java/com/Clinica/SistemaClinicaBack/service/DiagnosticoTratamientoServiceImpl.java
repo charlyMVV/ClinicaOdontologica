@@ -48,7 +48,13 @@ public class DiagnosticoTratamientoServiceImpl implements DiagnosticoTratamiento
     public DiagnosticoTratamiento update(DiagnosticoTratamiento diagnosticoTratamiento) {
         return diagnosticoTratamientoRepository.save(diagnosticoTratamiento);
     }
-    
-    
+
+    @Override
+    public DiagnosticoTratamiento findByCurp(String curp) {
+        return diagnosticoTratamientoRepository.findByCurp(curp)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existe diagnóstico para la CURP: " + curp
+                ));
+    }
     
 }

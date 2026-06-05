@@ -8,19 +8,26 @@ import { Observable } from 'rxjs';
 })
 export class Datospacienteservice {
 
-  private api : string = 'http://localhost:8080/api/pacientes';
-  
-  constructor(private http:HttpClient){}
+  private api: string = 'http://localhost:8080/api/pacientes';
+
+  constructor(private http: HttpClient) { }
 
 
-  createDatosPaciente(datospacientes : DatosPacientes):Observable<DatosPacientes>{
-    return this.http.post<DatosPacientes>(this.api,datospacientes);
+  createDatosPaciente(datospacientes: DatosPacientes): Observable<DatosPacientes> {
+    return this.http.post<DatosPacientes>(this.api, datospacientes);
   }
 
-  getDatosPaciente(): Observable<DatosPacientes[]>{
+  getDatosPaciente(): Observable<DatosPacientes[]> {
     return this.http.get<DatosPacientes[]>(this.api);
   }
 
-  
+  existePacientePorCurp(curp: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.api}/existen/${curp}`);
+  }
+
+  updateDatosPaciente(curp: string, datosPaciente: DatosPacientes): Observable<DatosPacientes> {
+    return this.http.put<DatosPacientes>(`${this.api}/curp/${curp}`, datosPaciente);
+  }
+
 
 }

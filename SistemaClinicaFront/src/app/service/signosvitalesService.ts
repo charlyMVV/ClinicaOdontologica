@@ -19,4 +19,8 @@ export class signosvitalesService {
   existenSignosVitalesPorCurp(curp: string): Observable<boolean> {
     return this.http.get<boolean>(`${this.api}/existen/${curp}`);
   }
+
+  updateSignosVitales(curp: string, signosVitales: any): Observable<any> {
+    return this.http.put<any>(`${this.api}/curp/${curp}`, signosVitales);
+  }
 }

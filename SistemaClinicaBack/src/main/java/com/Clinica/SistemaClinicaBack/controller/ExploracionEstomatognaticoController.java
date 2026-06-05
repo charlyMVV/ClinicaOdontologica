@@ -62,17 +62,19 @@ public class ExploracionEstomatognaticoController {
         return ResponseEntity.ok(existen);
     }
 
-    
-    
-    @PutMapping
-    public ExploracionEstomatognatico updateExploracionEstomatognatico(@RequestBody ExploracionEstomatognatico exploracionEstomatognatico) throws IllegalAccessException{
-           
-        ExploracionEstomatognatico exploracionEstomatognaticodb = exploracionEstomatognaticaService.findById(exploracionEstomatognatico.getIdEstomatognatico());
-       
-        if (!exploracionEstomatognaticodb.getCurp().equals(exploracionEstomatognatico.getCurp())) {
+
+    @PutMapping("/curp/{curp}")
+    public ExploracionEstomatognatico updateExploracionEstomatognatico(
+            @PathVariable String curp,
+            @RequestBody ExploracionEstomatognatico exploracionEstomatognatico) throws IllegalAccessException {
+
+        ExploracionEstomatognatico exploracionEstomatognaticodb =
+                exploracionEstomatognaticaService.findByCurp(curp);
+
+        if (!exploracionEstomatognaticodb.getCurp().equals(curp)) {
             throw new IllegalAccessException("La Curp del estomatognatico no se puede modificar");
         }
-        
+
         exploracionEstomatognaticodb.setRuidos(exploracionEstomatognatico.isRuidos());
         exploracionEstomatognaticodb.setLateralidad(exploracionEstomatognatico.isLateralidad());
         exploracionEstomatognaticodb.setApertura(exploracionEstomatognatico.isApertura());
@@ -83,7 +85,7 @@ public class ExploracionEstomatognaticoController {
         exploracionEstomatognaticodb.setFatigaDolorMuscular(exploracionEstomatognatico.isFatigaDolorMuscular());
         exploracionEstomatognaticodb.setDisminuicionAbertura(exploracionEstomatognatico.isDisminuicionAbertura());
         exploracionEstomatognaticodb.setDesviacionAberturaCierre(exploracionEstomatognatico.isDesviacionAberturaCierre());
-     
+
         return exploracionEstomatognaticaService.update(exploracionEstomatognaticodb);
     }
     

@@ -5,6 +5,7 @@ import com.Clinica.SistemaClinicaBack.entity.DiagnosticoTratamiento;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 /**
  *
  * @author charly michel
@@ -14,4 +15,6 @@ public interface DiagnosticoTratamientoRepository extends JpaRepository<Diagnost
         
         boolean existsByCurp(String curp);
     
+
+    Optional<DiagnosticoTratamiento> findByCurp(String curp);
 }

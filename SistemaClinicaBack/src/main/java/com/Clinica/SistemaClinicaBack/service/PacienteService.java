@@ -15,4 +15,7 @@ public interface PacienteService {
 
     Paciente update(Paciente paciente);
 
+    Paciente findByCURP(String curp);
+
+    boolean existsByCURP(String curp);
 }

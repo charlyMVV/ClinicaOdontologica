@@ -48,15 +48,20 @@ public class PacienteController {
     public void deletById(@PathVariable("idPaciente")Integer id){
         pacienteservice.deleteById(id);
     }
-    
-    //localhost:8080/api/pacientes
-    @PutMapping
-    public Paciente UpdatePaciente(@RequestBody Paciente paciente){
-        
-        Paciente pacientedb = pacienteservice.findById(paciente.getIdPaciente());
-        
+
+    @GetMapping("/existen/{curp}")
+    public Boolean existePacientePorCurp(@PathVariable String curp) {
+        return pacienteservice.existsByCURP(curp);
+    }
+
+    @PutMapping("/curp/{curp}")
+    public Paciente updatePacientePorCurp(
+            @PathVariable String curp,
+            @RequestBody Paciente paciente) {
+
+        Paciente pacientedb = pacienteservice.findByCURP(curp);
+
         pacientedb.setNombrePaciente(paciente.getNombrePaciente());
-        pacientedb.setCURP(paciente.getCURP());
         pacientedb.setSexo(paciente.getSexo());
         pacientedb.setEdad(paciente.getEdad());
         pacientedb.setfechaNacimiento(paciente.getfechaNacimiento());
@@ -71,11 +76,7 @@ public class PacienteController {
         pacientedb.setMedicoFamiliar(paciente.getMedicoFamiliar());
         pacientedb.setNumero_medico(paciente.getNumero_medico());
         pacientedb.setUltimaConsulta(paciente.getUltimaConsulta());
-        
-        
-        
-        
-        
+
         return pacienteservice.update(pacientedb);
     }
    

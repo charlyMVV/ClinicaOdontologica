@@ -48,7 +48,14 @@ public class TejidosBlandosServiceImpl implements TejidosBlandosService{
     public TejidosBlandos update(TejidosBlandos tejidosBlandos) {
         return tejidosBlandosRepository.save(tejidosBlandos);
     }
-    
+
+    @Override
+    public TejidosBlandos findByCurp(String curp) {
+        return tejidosBlandosRepository.findByCurp(curp)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existen tejidos blandos para la CURP: " + curp
+                ));
+    }
     
     
 }

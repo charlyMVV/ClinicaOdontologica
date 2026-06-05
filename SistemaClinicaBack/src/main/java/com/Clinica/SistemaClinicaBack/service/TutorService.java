@@ -18,5 +18,6 @@ public interface TutorService {
     void deleteById(Integer id);
     
     Tutor update(Tutor tutor);
-    
+
+    Tutor findByCurp(String curp);
 }

@@ -8,16 +8,19 @@ import { Observable } from 'rxjs';
 })
 export class CabezacuelloService {
 
-  private api : string = 'http://localhost:8080/api/cabezacuello';
+  private api: string = 'http://localhost:8080/api/cabezacuello';
 
-  constructor( private http:HttpClient) { }
+  constructor(private http: HttpClient) { }
 
-  createExploracionCabezaCuello(cabezacuello: Cabezacuello) : Observable<Cabezacuello>{
-    return this.http.post<Cabezacuello>(this.api,cabezacuello);
+  createExploracionCabezaCuello(cabezacuello: Cabezacuello): Observable<Cabezacuello> {
+    return this.http.post<Cabezacuello>(this.api, cabezacuello);
   }
 
-  
+
   existenCabezaCuelloPorCurp(curp: string): Observable<boolean> {
     return this.http.get<boolean>(`${this.api}/existen/${curp}`);
+  }
+  updateExploracionCabezaCuello(curp: string, cabezaCuello: Cabezacuello): Observable<Cabezacuello> {
+    return this.http.put<Cabezacuello>(`${this.api}/curp/${curp}`, cabezaCuello);
   }
 }

@@ -58,26 +58,25 @@ public class TutorController {
         boolean existen = tutorRepository.existsByCurp(curp);
         return ResponseEntity.ok(existen);
     }
-    
-    @PutMapping
-    public Tutor updateTutor(@RequestBody Tutor tutor){
-        
-        Tutor tutordb = tutorService.findById(tutor.getIdTutor());
-        
-        if (!tutordb.getCurp().equals(tutor.getCurp())) {
-            throw new IllegalArgumentException("La CURP  del los antecedentes no se puede modificar.");
+
+    @PutMapping("/curp/{curp}")
+    public Tutor updateTutor(
+            @PathVariable String curp,
+            @RequestBody Tutor tutor) {
+
+        Tutor tutordb = tutorService.findByCurp(curp);
+
+        if (!tutordb.getCurp().equals(curp)) {
+            throw new IllegalArgumentException("La CURP del tutor no se puede modificar.");
         }
-        
+
         tutordb.setNombreTutor(tutor.getNombreTutor());
         tutordb.setEdadTutor(tutor.getEdadTutor());
         tutordb.setDomicilioTutor(tutor.getDomicilioTutor());
         tutordb.setTelefonoCasaTutor(tutor.getTelefonoCasaTutor());
         tutordb.setCelularTutor(tutor.getCelularTutor());
-        
-        
+
         return tutorService.update(tutordb);
-        
-        
     }
     
 }

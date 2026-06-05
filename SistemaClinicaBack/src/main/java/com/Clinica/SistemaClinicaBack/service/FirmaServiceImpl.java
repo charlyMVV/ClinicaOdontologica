@@ -25,6 +25,16 @@ public class FirmaServiceImpl implements FirmaService{
 
     @Override
     public Firma save(Firma firma) {
+        List<Firma> firmasExistentes = firmaRepository.findByCurp(firma.getCurp());
+
+        if (!firmasExistentes.isEmpty()) {
+            firma.setIdFirma(firmasExistentes.get(0).getIdFirma());
+
+            for (int i = 1; i < firmasExistentes.size(); i++) {
+                firmaRepository.delete(firmasExistentes.get(i));
+            }
+        }
+
         return firmaRepository.save(firma);
     }
 

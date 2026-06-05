@@ -22,8 +22,8 @@ public interface EvolucionPacienteService{
     void deleteById(Integer id);
     
     EvolucionPaciente update(EvolucionPaciente evolucionPaciente);
-    
-    
+
+    EvolucionPaciente findByCurp(String curp);
     
     
 }

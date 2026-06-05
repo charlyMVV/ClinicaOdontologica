@@ -46,8 +46,14 @@ public class TutorServiceImpl implements TutorService{
     public Tutor update(Tutor tutor) {
         return tutorRepository.save(tutor);
     }
-    
-    
-    
+
+
+    @Override
+    public Tutor findByCurp(String curp) {
+        return tutorRepository.findByCurp(curp)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existe tutor para la CURP: " + curp
+                ));
+    }
     
 }

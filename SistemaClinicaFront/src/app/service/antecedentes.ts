@@ -17,6 +17,10 @@ export class Antecedentes {
     return this.http.post<AntecedentesHeredofamiliares>(this.api,antecedentesheredofamiliares);
   }
 
+  upsertAntecedente(antecedente: any): Observable<any> {
+    return this.http.post<any>(`${this.api}/upsert`, antecedente);
+  }
+
   
   existenAntecedentesPorCurp(curp: string): Observable<boolean> {
   return this.http.get<boolean>(`${this.api}/existen/${curp}`);

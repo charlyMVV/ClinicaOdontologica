@@ -61,16 +61,18 @@ public class CabezaCuelloController {
         boolean existen = cabezaCuelloRepository.existsByCurp(curp);
         return ResponseEntity.ok(existen);
     }
-    
-    @PutMapping
-    public CabezaCuello updateCabezaCuello(@RequestBody CabezaCuello cabezaCuello){
-        
-        CabezaCuello cabezaCuellodb = cabezaCuelloService.findById(cabezaCuello.getIdExploracionCabezacuello());
-        
-        if (!cabezaCuellodb.getCurp().equals(cabezaCuello.getCurp())) {
-            throw new IllegalArgumentException("la curp no se puede modificar.");
+
+    @PutMapping("/curp/{curp}")
+    public CabezaCuello updateCabezaCuello(
+            @PathVariable String curp,
+            @RequestBody CabezaCuello cabezaCuello) {
+
+        CabezaCuello cabezaCuellodb = cabezaCuelloService.findByCurp(curp);
+
+        if (!cabezaCuellodb.getCurp().equals(curp)) {
+            throw new IllegalArgumentException("La CURP no se puede modificar.");
         }
-        
+
         cabezaCuellodb.setExostosis(cabezaCuello.isExostosis());
         cabezaCuellodb.setEndotosis(cabezaCuello.isEndotosis());
         cabezaCuellodb.setDolicocefalico(cabezaCuello.isDolicocefalico());
@@ -89,11 +91,8 @@ public class CabezaCuelloController {
         cabezaCuellodb.setMusculosHipertonicos(cabezaCuello.isMusculosHipertonicos());
         cabezaCuellodb.setMusculosEspasticos(cabezaCuello.isMusculosEspasticos());
         cabezaCuellodb.setCadenaGanglionar(cabezaCuello.isCadenaGanglionar());
-        
-        
-        
+
         return cabezaCuelloService.update(cabezaCuellodb);
     }
-    
 
 }

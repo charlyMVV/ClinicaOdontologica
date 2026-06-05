@@ -20,4 +20,8 @@ export class Diagnosticotratamientoservice {
   existenDiagnosticoTratamientoCurp(curp: string): Observable<boolean> {
     return this.http.get<boolean>(`${this.api}/existen/${curp}`);
   }
+
+  updateDiagnosticoTratamiento(curp: string, diagnostico: Diagnosticotratamiento): Observable<Diagnosticotratamiento> {
+    return this.http.put<Diagnosticotratamiento>(`${this.api}/curp/${curp}`, diagnostico);
+  }
 }

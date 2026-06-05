@@ -59,21 +59,30 @@ public class DiagnosticoTratamientoController {
     public ResponseEntity<Boolean> existenDiagnosticoTratamientoPorCurp(@PathVariable String curp) {  
         boolean existen = diagnosticoTratamientoRepository.existsByCurp(curp);
         return ResponseEntity.ok(existen);
-    }    
-    
-    @PutMapping
-    public DiagnosticoTratamiento updateDiagnosticoTratamiento(@RequestBody DiagnosticoTratamiento diagnosticoTratamiento){
-    
-        DiagnosticoTratamiento diagnosticoTratamientodb = diagnosticoTratamientoService.findById(diagnosticoTratamiento.getIdDiagnostico());
-        
-        if (!diagnosticoTratamientodb.getCurp().equals(diagnosticoTratamiento.getCurp())) {
-            throw new IllegalArgumentException("La CURP  del los diagnosticos no se puede modificar.");
+    }
+
+    @PutMapping("/curp/{curp}")
+    public DiagnosticoTratamiento updateDiagnosticoTratamiento(
+            @PathVariable String curp,
+            @RequestBody DiagnosticoTratamiento diagnosticoTratamiento) {
+
+        DiagnosticoTratamiento diagnosticoTratamientodb =
+                diagnosticoTratamientoService.findByCurp(curp);
+
+        if (!diagnosticoTratamientodb.getCurp().equals(curp)) {
+            throw new IllegalArgumentException(
+                    "La CURP de los diagnósticos no se puede modificar.");
         }
-        
-        diagnosticoTratamientodb.setInterpretacionRx(diagnosticoTratamiento.getInterpretacionRx());
-        diagnosticoTratamientodb.setDiagnostico(diagnosticoTratamiento.getDiagnostico());
-        diagnosticoTratamientodb.setResumenTratamiento(diagnosticoTratamiento.getResumenTratamiento());
-        
+
+        diagnosticoTratamientodb.setInterpretacionRx(
+                diagnosticoTratamiento.getInterpretacionRx());
+
+        diagnosticoTratamientodb.setDiagnostico(
+                diagnosticoTratamiento.getDiagnostico());
+
+        diagnosticoTratamientodb.setResumenTratamiento(
+                diagnosticoTratamiento.getResumenTratamiento());
+
         return diagnosticoTratamientoService.update(diagnosticoTratamientodb);
     }
     

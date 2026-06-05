@@ -63,20 +63,23 @@ public class EvolucionPacienteController {
         boolean existen = evolucionPacienteRepository.existsByCurp(curp);
         return ResponseEntity.ok(existen);
     }
-    
-    @PutMapping
-    public EvolucionPaciente updateEvolucionPaciente(@RequestBody EvolucionPaciente evolucionPaciente){
-    
-        EvolucionPaciente evolucionPacientedb = evolucionPacienteService.findById(evolucionPaciente.getIdControlEvolucion());
-        
-        if (!evolucionPacientedb.getCurp().equals(evolucionPaciente.getCurp())) {
-            throw new IllegalArgumentException("La CURP  de la evolucion del paciente no se puede modificar.");
+
+    @PutMapping("/curp/{curp}")
+    public EvolucionPaciente updateEvolucion(
+            @PathVariable String curp,
+            @RequestBody EvolucionPaciente evolucion) {
+
+        EvolucionPaciente evoluciondb = evolucionPacienteService.findByCurp(curp);
+
+        if (!evoluciondb.getCurp().equals(curp)) {
+            throw new IllegalArgumentException(
+                    "La CURP de la evolución no se puede modificar.");
         }
-        
-        evolucionPacientedb.setFecha(evolucionPaciente.getFecha());
-        evolucionPacientedb.setComentarioControl(evolucionPaciente.getComentarioControl());
-        
-        return evolucionPacienteService.update(evolucionPacientedb);
+
+        evoluciondb.setFecha(evolucion.getFecha());
+        evoluciondb.setComentarioControl(evolucion.getComentarioControl());
+
+        return evolucionPacienteService.update(evoluciondb);
     }
     
 }
