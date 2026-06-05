@@ -1,19 +1,13 @@
 package com.Clinica.SistemaClinicaBack.controller;
 
+import com.Clinica.SistemaClinicaBack.entity.HistoriaClinica;
 import com.Clinica.SistemaClinicaBack.entity.SignosVitales;
 import com.Clinica.SistemaClinicaBack.repository.SignosVitalesRepository;
+import com.Clinica.SistemaClinicaBack.service.HistoriaClinicaService;
 import com.Clinica.SistemaClinicaBack.service.SignosVitalesService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/signosvitales")
@@ -22,17 +16,31 @@ public class SignosVitalesController {
 
     private final SignosVitalesService signosVitalesService;
     private final SignosVitalesRepository signosVitalesRepository;
+    private final HistoriaClinicaService historiaClinicaService;
 
-    public SignosVitalesController(SignosVitalesService signosVitalesService, SignosVitalesRepository signosVitalesRepository) {
+    public SignosVitalesController(
+            SignosVitalesService signosVitalesService,
+            SignosVitalesRepository signosVitalesRepository,
+            HistoriaClinicaService historiaClinicaService) {
+
         this.signosVitalesService = signosVitalesService;
         this.signosVitalesRepository = signosVitalesRepository;
+        this.historiaClinicaService = historiaClinicaService;
     }
-
-  
 
     @PostMapping
     public SignosVitales save(@RequestBody SignosVitales signosVitales) {
-        return signosVitalesService.save(signosVitales);
+
+        SignosVitales guardado = signosVitalesService.save(signosVitales);
+
+        HistoriaClinica hc =
+                historiaClinicaService.findByCurpPaciente(guardado.getCurp());
+
+        hc.setSignosVitales(guardado);
+
+        historiaClinicaService.update(hc);
+
+        return guardado;
     }
 
     @GetMapping
@@ -41,12 +49,12 @@ public class SignosVitalesController {
     }
 
     @GetMapping("/{idSignosVitales}")
-    public SignosVitales findById(@PathVariable("idSignosVitales")Integer id){
+    public SignosVitales findById(@PathVariable("idSignosVitales") Integer id) {
         return signosVitalesService.findById(id);
     }
-    
+
     @DeleteMapping("/{idSignosVitales}")
-    public void deleteById(@PathVariable("idSignosVitales") Integer id){
+    public void deleteById(@PathVariable("idSignosVitales") Integer id) {
         signosVitalesService.deleteById(id);
     }
 
@@ -68,14 +76,21 @@ public class SignosVitalesController {
         svdb.setPeso(signosVitales.getPeso());
         svdb.setTalla(signosVitales.getTalla());
 
-        return signosVitalesService.update(svdb);
+        SignosVitales actualizado = signosVitalesService.update(svdb);
+
+        HistoriaClinica hc =
+                historiaClinicaService.findByCurpPaciente(actualizado.getCurp());
+
+        hc.setSignosVitales(actualizado);
+
+        historiaClinicaService.update(hc);
+
+        return actualizado;
     }
-    
-    
-       @GetMapping("/existen/{curp}")
-    public ResponseEntity<Boolean> existenAntecedentesNoPatologicosPorCurp(@PathVariable String curp) {  
+
+    @GetMapping("/existen/{curp}")
+    public ResponseEntity<Boolean> existenSignosVitalesPorCurp(@PathVariable String curp) {
         boolean existen = signosVitalesRepository.existsByCurp(curp);
         return ResponseEntity.ok(existen);
     }
-
 }

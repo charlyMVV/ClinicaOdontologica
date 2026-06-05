@@ -2,9 +2,12 @@
 package com.Clinica.SistemaClinicaBack.controller;
 
 import com.Clinica.SistemaClinicaBack.entity.ExploracionEstomatognatico;
+import com.Clinica.SistemaClinicaBack.entity.HistoriaClinica;
 import com.Clinica.SistemaClinicaBack.repository.ExploracionEstomatognaticoRepository;
 import com.Clinica.SistemaClinicaBack.service.ExploracionEstomatognaticoService;
 import java.util.List;
+
+import com.Clinica.SistemaClinicaBack.service.HistoriaClinicaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,12 +31,17 @@ public class ExploracionEstomatognaticoController {
     
     private final ExploracionEstomatognaticoService exploracionEstomatognaticaService;
     private final ExploracionEstomatognaticoRepository exploracionEstomatognaticaRepository;
+    private final HistoriaClinicaService historiaClinicaService;
 
-    public ExploracionEstomatognaticoController(ExploracionEstomatognaticoService exploracionEstomatognaticoService, ExploracionEstomatognaticoRepository exploracionEstomatognaticoRepository) {
+    public ExploracionEstomatognaticoController(
+            ExploracionEstomatognaticoService exploracionEstomatognaticoService,
+            ExploracionEstomatognaticoRepository exploracionEstomatognaticoRepository,
+            HistoriaClinicaService historiaClinicaService) {
+
         this.exploracionEstomatognaticaService = exploracionEstomatognaticoService;
         this.exploracionEstomatognaticaRepository = exploracionEstomatognaticoRepository;
+        this.historiaClinicaService = historiaClinicaService;
     }
-    
     //localhost:8080/api/estomatognatico
     @GetMapping
     public List<ExploracionEstomatognatico> findAll(){
@@ -50,10 +58,24 @@ public class ExploracionEstomatognaticoController {
     public void deleteById(@PathVariable("idEstomatognatico") Integer id){
         exploracionEstomatognaticaService.deleteById(id);
     }
-    
+
     @PostMapping
-    public ResponseEntity<ExploracionEstomatognatico> save(@RequestBody ExploracionEstomatognatico exploracionEstomatognatico){
-        return ResponseEntity.ok(exploracionEstomatognaticaService.save(exploracionEstomatognatico));
+    public ResponseEntity<ExploracionEstomatognatico> save(
+            @RequestBody ExploracionEstomatognatico exploracionEstomatognatico) {
+
+        ExploracionEstomatognatico guardado =
+                exploracionEstomatognaticaService.save(
+                        exploracionEstomatognatico);
+
+        HistoriaClinica hc =
+                historiaClinicaService.findByCurpPaciente(
+                        guardado.getCurp());
+
+        hc.setExploracionEstomatognatico(guardado);
+
+        historiaClinicaService.update(hc);
+
+        return ResponseEntity.ok(guardado);
     }
     
     @GetMapping("/existen/{curp}")
@@ -86,13 +108,19 @@ public class ExploracionEstomatognaticoController {
         exploracionEstomatognaticodb.setDisminuicionAbertura(exploracionEstomatognatico.isDisminuicionAbertura());
         exploracionEstomatognaticodb.setDesviacionAberturaCierre(exploracionEstomatognatico.isDesviacionAberturaCierre());
 
-        return exploracionEstomatognaticaService.update(exploracionEstomatognaticodb);
+        ExploracionEstomatognatico actualizado =
+                exploracionEstomatognaticaService.update(
+                        exploracionEstomatognaticodb);
+
+        HistoriaClinica hc =
+                historiaClinicaService.findByCurpPaciente(
+                        actualizado.getCurp());
+
+        hc.setExploracionEstomatognatico(actualizado);
+
+        historiaClinicaService.update(hc);
+
+        return actualizado;
     }
-    
-    
-    
-    
-    
-    
-    
+
 }

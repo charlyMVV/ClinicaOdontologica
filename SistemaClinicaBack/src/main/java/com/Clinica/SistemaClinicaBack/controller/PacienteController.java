@@ -1,8 +1,13 @@
 package com.Clinica.SistemaClinicaBack.controller;
 
+import com.Clinica.SistemaClinicaBack.dto.CrearPacienteRequest;
 import com.Clinica.SistemaClinicaBack.entity.Paciente;
+import com.Clinica.SistemaClinicaBack.entity.Usuario;
+import com.Clinica.SistemaClinicaBack.service.HistoriaClinicaService;
 import com.Clinica.SistemaClinicaBack.service.PacienteService;
 import java.util.List;
+
+import com.Clinica.SistemaClinicaBack.service.UsuarioService;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,20 +22,36 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/pacientes")
 @CrossOrigin(origins = "http://localhost:4200")
 public class PacienteController {
-    
-    private final PacienteService pacienteservice;
 
-    public PacienteController(PacienteService pacienteservice) {
+    private final PacienteService pacienteservice;
+    private final HistoriaClinicaService historiaClinicaService;
+    private final UsuarioService usuarioService;
+
+    public PacienteController(
+            PacienteService pacienteservice,
+            HistoriaClinicaService historiaClinicaService,
+            UsuarioService usuarioService) {
+
         this.pacienteservice = pacienteservice;
+        this.historiaClinicaService = historiaClinicaService;
+        this.usuarioService = usuarioService;
     }
-    
-    //localhost:8080/api/pacientes
+
     @PostMapping
-    public Paciente save(@RequestBody Paciente paciente){
-        return pacienteservice.save(paciente);
-        
+    public Paciente save(@RequestBody CrearPacienteRequest request) {
+
+        Paciente pacienteGuardado = pacienteservice.save(request.getPaciente());
+
+        Usuario usuario = usuarioService.findByMatricula(request.getMatricula());
+
+        historiaClinicaService.obtenerOCrearHistoriaClinica(
+                pacienteGuardado,
+                usuario
+        );
+
+        return pacienteGuardado;
     }
-        
+
     //localhost:8080/api/pacientes
     @GetMapping
     public List<Paciente> findAll(){

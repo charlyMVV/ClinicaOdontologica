@@ -1,9 +1,12 @@
 package com.Clinica.SistemaClinicaBack.controller;
 
 import com.Clinica.SistemaClinicaBack.entity.DiagnosticoTratamiento;
+import com.Clinica.SistemaClinicaBack.entity.HistoriaClinica;
 import com.Clinica.SistemaClinicaBack.repository.DiagnosticoTratamientoRepository;
 import com.Clinica.SistemaClinicaBack.service.DiagnosticoTratamientoService;
 import java.util.List;
+
+import com.Clinica.SistemaClinicaBack.service.HistoriaClinicaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,13 +30,14 @@ public class DiagnosticoTratamientoController {
     
     private final DiagnosticoTratamientoService diagnosticoTratamientoService;
     private final DiagnosticoTratamientoRepository diagnosticoTratamientoRepository;
+    private final HistoriaClinicaService historiaClinicaService;
 
-    public DiagnosticoTratamientoController(DiagnosticoTratamientoService diagnosticoTratamientoService, DiagnosticoTratamientoRepository diagnosticoTratamientoRepository) {
+    public DiagnosticoTratamientoController(DiagnosticoTratamientoService diagnosticoTratamientoService, DiagnosticoTratamientoRepository diagnosticoTratamientoRepository, HistoriaClinicaService historiaClinicaService) {
         this.diagnosticoTratamientoService = diagnosticoTratamientoService;
         this.diagnosticoTratamientoRepository = diagnosticoTratamientoRepository;
+        this.historiaClinicaService = historiaClinicaService;
     }
-    
-    
+
     //localhost:8080/api/diagnosticotratamiento
     @GetMapping
     public List<DiagnosticoTratamiento> findAll(){
@@ -49,10 +53,24 @@ public class DiagnosticoTratamientoController {
     public void deleteById(@PathVariable("idDiagnostico")Integer id){
         diagnosticoTratamientoService.deleteById(id);
     }
-    
+
     @PostMapping
-    public ResponseEntity<DiagnosticoTratamiento> save(@RequestBody DiagnosticoTratamiento diagnosticoTratamiento){
-        return ResponseEntity.ok(diagnosticoTratamientoService.save(diagnosticoTratamiento));
+    public ResponseEntity<DiagnosticoTratamiento> save(
+            @RequestBody DiagnosticoTratamiento diagnosticoTratamiento){
+
+        DiagnosticoTratamiento guardado =
+                diagnosticoTratamientoService.save(
+                        diagnosticoTratamiento);
+
+        HistoriaClinica hc =
+                historiaClinicaService.findByCurpPaciente(
+                        guardado.getCurp());
+
+        hc.setDiagnosticoTratamiento(guardado);
+
+        historiaClinicaService.update(hc);
+
+        return ResponseEntity.ok(guardado);
     }
 
     @GetMapping("/existen/{curp}")
@@ -83,8 +101,19 @@ public class DiagnosticoTratamientoController {
         diagnosticoTratamientodb.setResumenTratamiento(
                 diagnosticoTratamiento.getResumenTratamiento());
 
-        return diagnosticoTratamientoService.update(diagnosticoTratamientodb);
-    }
+        DiagnosticoTratamiento actualizado =
+                diagnosticoTratamientoService.update(
+                        diagnosticoTratamientodb);
+
+        HistoriaClinica hc =
+                historiaClinicaService.findByCurpPaciente(
+                        actualizado.getCurp());
+
+        hc.setDiagnosticoTratamiento(actualizado);
+
+        historiaClinicaService.update(hc);
+
+        return actualizado;    }
     
     
 }

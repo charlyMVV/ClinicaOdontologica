@@ -1,85 +1,85 @@
 package com.Clinica.SistemaClinicaBack.controller;
 
 import com.Clinica.SistemaClinicaBack.entity.FotosInicio;
+import com.Clinica.SistemaClinicaBack.entity.HistoriaClinica;
 import com.Clinica.SistemaClinicaBack.repository.FotosInicioRepository;
 import com.Clinica.SistemaClinicaBack.service.FotosInicioService;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import com.Clinica.SistemaClinicaBack.service.HistoriaClinicaService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
-/**
- *
- * @author charly michel
- */
 @RestController
 @RequestMapping("/api/fotosinicio")
 @CrossOrigin(origins = "http://localhost:4200")
 public class FotosInicioController {
 
-    private final FotosInicioService FotosInicioService;
+    private final FotosInicioService fotosInicioService;
     private final FotosInicioRepository fotosInicioRepository;
+    private final HistoriaClinicaService historiaClinicaService;
 
-    public FotosInicioController(FotosInicioService FotosInicioService, FotosInicioRepository fotosInicioRepository) {
-        this.FotosInicioService = FotosInicioService;
+    public FotosInicioController(
+            FotosInicioService fotosInicioService,
+            FotosInicioRepository fotosInicioRepository,
+            HistoriaClinicaService historiaClinicaService) {
+
+        this.fotosInicioService = fotosInicioService;
         this.fotosInicioRepository = fotosInicioRepository;
+        this.historiaClinicaService = historiaClinicaService;
     }
 
-    //localhost:8080/api/pacientes
     @PostMapping
     public FotosInicio save(@RequestBody FotosInicio fotosInicio) {
-        return FotosInicioService.save(fotosInicio);
+
+        HistoriaClinica hc =
+                historiaClinicaService.findByCurpPaciente(
+                        fotosInicio.getCurp());
+
+        fotosInicio.setHistoriaClinica(hc);
+
+        return fotosInicioService.save(fotosInicio);
     }
 
     @GetMapping
     public List<FotosInicio> findAll() {
-        return FotosInicioService.findAll();
+        return fotosInicioService.findAll();
     }
 
     @GetMapping("/{idFotosInicio}")
     public FotosInicio FindById(@PathVariable("idFotosInicio") Integer id) {
-        return FotosInicioService.findById(id);
+        return fotosInicioService.findById(id);
     }
 
     @DeleteMapping("/{idFotosInicio}")
     public void deletById(@PathVariable("idFotosInicio") Integer id) {
-        FotosInicioService.deleteById(id);
+        fotosInicioService.deleteById(id);
     }
 
     @PostMapping("/multiples")
     @Transactional
     public ResponseEntity<?> guardarMultiples(@RequestBody List<FotosInicio> fotos) {
+
         if (!fotos.isEmpty()) {
             String curp = fotos.get(0).getCurp();
+
+            HistoriaClinica hc =
+                    historiaClinicaService.findByCurpPaciente(curp);
+
             fotosInicioRepository.deleteByCurp(curp);
+
+            for (FotosInicio f : fotos) {
+                f.setHistoriaClinica(hc);
+                fotosInicioService.save(f);
+            }
         }
 
-        for (FotosInicio f : fotos) {
-            FotosInicioService.save(f);
-        }
-
-        // Retornar una respuesta como JSON
         Map<String, Object> respuesta = new HashMap<>();
         respuesta.put("mensaje", "Se guardaron " + fotos.size() + " fotos.");
         respuesta.put("cantidad", fotos.size());
 
         return ResponseEntity.ok(respuesta);
     }
-
 }

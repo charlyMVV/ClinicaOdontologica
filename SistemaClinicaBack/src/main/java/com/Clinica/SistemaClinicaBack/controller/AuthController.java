@@ -28,10 +28,9 @@ public class AuthController {
 
             Map<String, String> respuesta = new HashMap<>();
             respuesta.put("mensaje", "Login correcto");
+            respuesta.put("matricula", u.getMatricula());
             respuesta.put("nombre", u.getNombreUsuario());
             respuesta.put("roles", u.getRoles());
-
-            
 
             return ResponseEntity.ok(respuesta);
         }

@@ -1,12 +1,8 @@
 package com.Clinica.SistemaClinicaBack.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -21,8 +17,11 @@ public class EvolucionPaciente {
     @Column(name = "fecha")
     private LocalDate fecha;
     private String comentarioControl;
-    @Column(name = "CURP_fk_control", unique = true)
+    @Column(name = "CURP_fk_control")
     private String curp;
+    @ManyToOne
+    @JoinColumn(name = "fk_historia_clinica")
+    private HistoriaClinica historiaClinica;
 
     public EvolucionPaciente() {
     }
@@ -66,6 +65,11 @@ public class EvolucionPaciente {
         this.curp = curp;
     }
 
-    
-        
+    public HistoriaClinica getHistoriaClinica() {
+        return historiaClinica;
+    }
+
+    public void setHistoriaClinica(HistoriaClinica historiaClinica) {
+        this.historiaClinica = historiaClinica;
+    }
 }

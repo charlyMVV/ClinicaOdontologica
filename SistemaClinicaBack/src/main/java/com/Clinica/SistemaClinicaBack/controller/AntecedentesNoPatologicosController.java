@@ -2,9 +2,12 @@
 package com.Clinica.SistemaClinicaBack.controller;
 
 import com.Clinica.SistemaClinicaBack.entity.AntecedentesNoPatologicos;
+import com.Clinica.SistemaClinicaBack.entity.HistoriaClinica;
 import com.Clinica.SistemaClinicaBack.repository.AntecedentesNoPatologicosRepository;
 import com.Clinica.SistemaClinicaBack.service.AntecedentesNoPatologicosService;
 import java.util.List;
+
+import com.Clinica.SistemaClinicaBack.service.HistoriaClinicaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,15 +27,34 @@ public class AntecedentesNoPatologicosController {
     
     private final AntecedentesNoPatologicosService antecedentesNoPatologicosService;
     private final AntecedentesNoPatologicosRepository antecedentesNoPatologicosRepository;
+    private final HistoriaClinicaService historiaClinicaService;
 
-    public AntecedentesNoPatologicosController(AntecedentesNoPatologicosService antecedentesNoPatologicosService, AntecedentesNoPatologicosRepository antecedentesNoPatologicosRepository) {
+    public AntecedentesNoPatologicosController(
+            AntecedentesNoPatologicosService antecedentesNoPatologicosService,
+            AntecedentesNoPatologicosRepository antecedentesNoPatologicosRepository,
+            HistoriaClinicaService historiaClinicaService) {
+
         this.antecedentesNoPatologicosService = antecedentesNoPatologicosService;
         this.antecedentesNoPatologicosRepository = antecedentesNoPatologicosRepository;
+        this.historiaClinicaService = historiaClinicaService;
     }
-    
+
     @PostMapping
-    public ResponseEntity<AntecedentesNoPatologicos> save(@RequestBody AntecedentesNoPatologicos antecedentesNoPatologicos){
-        return ResponseEntity.ok(antecedentesNoPatologicosService.save(antecedentesNoPatologicos));
+    public ResponseEntity<AntecedentesNoPatologicos> save(
+            @RequestBody AntecedentesNoPatologicos antecedentesNoPatologicos){
+
+        AntecedentesNoPatologicos guardado = antecedentesNoPatologicosService.save(
+                        antecedentesNoPatologicos);
+
+        HistoriaClinica hc =
+                historiaClinicaService.findByCurpPaciente(
+                        guardado.getCurp());
+
+        hc.setAntecedentesNoPatologicos(guardado);
+
+        historiaClinicaService.update(hc);
+
+        return ResponseEntity.ok(guardado);
     }
     
     //localhost:8080/api/antecedentesnopatologicos
@@ -98,7 +120,13 @@ public class AntecedentesNoPatologicosController {
         antecedentesNoPatologicosdb.setTieneIntervenciones(antecedentesNoPatologicos.getTieneIntervenciones());
         antecedentesNoPatologicosdb.setParteCuerpo(antecedentesNoPatologicos.getParteCuerpo());
 
-        return antecedentesNoPatologicosService.update(antecedentesNoPatologicosdb);
+        AntecedentesNoPatologicos actualizado = antecedentesNoPatologicosService.update(antecedentesNoPatologicosdb);
+        HistoriaClinica hc = historiaClinicaService.findByCurpPaciente( actualizado.getCurp());
+        hc.setAntecedentesNoPatologicos(actualizado);
+
+        historiaClinicaService.update(hc);
+
+        return actualizado;
     }
     
     @GetMapping("/existen/{curp}")

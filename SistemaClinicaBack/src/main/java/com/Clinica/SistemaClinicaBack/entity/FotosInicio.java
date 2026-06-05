@@ -4,11 +4,7 @@
  */
 package com.Clinica.SistemaClinicaBack.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
+import jakarta.persistence.*;
 
 /**
  *
@@ -23,6 +19,9 @@ public class FotosInicio {
     @Lob
     private String fotos;
     private String curp;
+    @ManyToOne
+    @JoinColumn(name = "fk_historia_clinica")
+    private HistoriaClinica historiaClinica;
 
     public FotosInicio() {
     }
@@ -56,8 +55,12 @@ public class FotosInicio {
     public void setCurp(String curp) {
         this.curp = curp;
     }
-    
-    
-    
-    
+
+    public HistoriaClinica getHistoriaClinica() {
+        return historiaClinica;
+    }
+
+    public void setHistoriaClinica(HistoriaClinica historiaClinica) {
+        this.historiaClinica = historiaClinica;
+    }
 }

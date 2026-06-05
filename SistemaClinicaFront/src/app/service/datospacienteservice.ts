@@ -12,10 +12,9 @@ export class Datospacienteservice {
 
   constructor(private http: HttpClient) { }
 
-
-  createDatosPaciente(datospacientes: DatosPacientes): Observable<DatosPacientes> {
-    return this.http.post<DatosPacientes>(this.api, datospacientes);
-  }
+    createDatosPaciente(payload: any): Observable<any> {
+      return this.http.post<any>(this.api, payload);
+    }
 
   getDatosPaciente(): Observable<DatosPacientes[]> {
     return this.http.get<DatosPacientes[]>(this.api);

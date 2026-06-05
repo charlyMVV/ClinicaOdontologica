@@ -438,6 +438,8 @@ export class HistoriaClinica implements OnInit {
       return;
     }
 
+    const matricula = sessionStorage.getItem('matricula');
+
     const datospaciente = new DatosPacientes(
       this.nombrePaciente,
       this.curp,
@@ -457,6 +459,11 @@ export class HistoriaClinica implements OnInit {
       this.ultimaConsulta
     );
 
+    const payload = {
+      paciente: datospaciente,
+      matricula: matricula
+    };
+
     this.datosService.existePacientePorCurp(this.curp).subscribe({
       next: (existe) => {
 
@@ -473,7 +480,6 @@ export class HistoriaClinica implements OnInit {
             },
             error: (err) => {
               console.error(err);
-
               Swal.fire({
                 title: 'Error',
                 text: 'Ocurrió un error al actualizar el paciente.',
@@ -485,7 +491,7 @@ export class HistoriaClinica implements OnInit {
 
         } else {
 
-          this.datosService.createDatosPaciente(datospaciente).subscribe({
+          this.datosService.createDatosPaciente(payload).subscribe({
             next: () => {
               Swal.fire({
                 title: '¡Guardado!',
@@ -496,7 +502,6 @@ export class HistoriaClinica implements OnInit {
             },
             error: (err) => {
               console.error(err);
-
               Swal.fire({
                 title: 'Error',
                 text: 'Ocurrió un error al guardar el paciente.',
@@ -510,7 +515,6 @@ export class HistoriaClinica implements OnInit {
       },
       error: (err) => {
         console.error(err);
-
         Swal.fire({
           title: 'Error',
           text: 'No se pudo verificar la existencia del paciente.',

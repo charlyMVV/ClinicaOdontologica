@@ -17,4 +17,6 @@ public interface UsuarioService{
 
    Usuario findByUsuario(String usuario);
 
+    Usuario findByMatricula(String matricula);
+
 }

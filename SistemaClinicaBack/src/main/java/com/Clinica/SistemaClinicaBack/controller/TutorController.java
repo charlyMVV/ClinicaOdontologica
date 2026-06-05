@@ -1,7 +1,9 @@
 package com.Clinica.SistemaClinicaBack.controller;
 
+import com.Clinica.SistemaClinicaBack.entity.HistoriaClinica;
 import com.Clinica.SistemaClinicaBack.entity.Tutor;
 import com.Clinica.SistemaClinicaBack.repository.TutorRepository;
+import com.Clinica.SistemaClinicaBack.service.HistoriaClinicaService;
 import com.Clinica.SistemaClinicaBack.service.TutorService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -26,12 +28,14 @@ public class TutorController {
     
     public final TutorService tutorService;
     public final TutorRepository tutorRepository;
+    private final HistoriaClinicaService historiaClinicaService;
 
-    public TutorController(TutorService tutorService, TutorRepository tutorRepository) {
+    public TutorController(TutorService tutorService, TutorRepository tutorRepository, HistoriaClinicaService historiaClinicaService) {
         this.tutorService = tutorService;
         this.tutorRepository = tutorRepository;
+        this.historiaClinicaService = historiaClinicaService;
     }
-    
+
     //localhost:8080/api/tutor
     @GetMapping
     public List<Tutor> findAll() {
@@ -47,10 +51,21 @@ public class TutorController {
     public void deleteById(@PathVariable("idTutor")Integer id){
         tutorService.deleteById(id);
     }
-    
+
     @PostMapping
     public ResponseEntity<Tutor> save(@RequestBody Tutor tutor){
-        return ResponseEntity.ok(tutorService.save(tutor));
+
+        Tutor guardado = tutorService.save(tutor);
+
+        HistoriaClinica hc =
+                historiaClinicaService.findByCurpPaciente(
+                        guardado.getCurp());
+
+        hc.setTutor(guardado);
+
+        historiaClinicaService.update(hc);
+
+        return ResponseEntity.ok(guardado);
     }
     
     @GetMapping("/existen/{curp}")
@@ -76,7 +91,16 @@ public class TutorController {
         tutordb.setTelefonoCasaTutor(tutor.getTelefonoCasaTutor());
         tutordb.setCelularTutor(tutor.getCelularTutor());
 
-        return tutorService.update(tutordb);
-    }
+        Tutor actualizado = tutorService.update(tutordb);
+
+        HistoriaClinica hc =
+                historiaClinicaService.findByCurpPaciente(
+                        actualizado.getCurp());
+
+        hc.setTutor(actualizado);
+
+        historiaClinicaService.update(hc);
+
+        return actualizado;     }
     
 }

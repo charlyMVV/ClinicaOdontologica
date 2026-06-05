@@ -1,6 +1,7 @@
 package com.Clinica.SistemaClinicaBack.service;
 
 import com.Clinica.SistemaClinicaBack.entity.Usuario;
+import com.Clinica.SistemaClinicaBack.exception.ResourceNotFoundException;
 import com.Clinica.SistemaClinicaBack.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,13 @@ public Usuario findByUsuario(String usuario) {
             .orElse(null); // O lanza una excepción si prefieres
 }
 
+    @Override
+    public Usuario findByMatricula(String matricula) {
+        return usuarioRepository.findById(matricula)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Usuario no encontrado con matrícula: " + matricula
+                ));
+    }
 
     
 }

@@ -15,7 +15,7 @@ export class AuthService {
 
 
   login(usuario: string, contrasena: string, roles: string) {
-    return this.http.post<{ mensaje: string, nombre: string, roles: string }>(
+    return this.http.post<{ matricula: string, mensaje: string, nombre: string, roles: string }>(
       'http://localhost:8080/api/auth/login',
       { usuario, contrasena, roles },
       { withCredentials: true }

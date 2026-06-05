@@ -1,24 +1,14 @@
 package com.Clinica.SistemaClinicaBack.controller;
 
+import com.Clinica.SistemaClinicaBack.entity.HistoriaClinica;
 import com.Clinica.SistemaClinicaBack.entity.TejidosBlandos;
 import com.Clinica.SistemaClinicaBack.repository.TejidosBlandosRepository;
+import com.Clinica.SistemaClinicaBack.service.HistoriaClinicaService;
 import com.Clinica.SistemaClinicaBack.service.TejidosBlandosService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-/**
- *
- * @author charly michel
- */
 @RestController
 @RequestMapping("/api/tejidosblandos")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -26,13 +16,18 @@ public class TejidosBlandosController {
 
     private final TejidosBlandosService tejidosBlandosService;
     private final TejidosBlandosRepository tejidosBlandosRepository;
+    private final HistoriaClinicaService historiaClinicaService;
 
-    public TejidosBlandosController(TejidosBlandosService tejidosBlandosService, TejidosBlandosRepository tejidosBlandosRepository) {
+    public TejidosBlandosController(
+            TejidosBlandosService tejidosBlandosService,
+            TejidosBlandosRepository tejidosBlandosRepository,
+            HistoriaClinicaService historiaClinicaService) {
+
         this.tejidosBlandosService = tejidosBlandosService;
         this.tejidosBlandosRepository = tejidosBlandosRepository;
+        this.historiaClinicaService = historiaClinicaService;
     }
 
-    //localhost:8080/api/tejidosblandos
     @GetMapping
     public List<TejidosBlandos> findAll() {
         return tejidosBlandosService.findAll();
@@ -50,7 +45,17 @@ public class TejidosBlandosController {
 
     @PostMapping
     public ResponseEntity<TejidosBlandos> save(@RequestBody TejidosBlandos tejidosBlandos) {
-        return ResponseEntity.ok(tejidosBlandosService.save(tejidosBlandos));
+
+        TejidosBlandos guardado = tejidosBlandosService.save(tejidosBlandos);
+
+        HistoriaClinica hc =
+                historiaClinicaService.findByCurpPaciente(guardado.getCurp());
+
+        hc.setTejidosBlandos(guardado);
+
+        historiaClinicaService.update(hc);
+
+        return ResponseEntity.ok(guardado);
     }
 
     @GetMapping("/existen/{curp}")
@@ -91,7 +96,15 @@ public class TejidosBlandosController {
         tejidosBlandosdb.setMucosaAlveolar(tejidosBlandos.getMucosaAlveolar());
         tejidosBlandosdb.setEncia(tejidosBlandos.getEncia());
 
-        return tejidosBlandosService.update(tejidosBlandosdb);
-    }   
+        TejidosBlandos actualizado = tejidosBlandosService.update(tejidosBlandosdb);
 
+        HistoriaClinica hc =
+                historiaClinicaService.findByCurpPaciente(actualizado.getCurp());
+
+        hc.setTejidosBlandos(actualizado);
+
+        historiaClinicaService.update(hc);
+
+        return actualizado;
+    }
 }

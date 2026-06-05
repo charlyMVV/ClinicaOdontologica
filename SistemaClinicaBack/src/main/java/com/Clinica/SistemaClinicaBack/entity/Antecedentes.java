@@ -1,12 +1,7 @@
 
 package com.Clinica.SistemaClinicaBack.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "antecedentes")
@@ -21,6 +16,9 @@ public class Antecedentes {
     private String detalle;
     @Column(name = "CURP_fk_antecedentes")
     private String curp;
+    @ManyToOne
+    @JoinColumn(name = "fk_historia_clinica")
+    private HistoriaClinica historiaClinica;
 
     public Antecedentes() {
     }
@@ -84,9 +82,13 @@ public class Antecedentes {
     public void setCurp(String curp) {
         this.curp = curp;
     }
-    
-    
-    
-    
-   
+
+
+    public HistoriaClinica getHistoriaClinica() {
+        return historiaClinica;
+    }
+
+    public void setHistoriaClinica(HistoriaClinica historiaClinica) {
+        this.historiaClinica = historiaClinica;
+    }
 }

@@ -1,9 +1,9 @@
 package com.Clinica.SistemaClinicaBack.service;
 
 import com.Clinica.SistemaClinicaBack.entity.Antecedentes;
+import com.Clinica.SistemaClinicaBack.entity.HistoriaClinica;
 import com.Clinica.SistemaClinicaBack.exception.ResourceNotFoundException;
 import com.Clinica.SistemaClinicaBack.repository.AntecedentesRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,10 +12,14 @@ import java.util.List;
 public class AntecedentesServiceImp implements AntecedentesService {
 
     private final AntecedentesRepository antecedentesRepository;
+    private final HistoriaClinicaService historiaClinicaService;
 
-    @Autowired
-    public AntecedentesServiceImp(AntecedentesRepository antecedentesRepository) {
+    public AntecedentesServiceImp(
+            AntecedentesRepository antecedentesRepository,
+            HistoriaClinicaService historiaClinicaService) {
+
         this.antecedentesRepository = antecedentesRepository;
+        this.historiaClinicaService = historiaClinicaService;
     }
 
     @Override
@@ -33,7 +37,7 @@ public class AntecedentesServiceImp implements AntecedentesService {
         return antecedentesRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                "El antecedente con id " + id + " no se encuentra"));
+                        "El antecedente con id " + id + " no se encuentra"));
     }
 
     @Override
@@ -46,8 +50,29 @@ public class AntecedentesServiceImp implements AntecedentesService {
         return antecedentesRepository.save(antecedentes);
     }
 
+    @Override
+    public Antecedentes upsert(Antecedentes antecedentes) {
 
+        HistoriaClinica historiaClinica =
+                historiaClinicaService.findByCurpPaciente(antecedentes.getCurp());
 
+        Antecedentes existente = antecedentesRepository
+                .findByCurpAndDescripcionAntecedentesAndTipoAntecedentes(
+                        antecedentes.getCurp(),
+                        antecedentes.getDescripcionAntecedentes(),
+                        antecedentes.getTipoAntecedentes()
+                )
+                .orElse(null);
+
+        if (existente == null) {
+            antecedentes.setHistoriaClinica(historiaClinica);
+            return antecedentesRepository.save(antecedentes);
+        }
+
+        existente.setRespuesta(antecedentes.getRespuesta());
+        existente.setDetalle(antecedentes.getDetalle());
+        existente.setHistoriaClinica(historiaClinica);
+
+        return antecedentesRepository.save(existente);
     }
-
-
+}

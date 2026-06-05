@@ -14,6 +14,7 @@ export class LoginComponent {
   contrasena = '';
   mensaje = '';
   roles = '';
+  matricula = '';
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -22,6 +23,7 @@ export class LoginComponent {
     next: (resp) => {
       if (resp.mensaje === 'Login correcto') {
         sessionStorage.setItem('usuario', this.usuario);
+        sessionStorage.setItem('matricula', resp.matricula);
         sessionStorage.setItem('nombre', resp.nombre); 
         sessionStorage.setItem('roles', resp.roles);
         this.router.navigate(['/menu']);

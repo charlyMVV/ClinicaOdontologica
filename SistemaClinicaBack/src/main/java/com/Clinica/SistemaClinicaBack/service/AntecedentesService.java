@@ -16,7 +16,7 @@ public interface AntecedentesService {
     void deleteById(Integer id);
     
     Antecedentes update(Antecedentes antecedentes);
-    
-    
+
+    Antecedentes upsert(Antecedentes antecedentes);
     
 }
