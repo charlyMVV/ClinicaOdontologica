@@ -49,17 +49,30 @@ export class Mishc {
   cargarPacientes(): void {
     this.cargandoPacientes = true;
 
-    this.datosPacienteService.getDatosPaciente().subscribe({
+    const matricula = sessionStorage.getItem('matricula');
+
+    if (!matricula) {
+      this.cargandoPacientes = false;
+      Swal.fire({
+        title: 'Sesión no válida',
+        text: 'No se encontró la matrícula del usuario logueado.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    this.datosPacienteService.getPacientesPorUsuario(matricula).subscribe({
       next: (pacientes) => {
         this.pacientes = pacientes || [];
         this.cargandoPacientes = false;
       },
       error: (error) => {
         this.cargandoPacientes = false;
-        console.error('Error al cargar pacientes:', error);
+        console.error('Error al cargar pacientes del usuario:', error);
         Swal.fire({
           title: 'Error',
-          text: 'No se pudo cargar la lista de pacientes.',
+          text: 'No se pudo cargar la lista de pacientes del usuario.',
           icon: 'error',
           confirmButtonText: 'OK'
         });

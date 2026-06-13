@@ -1,13 +1,16 @@
 package com.Clinica.SistemaClinicaBack.controller;
 
 import com.Clinica.SistemaClinicaBack.dto.CrearPacienteRequest;
+import com.Clinica.SistemaClinicaBack.entity.HistoriaClinica;
 import com.Clinica.SistemaClinicaBack.entity.Paciente;
 import com.Clinica.SistemaClinicaBack.entity.Usuario;
+import com.Clinica.SistemaClinicaBack.repository.HistoriaClinicaRepository;
 import com.Clinica.SistemaClinicaBack.service.HistoriaClinicaService;
 import com.Clinica.SistemaClinicaBack.service.PacienteService;
 import java.util.List;
 
 import com.Clinica.SistemaClinicaBack.service.UsuarioService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,22 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/pacientes")
+@RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:4200")
 public class PacienteController {
 
     private final PacienteService pacienteservice;
     private final HistoriaClinicaService historiaClinicaService;
     private final UsuarioService usuarioService;
-
-    public PacienteController(
-            PacienteService pacienteservice,
-            HistoriaClinicaService historiaClinicaService,
-            UsuarioService usuarioService) {
-
-        this.pacienteservice = pacienteservice;
-        this.historiaClinicaService = historiaClinicaService;
-        this.usuarioService = usuarioService;
-    }
+    private final HistoriaClinicaRepository historiaClinicaRepository;
 
     @PostMapping
     public Paciente save(@RequestBody CrearPacienteRequest request) {
@@ -100,5 +95,14 @@ public class PacienteController {
 
         return pacienteservice.update(pacientedb);
     }
+
+    @GetMapping("/usuario/{matricula}")
+    public List<Paciente> findPacientesPorUsuario(@PathVariable String matricula) {
+        return historiaClinicaRepository.findByUsuario_Matricula(matricula)
+                .stream()
+                .map(HistoriaClinica::getPaciente)
+                .toList();
+    }
+
    
 }

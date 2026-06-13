@@ -16,17 +16,21 @@ export class Datospacienteservice {
       return this.http.post<any>(this.api, payload);
     }
 
-  getDatosPaciente(): Observable<DatosPacientes[]> {
-    return this.http.get<DatosPacientes[]>(this.api);
-  }
+    getDatosPaciente(): Observable<DatosPacientes[]> {
+      return this.http.get<DatosPacientes[]>(this.api);
+    }
 
-  existePacientePorCurp(curp: string): Observable<boolean> {
-    return this.http.get<boolean>(`${this.api}/existen/${curp}`);
-  }
+    existePacientePorCurp(curp: string): Observable<boolean> {
+      return this.http.get<boolean>(`${this.api}/existen/${curp}`);
+    }
 
-  updateDatosPaciente(curp: string, datosPaciente: DatosPacientes): Observable<DatosPacientes> {
-    return this.http.put<DatosPacientes>(`${this.api}/curp/${curp}`, datosPaciente);
-  }
+    updateDatosPaciente(curp: string, datosPaciente: DatosPacientes): Observable<DatosPacientes> {
+      return this.http.put<DatosPacientes>(`${this.api}/curp/${curp}`, datosPaciente);
+    }
+
+    getPacientesPorUsuario(matricula: string): Observable<DatosPacientes[]> {
+      return this.http.get<DatosPacientes[]>(`${this.api}/usuario/${matricula}`);
+    }
 
 
 }
