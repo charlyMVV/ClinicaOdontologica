@@ -41,4 +41,8 @@ export class HistoriaClinicaService {
   rechazar(idHistoriaClinica: number): Observable<any> {
     return this.http.put<any>(`${this.api}/${idHistoriaClinica}/rechazar`, {});
   }
+
+  crearNuevaHistoriaClinica(payload: any): Observable<any> {
+    return this.http.post<any>(`${this.api}/nueva`, payload);
+  }
 }

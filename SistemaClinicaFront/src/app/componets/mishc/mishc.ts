@@ -127,4 +127,60 @@ export class Mishc {
       cancelButtonText: 'Cancelar'
     }).then((result) => result.isConfirmed);
   }
+
+  puedeCrearNuevaHC(hc: any): boolean {
+    const curp = hc.paciente?.curp || hc.paciente?.CURP;
+
+    if (hc.estatusHistoriaClinica?.clave !== 'APROBADA') {
+      return false;
+    }
+
+    const existeActiva = this.historiasClinicas.some((otra) => {
+      const otraCurp = otra.paciente?.curp || otra.paciente?.CURP;
+      const estatus = otra.estatusHistoriaClinica?.clave;
+
+      return otraCurp === curp &&
+        ['BORRADOR', 'REVISION', 'RECHAZADA'].includes(estatus);
+    });
+
+    return !existeActiva;
+  }
+  crearNuevaHC(hc: any): void {
+    const matricula = sessionStorage.getItem('matricula');
+
+    if (!matricula) {
+      Swal.fire('Error', 'No se encontró la matrícula del usuario.', 'error');
+      return;
+    }
+
+    const payload = {
+      curp: hc.paciente?.curp || hc.paciente?.CURP,
+      matricula: matricula,
+      tipoHc: hc.tipoHistoriaClinica?.clave || 'ODONTOLOGICA'
+    };
+
+    Swal.fire({
+      title: '¿Crear nueva historia clínica?',
+      text: `Se creará una nueva HC para ${hc.paciente?.nombrePaciente}.`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, crear',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.historiaClinicaService.crearNuevaHistoriaClinica(payload).subscribe({
+          next: (nuevaHC) => {
+            Swal.fire('Creada', 'La nueva historia clínica fue creada correctamente.', 'success')
+              .then(() => {
+                this.router.navigate(['/hc', nuevaHC.idHistoriaClinica]);
+              });
+          },
+          error: (err) => {
+            console.error(err);
+            Swal.fire('Error', 'No se pudo crear la nueva historia clínica.', 'error');
+          }
+        });
+      }
+    });
+  }
 }

@@ -32,4 +32,6 @@ public interface HistoriaClinicaService {
     HistoriaClinica cambiarEstatus(Integer idHistoriaClinica, String claveEstatus);
 
     public void validarHistoriaCompleta(Integer idHistoriaClinica);
+
+    HistoriaClinica crearNuevaHistoriaClinica(String curp, String matricula, String tipoHc);
 }

@@ -18,6 +18,8 @@ public class HistoriaClinicaServiceImpl implements HistoriaClinicaService {
     private final CatalogoEstatusHistoriaClinicaRepository catalogoEstatusHistoriaClinicaRepository;
     private final AntecedentesRepository antecedentesRepository;
     private final FotosInicioRepository fotosInicioRepository;
+    private final PacienteRepository pacienteRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Override
     public HistoriaClinica save(HistoriaClinica historiaClinica) {
@@ -184,6 +186,43 @@ public class HistoriaClinicaServiceImpl implements HistoriaClinicaService {
                     "Debe capturar al menos una fotografía."
             );
         }
+    }
+
+    @Override
+    public HistoriaClinica crearNuevaHistoriaClinica(
+            String curp,
+            String matricula,
+            String tipoHc) {
+
+        Paciente paciente = pacienteRepository.findByCurp(curp)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existe paciente con CURP: " + curp
+                ));
+
+        Usuario usuario = usuarioRepository.findById(matricula)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existe usuario con matrícula: " + matricula
+                ));
+
+        CatalogoTipoHistoriaClinica tipo =
+                catalogoTipoHistoriaClinicaRepository.findByClave(tipoHc)
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "No existe tipo de HC: " + tipoHc
+                        ));
+
+        CatalogoEstatusHistoriaClinica estatus =
+                catalogoEstatusHistoriaClinicaRepository.findByClave("BORRADOR")
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "No existe estatus BORRADOR"
+                        ));
+
+        HistoriaClinica nueva = new HistoriaClinica();
+        nueva.setPaciente(paciente);
+        nueva.setUsuario(usuario);
+        nueva.setTipoHistoriaClinica(tipo);
+        nueva.setEstatusHistoriaClinica(estatus);
+
+        return historiaClinicaRepository.save(nueva);
     }
 
 }

@@ -41,12 +41,17 @@
                     <td>{{ hc.tipoHistoriaClinica?.descripcion }}</td>
                     <td>{{ hc.estatusHistoriaClinica?.descripcion }}</td>
                     <td>
-                        <button *ngIf="hc.estatusHistoriaClinica?.clave == 'BORRADOR' ||  hc.estatusHistoriaClinica?.clave === 'RECHAZADA'" class="btn btn-continuar btn-sm" type="button" (click)="continuarHistoria(hc)">
+                        <button *ngIf="hc.estatusHistoriaClinica?.clave == 'BORRADOR' ||  hc.estatusHistoriaClinica?.clave === 'RECHAZADA'"
+                            class="btn btn-continuar btn-sm" type="button" (click)="continuarHistoria(hc)">
                             Continuar
                         </button>
-                    </td>
-                </tr>
-            </tbody>
+                        
+                        <button *ngIf="puedeCrearNuevaHC(hc)" class="btn btn-success btn-sm" (click)="crearNuevaHC(hc)">
+                            ➕ Nueva HC
+                        </button>
+                        </td>
+                        </tr>
+                        </tbody>
         </table>
     </div>
 </div>

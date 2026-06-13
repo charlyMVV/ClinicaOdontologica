@@ -1,5 +1,6 @@
 package com.Clinica.SistemaClinicaBack.controller;
 
+import com.Clinica.SistemaClinicaBack.dto.NuevaHistoriaClinicaRequest;
 import com.Clinica.SistemaClinicaBack.entity.HistoriaClinica;
 import com.Clinica.SistemaClinicaBack.entity.Paciente;
 import com.Clinica.SistemaClinicaBack.repository.*;
@@ -168,6 +169,34 @@ public class HistoriaClinicaController {
                 historiaClinicaService.cambiarEstatus(id, "RECHAZADA");
 
         return ResponseEntity.ok(historia);
+    }
+
+    @PostMapping("/nueva")
+    public ResponseEntity<HistoriaClinica> crearNuevaHistoriaClinica(
+            @RequestBody NuevaHistoriaClinicaRequest request) {
+
+        String curp = request.getCurp().trim().toUpperCase();
+
+        List<HistoriaClinica> activas =
+                historiaClinicaRepository.findByPaciente_CurpAndEstatusHistoriaClinica_ClaveIn(
+                        curp,
+                        List.of("BORRADOR", "REVISION", "RECHAZADA")
+                );
+
+        if (!activas.isEmpty()) {
+            throw new IllegalStateException(
+                    "Ya existe una historia clínica activa para este paciente."
+            );
+        }
+
+        HistoriaClinica nueva =
+                historiaClinicaService.crearNuevaHistoriaClinica(
+                        curp,
+                        request.getMatricula(),
+                        request.getTipoHc()
+                );
+
+        return ResponseEntity.ok(nueva);
     }
 
 }
