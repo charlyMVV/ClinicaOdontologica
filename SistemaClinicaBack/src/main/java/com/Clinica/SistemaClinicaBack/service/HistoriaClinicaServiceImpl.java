@@ -2,28 +2,22 @@ package com.Clinica.SistemaClinicaBack.service;
 
 import com.Clinica.SistemaClinicaBack.entity.*;
 import com.Clinica.SistemaClinicaBack.exception.ResourceNotFoundException;
-import com.Clinica.SistemaClinicaBack.repository.CatalogoEstatusHistoriaClinicaRepository;
-import com.Clinica.SistemaClinicaBack.repository.CatalogoTipoHistoriaClinicaRepository;
-import com.Clinica.SistemaClinicaBack.repository.HistoriaClinicaRepository;
+import com.Clinica.SistemaClinicaBack.repository.*;
+
 import java.util.List;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+@RequiredArgsConstructor
 @Service
 public class HistoriaClinicaServiceImpl implements HistoriaClinicaService {
 
     private final HistoriaClinicaRepository historiaClinicaRepository;
     private final CatalogoTipoHistoriaClinicaRepository catalogoTipoHistoriaClinicaRepository;
     private final CatalogoEstatusHistoriaClinicaRepository catalogoEstatusHistoriaClinicaRepository;
-
-    public HistoriaClinicaServiceImpl(
-            HistoriaClinicaRepository historiaClinicaRepository,
-            CatalogoTipoHistoriaClinicaRepository catalogoTipoHistoriaClinicaRepository,
-            CatalogoEstatusHistoriaClinicaRepository catalogoEstatusHistoriaClinicaRepository) {
-
-        this.historiaClinicaRepository = historiaClinicaRepository;
-        this.catalogoTipoHistoriaClinicaRepository = catalogoTipoHistoriaClinicaRepository;
-        this.catalogoEstatusHistoriaClinicaRepository = catalogoEstatusHistoriaClinicaRepository;
-    }
+    private final AntecedentesRepository antecedentesRepository;
+    private final FotosInicioRepository fotosInicioRepository;
 
     @Override
     public HistoriaClinica save(HistoriaClinica historiaClinica) {
@@ -105,4 +99,91 @@ public class HistoriaClinicaServiceImpl implements HistoriaClinicaService {
                         "No existe historia clínica para la CURP: " + curp
                 ));
     }
+
+    @Override
+    public List<HistoriaClinica> findAllByPaciente_Curp(String curp) {
+        List<HistoriaClinica> historias =
+                historiaClinicaRepository.findAllByPaciente_Curp(curp);
+
+        if (historias.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "No existen historias clínicas para la CURP: " + curp
+            );
+        }
+
+        return historias;
+    }
+
+    @Override
+    public HistoriaClinica cambiarEstatus(Integer idHistoriaClinica, String claveEstatus) {
+
+        HistoriaClinica historiaClinica = historiaClinicaRepository.findById(idHistoriaClinica)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existe historia clínica con id: " + idHistoriaClinica
+                ));
+
+        CatalogoEstatusHistoriaClinica estatus =
+                catalogoEstatusHistoriaClinicaRepository.findByClave(claveEstatus)
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "No existe el estatus de historia clínica: " + claveEstatus
+                        ));
+
+        historiaClinica.setEstatusHistoriaClinica(estatus);
+
+        return historiaClinicaRepository.save(historiaClinica);
+    }
+
+    @Override
+    public void validarHistoriaCompleta(Integer idHistoriaClinica) {
+
+        HistoriaClinica hc = findById(idHistoriaClinica);
+
+        if (hc.getPaciente() == null) {
+            throw new IllegalStateException("Faltan los datos del paciente.");
+        }
+
+        if (hc.getAntecedentesNoPatologicos() == null) {
+            throw new IllegalStateException("Faltan antecedentes no patológicos.");
+        }
+
+        if (hc.getSignosVitales() == null) {
+            throw new IllegalStateException("Faltan signos vitales.");
+        }
+
+        if (hc.getCabezaCuello() == null) {
+            throw new IllegalStateException("Falta exploración cabeza y cuello.");
+        }
+
+        if (hc.getExploracionEstomatognatico() == null) {
+            throw new IllegalStateException("Falta exploración estomatognática.");
+        }
+
+        if (hc.getTejidosBlandos() == null) {
+            throw new IllegalStateException("Falta exploración de tejidos blandos.");
+        }
+
+        if (hc.getDiagnosticoTratamiento() == null) {
+            throw new IllegalStateException("Falta diagnóstico y tratamiento.");
+        }
+        List<Antecedentes> antecedentes =
+                antecedentesRepository.findByHistoriaClinica_IdHistoriaClinica(
+                        idHistoriaClinica);
+
+        if (antecedentes.isEmpty()) {
+            throw new IllegalStateException(
+                    "Debe capturar antecedentes."
+            );
+        }
+
+        List<FotosInicio> fotos =
+                fotosInicioRepository.findByHistoriaClinica_IdHistoriaClinica(
+                        idHistoriaClinica);
+
+        if (fotos.isEmpty()) {
+            throw new IllegalStateException(
+                    "Debe capturar al menos una fotografía."
+            );
+        }
+    }
+
 }

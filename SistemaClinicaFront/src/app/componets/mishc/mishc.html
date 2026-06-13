@@ -29,22 +29,21 @@
                 <tr>
                     <th>Nombre del Paciente</th>
                     <th>CURP</th>
+                    <th>Tipo De HC</th>
+                    <th>Estatus</th>
                     <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let paciente of pacientesFiltrados">
-                    <td>{{ paciente.nombrePaciente }}</td>
-                    <td>{{ paciente.curp }}</td>
+                <tr *ngFor="let hc of historiasFiltradas">
+                    <td>{{ hc.paciente?.nombrePaciente }}</td>
+                    <td>{{ hc.paciente?.curp }}</td>
+                    <td>{{ hc.tipoHistoriaClinica?.descripcion }}</td>
+                    <td>{{ hc.estatusHistoriaClinica?.descripcion }}</td>
                     <td>
-                        <button class="btn btn-continuar btn-sm" type="button" (click)="continuarHistoria(paciente)">
+                        <button *ngIf="hc.estatusHistoriaClinica?.clave == 'BORRADOR' ||  hc.estatusHistoriaClinica?.clave === 'RECHAZADA'" class="btn btn-continuar btn-sm" type="button" (click)="continuarHistoria(hc)">
                             Continuar
                         </button>
-                    </td>
-                </tr>
-                <tr *ngIf="pacientesFiltrados.length === 0">
-                    <td colspan="3" class="text-center text-muted py-4">
-                        No hay pacientes para mostrar.
                     </td>
                 </tr>
             </tbody>

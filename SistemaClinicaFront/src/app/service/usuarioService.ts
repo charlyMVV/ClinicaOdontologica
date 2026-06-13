@@ -32,6 +32,13 @@ export class UsuarioService {
   }
 
 
+  aprobar(idHistoriaClinica: number): Observable<any> {
+    return this.http.put<any>(`${this.api}/${idHistoriaClinica}/aprobar`, {});
+  }
+
+  rechazar(idHistoriaClinica: number): Observable<any> {
+    return this.http.put<any>(`${this.api}/${idHistoriaClinica}/rechazar`, {});
+  }
 
 
 

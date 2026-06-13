@@ -8,6 +8,7 @@ import com.Clinica.SistemaClinicaBack.entity.EvolucionPaciente;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 /**
  *
@@ -19,4 +20,6 @@ public interface EvolucionPacienteRepository extends JpaRepository<EvolucionPaci
     boolean existsByCurp(String curp);
 
     Optional<EvolucionPaciente> findByCurp(String curp);
+
+    List<EvolucionPaciente> findByHistoriaClinica_IdHistoriaClinica(Integer idHistoriaClinica);
 }

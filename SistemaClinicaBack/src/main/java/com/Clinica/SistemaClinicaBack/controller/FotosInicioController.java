@@ -68,7 +68,6 @@ public class FotosInicioController {
             HistoriaClinica hc =
                     historiaClinicaService.findByCurpPaciente(curp);
 
-            fotosInicioRepository.deleteByCurp(curp);
 
             for (FotosInicio f : fotos) {
                 f.setHistoriaClinica(hc);

@@ -23,4 +23,22 @@ export class HistoriaClinicaService {
     return this.http.get<any[]>(`${this.api}/todas`);
   }
 
+  getHistoriasPorUsuario(matricula: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/usuario/${matricula}`);
+  }
+  getHistoriaClinicaPorId(idHistoriaClinica: number): Observable<any> {
+    return this.http.get<any>(`${this.api}/id/${idHistoriaClinica}`);
+  }
+
+  enviarRevision(idHistoriaClinica: number): Observable<any> {
+    return this.http.put<any>(`${this.api}/${idHistoriaClinica}/enviar-revision`, {});
+  }
+
+  aprobar(idHistoriaClinica: number): Observable<any> {
+    return this.http.put<any>(`${this.api}/${idHistoriaClinica}/aprobar`, {});
+  }
+
+  rechazar(idHistoriaClinica: number): Observable<any> {
+    return this.http.put<any>(`${this.api}/${idHistoriaClinica}/rechazar`, {});
+  }
 }

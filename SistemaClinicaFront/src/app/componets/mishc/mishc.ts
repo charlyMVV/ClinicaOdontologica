@@ -2,8 +2,7 @@ import { Component } from '@angular/core';
 import Swal from 'sweetalert2';
 import { AuthService } from '../../service/auth';
 import { Router } from '@angular/router';
-import { DatosPacientes } from '../../datos-pacientes';
-import { Datospacienteservice } from '../../service/datospacienteservice';
+import { HistoriaClinicaService } from '../../service/historiaclinicaservice';
 
 @Component({
   selector: 'app-mishc',
@@ -15,84 +14,71 @@ export class Mishc {
 
   nombreUsuarioLogueado: string = '';
   datosEditados = false;
-  pacientes: DatosPacientes[] = [];
+
+  historiasClinicas: any[] = [];
   filtroPacientes: string = '';
   cargandoPacientes = false;
 
   constructor(
     private authService: AuthService,
     private router: Router,
-    private datosPacienteService: Datospacienteservice
+    private historiaClinicaService: HistoriaClinicaService
   ) { }
 
   ngOnInit(): void {
-
     this.nombreUsuarioLogueado = sessionStorage.getItem('nombre') || 'Usuario';
-    this.cargarPacientes();
+    this.cargarHistoriasClinicas();
   }
 
-  get pacientesFiltrados(): DatosPacientes[] {
+  get historiasFiltradas(): any[] {
     const filtro = this.filtroPacientes.trim().toLowerCase();
 
     if (!filtro) {
-      return this.pacientes;
+      return this.historiasClinicas;
     }
 
-    return this.pacientes.filter((paciente) => {
-      const nombre = paciente.nombrePaciente || '';
-      const curp = paciente.curp || '';
+    return this.historiasClinicas.filter((hc) => {
+      const nombre = hc.paciente?.nombrePaciente || '';
+      const curp = hc.paciente?.curp || hc.paciente?.CURP || '';
+      const estatus = hc.estatusHistoriaClinica?.descripcion || '';
+      const tipo = hc.tipoHistoriaClinica?.descripcion || '';
 
-      return `${nombre} ${curp}`.toLowerCase().includes(filtro);
+      return `${nombre} ${curp} ${estatus} ${tipo}`.toLowerCase().includes(filtro);
     });
   }
 
-  cargarPacientes(): void {
+  cargarHistoriasClinicas(): void {
     this.cargandoPacientes = true;
 
     const matricula = sessionStorage.getItem('matricula');
 
     if (!matricula) {
       this.cargandoPacientes = false;
-      Swal.fire({
-        title: 'Sesión no válida',
-        text: 'No se encontró la matrícula del usuario logueado.',
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
+      Swal.fire('Error', 'No se encontró la matrícula del usuario.', 'error');
       return;
     }
 
-    this.datosPacienteService.getPacientesPorUsuario(matricula).subscribe({
-      next: (pacientes) => {
-        this.pacientes = pacientes || [];
+    this.historiaClinicaService.getHistoriasPorUsuario(matricula).subscribe({
+      next: (historias) => {
+        this.historiasClinicas = historias || [];
         this.cargandoPacientes = false;
       },
       error: (error) => {
         this.cargandoPacientes = false;
-        console.error('Error al cargar pacientes del usuario:', error);
-        Swal.fire({
-          title: 'Error',
-          text: 'No se pudo cargar la lista de pacientes del usuario.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
+        console.error('Error al cargar historias clínicas:', error);
+        Swal.fire('Error', 'No se pudieron cargar tus historias clínicas.', 'error');
       }
     });
   }
 
-  continuarHistoria(paciente: DatosPacientes): void {
-    if (!paciente.curp) {
-      Swal.fire({
-        title: 'CURP faltante',
-        text: 'Este paciente no tiene CURP registrada.',
-        icon: 'warning',
-        confirmButtonText: 'OK'
-      });
+  continuarHistoria(hc: any): void {
+    if (!hc?.idHistoriaClinica) {
+      Swal.fire('Error', 'La historia clínica no tiene ID.', 'error');
       return;
     }
 
     this.datosEditados = false;
-    this.router.navigate(['/hc', paciente.curp]);
+    this.router.navigate(['/hc', hc.idHistoriaClinica]);
   }
 
   logout(): void {
@@ -109,11 +95,11 @@ export class Mishc {
       if (result.isConfirmed) {
         this.authService.logout().subscribe({
           next: () => {
-            sessionStorage.removeItem('usuario');
+            sessionStorage.clear();
             this.router.navigate(['/']);
           },
           error: () => {
-            sessionStorage.removeItem('usuario');
+            sessionStorage.clear();
             this.router.navigate(['/']);
           }
         });
@@ -141,5 +127,4 @@ export class Mishc {
       cancelButtonText: 'Cancelar'
     }).then((result) => result.isConfirmed);
   }
-
 }

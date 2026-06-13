@@ -18,4 +18,6 @@ public interface FotosInicioRepository extends JpaRepository<FotosInicio, Intege
     List<FotosInicio> findByCurp(String curp);
 
     void deleteByCurp(String curp);
+
+    List<FotosInicio> findByHistoriaClinica_IdHistoriaClinica(Integer idHistoriaClinica);
 }

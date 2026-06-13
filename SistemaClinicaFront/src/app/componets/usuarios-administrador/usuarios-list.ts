@@ -400,5 +400,53 @@ export class UsuariosList implements OnInit {
     this.router.navigate(['/historia-clinica', curp]);
   }
 
+  aprobarHC(hc: any): void {
+  Swal.fire({
+    title: '¿Aprobar historia clínica?',
+    text: `Se aprobará la HC del paciente ${hc.paciente?.nombrePaciente}.`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, aprobar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.historiaClinicaService.aprobar(hc.idHistoriaClinica).subscribe({
+        next: () => {
+          Swal.fire('Aprobada', 'La historia clínica fue aprobada correctamente.', 'success');
+          this.cargarHistoriasClinicas();
+        },
+        error: (err) => {
+          console.error(err);
+          Swal.fire('Error', 'No se pudo aprobar la historia clínica.', 'error');
+        }
+      });
+    }
+  });
+}
+
+rechazarHC(hc: any): void {
+  Swal.fire({
+    title: '¿Rechazar historia clínica?',
+    text: `Se rechazará la HC del paciente ${hc.paciente?.nombrePaciente}.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, rechazar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.historiaClinicaService.rechazar(hc.idHistoriaClinica).subscribe({
+        next: () => {
+          Swal.fire('Rechazada', 'La historia clínica fue rechazada.', 'success');
+          this.cargarHistoriasClinicas();
+        },
+        error: (err) => {
+          console.error(err);
+          Swal.fire('Error', 'No se pudo rechazar la historia clínica.', 'error');
+        }
+      });
+    }
+  });
+}
+
 
 }

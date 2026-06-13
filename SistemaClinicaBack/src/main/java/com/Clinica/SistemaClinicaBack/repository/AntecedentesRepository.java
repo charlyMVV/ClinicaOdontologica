@@ -19,4 +19,6 @@ public interface AntecedentesRepository extends JpaRepository<Antecedentes , Int
     );
 
     List<Antecedentes> findByCurp(String curp);
+
+    List<Antecedentes> findByHistoriaClinica_IdHistoriaClinica(Integer idHistoriaClinica);
 }

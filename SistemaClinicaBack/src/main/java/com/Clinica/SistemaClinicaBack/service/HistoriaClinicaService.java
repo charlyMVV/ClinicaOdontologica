@@ -27,4 +27,9 @@ public interface HistoriaClinicaService {
 
     HistoriaClinica findByCurpPaciente(String curp);
 
+    List<HistoriaClinica> findAllByPaciente_Curp(String curp);
+
+    HistoriaClinica cambiarEstatus(Integer idHistoriaClinica, String claveEstatus);
+
+    public void validarHistoriaCompleta(Integer idHistoriaClinica);
 }

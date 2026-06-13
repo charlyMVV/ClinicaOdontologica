@@ -63,8 +63,8 @@
                   <th>Estudiante</th>
                   <th>Paciente</th>
                   <th>Tipo de Historia</th>
-                  <th>Fecha</th>
                   <th>Estatus</th>
+                  <th>Fecha</th>
                   <th>Acciones</th>
                 </tr>
                 </thead>
@@ -74,7 +74,7 @@
                   <td>{{ hc.usuario?.nombreUsuario }}</td>
                   <td>{{ hc.paciente?.nombrePaciente }}</td>
                   <td>{{ hc.tipoHistoriaClinica?.descripcion }}</td>
-                  <td>{{hc.estatusHistoriaClinica?.clave}}</td>
+                  <td>{{hc.estatusHistoriaClinica?.descripcion}}</td>
                   <td>{{ hc.fechaCreacion | date:'yyyy-MM-dd' }}</td>
                   <td>
                     <button *ngIf="hc.estatusHistoriaClinica?.clave == 'REVISION'" class="btn btn-success btn-sm btn-accion">
@@ -118,11 +118,16 @@
                     <td>{{ hc.fechaCreacion | date:'yyyy-MM-dd' }}</td>
                     <td>{{hc.estatusHistoriaClinica?.clave}}</td>
                     <td>
-                      <button class="btn btn-success btn-sm btn-accion">✔️ Aprobar</button>
-                      <button class="btn btn-danger btn-sm btn-accion">❌ Rechazar</button>
+                      <button class="btn btn-success btn-sm btn-accion" (click)="aprobarHC(hc)">
+                        ✔️ Aprobar
+                      </button>
+                    
+                      <button class="btn btn-danger btn-sm btn-accion" (click)="rechazarHC(hc)">
+                        ❌ Rechazar
+                      </button>
                       <button class="btn btn-primary btn-sm btn-accion" (click)="verHistoriaClinica(hc)">🔍 Ver</button>
                     </td>
-                  </tr>
+                    </tr>
                 </tbody>
                 </table>
                 </div>

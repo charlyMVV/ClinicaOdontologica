@@ -18,4 +18,7 @@ public interface HistoriaClinicaRepository
     List<HistoriaClinica> findByEstatusHistoriaClinica_Clave(String clave);
 
     List<HistoriaClinica> findByUsuario_Matricula(String matricula);
+
+    List<HistoriaClinica> findAllByPaciente_Curp(String curp);
+
 }

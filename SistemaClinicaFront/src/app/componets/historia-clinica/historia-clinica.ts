@@ -46,6 +46,7 @@ import { HistoriaClinicaService } from '../../service/historiaclinicaservice';
 
 export class HistoriaClinica implements OnInit {
 
+  idHistoriaClinica!: number;
 
   //Datos personales
   nombrePaciente: string = "";
@@ -240,18 +241,30 @@ export class HistoriaClinica implements OnInit {
     localStorage.clear();
     this.nombreUsuarioLogueado = sessionStorage.getItem('nombre') || 'Usuario';
 
-
     this.cargarFirmas();
 
-    const curpRuta = this.route.snapshot.paramMap.get('curp');
-    if (curpRuta) {
-      this.cargarHistoriaClinica(curpRuta);
+    const idHistoriaClinica = Number(
+      this.route.snapshot.paramMap.get('idHistoriaClinica')
+    );
+
+    if (idHistoriaClinica) {
+      this.cargarHistoriaClinicaPorId(idHistoriaClinica);
     }
-
-
   }
 
 
+  cargarHistoriaClinicaPorId(idHistoriaClinica: number): void {
+  this.historiaClinicaService.getHistoriaClinicaPorId(idHistoriaClinica).subscribe({
+    next: (historia) => {
+      this.idHistoriaClinica = historia.idHistoriaClinica;
+      this.aplicarHistoriaClinica(historia);
+      this.datosEditados = true;
+    },
+    error: (error) => {
+      console.error('Error al cargar la historia clinica:', error);
+    }
+  });
+}
 
   constructor(
     private authService: AuthService,
@@ -333,7 +346,16 @@ export class HistoriaClinica implements OnInit {
     this.aplicarCampos(historia?.diagnosticoTratamiento, [
       'interpretacionRx', 'diagnostico', 'resumenTratamiento'
     ]);
-    this.aplicarCampos(historia?.evolucionPaciente, ['fecha', 'comentarioControl']);
+    const evoluciones = historia?.evolucionPaciente || [];
+
+    if (evoluciones.length > 0) {
+      const ultimaEvolucion = evoluciones[evoluciones.length - 1];
+
+      this.aplicarCampos(ultimaEvolucion, [
+        'fecha',
+        'comentarioControl'
+      ]);
+    }
     this.aplicarFotos(historia?.fotosInicio || []);
     this.aplicarFirma(historia?.firma);
   }
@@ -1171,29 +1193,142 @@ addSignosVitales() {
     });
   }
 
-  addFotosInicio(): void {
-    if (!this.curp || this.listaFotos.length === 0) {
-      return;
-    }
+  fotosGuardadas = false;
 
-    // Asignar CURP a cada imagen
-    this.listaFotos = this.listaFotos.map(f => new Fotosinicio(f.fotos, this.curp));
-
-    console.log('Enviando fotos:', this.listaFotos);
-
-    this.fotosInicioService.guardarMultiplesFotos(this.listaFotos).subscribe({
-      next: (res: any) => {
-        this.listaFotos = [];
-        this.previews = [];
-        this.curp = '';
-      },
-      error: (err) => {
-        console.error('Error al guardar imágenes', err);
-      }
-    });
+addFotosInicio(): void {
+  if (!this.curp || this.listaFotos.length === 0) {
+    return;
   }
 
+  const fotosParaGuardar = this.listaFotos.map(
+    f => new Fotosinicio(f.fotos, this.curp)
+  );
+
+  console.log('Enviando fotos:', fotosParaGuardar);
+
+  this.fotosInicioService.guardarMultiplesFotos(fotosParaGuardar).subscribe({
+    next: () => {
+      this.fotosGuardadas = true;
+
+      // Solo limpia selección visual, NO la CURP
+      this.listaFotos = [];
+      this.previews = [];
+    },
+    error: (err) => {
+      console.error('Error al guardar imágenes', err);
+    }
+  });
+}
+
+  validarHistoriaCompletaFront(): string[] {
+  const faltantes: string[] = [];
+
+  if (!this.curp || this.curp.trim() === '') {
+    faltantes.push('Datos del paciente');
+  }
+
+  if (!this.antecedentesPersonales?.length || !this.antecedentesHeredofamiliaresList?.length) {
+    faltantes.push('Antecedentes personales y heredofamiliares');
+  }
+
+  if (!this.frecuenciaLavadoDientes || !this.grupoSanguineo || !this.factorRh) {
+    faltantes.push('Antecedentes no patológicos');
+  }
+
+  if (!this.temperatura || !this.frecuenciaRespiratoria || !this.tensionArterial || !this.frecuenciaCardiaca || !this.peso || !this.talla) {
+    faltantes.push('Signos vitales');
+  }
+
+  if (
+    !this.cabezaCuello.exostosis &&
+    !this.cabezaCuello.endotosis &&
+    !this.cabezaCuello.dolicocefalico &&
+    !this.cabezaCuello.mesocefalico &&
+    !this.cabezaCuello.branquicefalico &&
+    !this.cabezaCuello.asimetriaTransversal &&
+    !this.cabezaCuello.asimetriaLongitudinal &&
+    !this.cabezaCuello.perfilConcavo &&
+    !this.cabezaCuello.perfilConvexo &&
+    !this.cabezaCuello.perfilRecto &&
+    !this.cabezaCuello.pielNormal &&
+    !this.cabezaCuello.pielPalida &&
+    !this.cabezaCuello.pielCianotica &&
+    !this.cabezaCuello.pielEnrojecida &&
+    !this.cabezaCuello.musculosHipotonicos &&
+    !this.cabezaCuello.musculosHipertonicos &&
+    !this.cabezaCuello.musculosEspasticos &&
+    !this.cabezaCuello.cadenaGanglionar
+  ) {
+    faltantes.push('Cabeza y cuello');
+  }
+
+  if (
+    !this.estomatognatico.ruidos &&
+    !this.estomatognatico.lateralidad &&
+    !this.estomatognatico.apertura &&
+    !this.estomatognatico.chasquidos &&
+    !this.estomatognatico.crepitacion &&
+    !this.estomatognatico.dificultadAbrirboca &&
+    !this.estomatognatico.dolorAberturaLateralidad &&
+    !this.estomatognatico.fatigaDolorMuscular &&
+    !this.estomatognatico.disminuicionAbertura &&
+    !this.estomatognatico.desviacionAberturaCierre
+  ) {
+    faltantes.push('Sistema estomatognático');
+  }
+
+  if (!this.ganglios || !this.glandulasSalivales) {
+    faltantes.push('Tejidos blandos');
+  }
+
+  if (!this.diagnostico || !this.resumenTratamiento) {
+    faltantes.push('Diagnóstico y tratamiento');
+  }
+
+ if (!this.hayFotos()) {
+  faltantes.push('Fotografías');
+}
+
+if (!this.hayFirma()) {
+  faltantes.push('Firma');
+}
+  return faltantes;
+}
+
+hayFotos(): boolean {
+  return this.fotosGuardadas || this.listaFotos.length > 0 || this.previews.length > 0;
+}
+
+hayFirma(): boolean {
+  if (this.firmaPendiente) {
+    return true;
+  }
+
+  if (this.signaturePad && !this.signaturePad.isEmpty()) {
+    return true;
+  }
+
+  return false;
+}
+
+
+
   enviarHC() {
+    const faltantes = this.validarHistoriaCompletaFront();
+
+    if (faltantes.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Historia clínica incompleta',
+        html: `
+      <p>Faltan las siguientes secciones:</p>
+      <ul style="text-align:left;">
+        ${faltantes.map(f => `<li>${f}</li>`).join('')}
+      </ul>
+    `
+      });
+      return;
+    }
     if (!this.curp || this.curp.trim() === '') {
       Swal.fire({
         icon: 'error',
@@ -1203,12 +1338,21 @@ addSignosVitales() {
       return;
     }
 
+    if (!this.idHistoriaClinica) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Historia clínica no identificada',
+        text: 'No se encontró el ID de la historia clínica.'
+      });
+      return;
+    }
+
     Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Se guardarán todos los datos del expediente clínico.',
+      title: '¿Enviar a revisión?',
+      text: 'Se guardarán todos los datos y la historia clínica pasará a revisión.',
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Sí, guardar',
+      confirmButtonText: 'Sí, enviar',
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
@@ -1226,10 +1370,26 @@ addSignosVitales() {
         this.addFotosInicio();
         this.addFirma();
 
-        Swal.fire({
-          icon: 'success',
-          title: 'Expediente guardado',
-          text: 'Todos los datos han sido enviados correctamente.'
+        this.historiaClinicaService.enviarRevision(this.idHistoriaClinica).subscribe({
+          next: () => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Historia clínica enviada',
+              text: 'La historia clínica fue enviada a revisión correctamente.'
+            });
+          },
+          error: (err) => {
+            const mensaje =
+              err?.error?.message ||
+              err?.error?.mensaje ||
+              'No se pudo enviar la historia clínica a revisión.';
+
+            Swal.fire({
+              icon: 'error',
+              title: 'No se pudo enviar',
+              text: mensaje
+            });
+          }
         });
       }
     });

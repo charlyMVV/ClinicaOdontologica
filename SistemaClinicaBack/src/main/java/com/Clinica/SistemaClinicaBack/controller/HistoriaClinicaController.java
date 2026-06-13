@@ -9,13 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.Clinica.SistemaClinicaBack.service.HistoriaClinicaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/historia-clinica")
@@ -36,6 +33,7 @@ public class HistoriaClinicaController {
     private final FotosInicioRepository fotosInicioRepository;
     private final FirmaRepository firmaRepository;
     private final HistoriaClinicaRepository historiaClinicaRepository;
+    private final HistoriaClinicaService  historiaClinicaService;
 
     @GetMapping("/{curp}")
     public ResponseEntity<Map<String, Object>> findHistoriaClinicaByCurp(@PathVariable String curp) {
@@ -82,5 +80,94 @@ public class HistoriaClinicaController {
         return ResponseEntity.ok(historiaClinicaRepository.findAll());
     }
 
+    @GetMapping("/id/{idHistoriaClinica}")
+    public ResponseEntity<Map<String, Object>> findHistoriaClinicaById(
+            @PathVariable Integer idHistoriaClinica) {
+
+        HistoriaClinica hc = historiaClinicaService.findById(idHistoriaClinica);
+
+        Map<String, Object> historiaClinica = new LinkedHashMap<>();
+
+        historiaClinica.put("idHistoriaClinica", hc.getIdHistoriaClinica());
+        historiaClinica.put("curp", hc.getPaciente().getCURP());
+        historiaClinica.put("historiaClinica", hc);
+
+        historiaClinica.put("paciente", hc.getPaciente());
+        historiaClinica.put("antecedentesNoPatologicos", hc.getAntecedentesNoPatologicos());
+        historiaClinica.put("signosVitales", hc.getSignosVitales());
+        historiaClinica.put("cabezaCuello", hc.getCabezaCuello());
+        historiaClinica.put("estomatognatico", hc.getExploracionEstomatognatico());
+        historiaClinica.put("tejidosBlandos", hc.getTejidosBlandos());
+        historiaClinica.put("tutor", hc.getTutor());
+        historiaClinica.put("diagnosticoTratamiento", hc.getDiagnosticoTratamiento());
+        historiaClinica.put("firma", hc.getFirma());
+
+        historiaClinica.put(
+                "antecedentes",
+                antecedentesRepository.findByHistoriaClinica_IdHistoriaClinica(idHistoriaClinica)
+        );
+
+        historiaClinica.put("evolucionPaciente",evolucionPacienteRepository.findByHistoriaClinica_IdHistoriaClinica(idHistoriaClinica) );
+
+        historiaClinica.put(
+                "fotosInicio",
+                fotosInicioRepository.findByHistoriaClinica_IdHistoriaClinica(idHistoriaClinica)
+        );
+
+        return ResponseEntity.ok(historiaClinica);
+    }
+
+    @GetMapping("/paciente/{curp}")
+    public ResponseEntity<List<HistoriaClinica>> findHistoriasPorPaciente(
+            @PathVariable String curp) {
+
+        String curpNormalizada = curp.trim().toUpperCase();
+
+        List<HistoriaClinica> historias =
+                historiaClinicaService.findAllByPaciente_Curp(curpNormalizada);
+
+        return ResponseEntity.ok(historias);
+    }
+
+    @GetMapping("/usuario/{matricula}")
+    public ResponseEntity<List<HistoriaClinica>> findByUsuario(
+            @PathVariable String matricula) {
+
+        List<HistoriaClinica> historias =
+                historiaClinicaRepository.findByUsuario_Matricula(matricula);
+
+        return ResponseEntity.ok(historias);
+    }
+
+    @PutMapping("/{id}/enviar-revision")
+    public ResponseEntity<HistoriaClinica> enviarRevision(
+            @PathVariable Integer id) {
+
+        historiaClinicaService.validarHistoriaCompleta(id);
+
+        HistoriaClinica historia =
+                historiaClinicaService.cambiarEstatus(
+                        id,
+                        "REVISION"
+                );
+
+        return ResponseEntity.ok(historia);
+    }
+
+    @PutMapping("/{id}/aprobar")
+    public ResponseEntity<HistoriaClinica> aprobar(@PathVariable Integer id) {
+        HistoriaClinica historia =
+                historiaClinicaService.cambiarEstatus(id, "APROBADA");
+
+        return ResponseEntity.ok(historia);
+    }
+
+    @PutMapping("/{id}/rechazar")
+    public ResponseEntity<HistoriaClinica> rechazar(@PathVariable Integer id) {
+        HistoriaClinica historia =
+                historiaClinicaService.cambiarEstatus(id, "RECHAZADA");
+
+        return ResponseEntity.ok(historia);
+    }
 
 }
