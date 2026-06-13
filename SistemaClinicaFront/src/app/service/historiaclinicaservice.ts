@@ -14,4 +14,13 @@ export class HistoriaClinicaService {
   getHistoriaClinicaPorCurp(curp: string): Observable<any> {
     return this.http.get<any>(`${this.api}/${curp}`);
   }
+
+  getHistoriasPorEstatus(estatus: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/estatus/${estatus}`);
+  }
+
+  getTodasHistorias(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/todas`);
+  }
+
 }

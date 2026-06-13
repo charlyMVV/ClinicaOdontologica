@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import { PeriodoService } from '../../service/periodo';
 import { AuthService } from '../../service/auth';
 import { Router } from '@angular/router';
+import { HistoriaClinicaService } from '../../service/historiaclinicaservice';
 
 @Component({
   selector: 'app-usuarios-list',
@@ -31,12 +32,18 @@ export class UsuariosList implements OnInit {
   modoEdicion: boolean = false;
   usuarios: Usuario[] = [];
 
-  nombreUsuarioLogueado: string = ''; // 👤 Nombre del usuario logueado
+  historiasTodas: any[] = [];
+  historiasRevision: any[] = [];
+  historiasAprobadas: any[] = [];
+  filtroHistorias: string = '';
+
+  nombreUsuarioLogueado: string = ''; // Nombre del usuario logueado
 
   constructor(
     private usuarioService: UsuarioService,
     private periodoService: PeriodoService,
     private authService: AuthService,
+    private historiaClinicaService: HistoriaClinicaService,
     private router: Router
   ) { }
 
@@ -44,7 +51,7 @@ export class UsuariosList implements OnInit {
     this.listUsuarios();
     this.obtenerPeriodos();
     this.nombreUsuarioLogueado = sessionStorage.getItem('nombre') || 'Usuario';
-
+    this.cargarHistoriasClinicas();
   }
   
   puedeSalir(): Promise<boolean> {
@@ -350,5 +357,48 @@ export class UsuariosList implements OnInit {
   abrirEstudiantes(): void {
     this.resetForm();
   }
+
+  cargarHistoriasClinicas(): void {
+    this.historiaClinicaService.getTodasHistorias().subscribe({
+      next: (data) => {
+        console.log('TODAS:', data);
+        this.historiasTodas = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar todas las historias:', err);
+      }
+    });
+
+    this.historiaClinicaService.getHistoriasPorEstatus('REVISION').subscribe({
+      next: (data) => {
+        console.log('REVISION:', data);
+        this.historiasRevision = data;
+      }
+    });
+
+    this.historiaClinicaService.getHistoriasPorEstatus('APROBADA').subscribe({
+      next: (data) => {
+        console.log('APROBADAS:', data);
+        this.historiasAprobadas = data;
+      }
+    });
+  }
+
+  historiasFiltradas(lista: any[]): any[] {
+    const filtro = this.filtroHistorias.toLowerCase();
+
+    return lista.filter(h =>
+      h.usuario?.matricula?.toLowerCase().includes(filtro) ||
+      h.usuario?.nombreUsuario?.toLowerCase().includes(filtro) ||
+      h.paciente?.nombrePaciente?.toLowerCase().includes(filtro) ||
+      h.paciente?.curp?.toLowerCase().includes(filtro)
+    );
+  }
+
+  verHistoriaClinica(hc: any): void {
+    const curp = hc.paciente?.curp || hc.paciente?.CURP;
+    this.router.navigate(['/historia-clinica', curp]);
+  }
+
 
 }
