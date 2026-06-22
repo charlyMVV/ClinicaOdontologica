@@ -33,70 +33,73 @@
       </button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="heredo-tab" data-bs-toggle="tab" data-bs-target="#heredo" type="button" role="tab">
+      <button class="nav-link" id="heredo-tab" data-bs-toggle="tab" data-bs-target="#heredo" type="button" role="tab" [disabled]="!pacienteGuardado">
         🧬 Antecedentes patológicos heredo familiares
       </button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="personales-tab" data-bs-toggle="tab" data-bs-target="#personales" type="button"
+      <button class="nav-link" id="personales-tab" data-bs-toggle="tab" data-bs-target="#personales" type="button" [disabled]="!pacienteGuardado"
         role="tab">
         🩺 Antecedentes personales patológicos
       </button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="personalesnopat-tab" data-bs-toggle="tab" data-bs-target="#personalesnopat"
-        type="button" role="tab">
+        type="button" role="tab" [disabled]="!pacienteGuardado">
         🙎Antecedentes personales no patologicos
       </button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="vitales-tab" data-bs-toggle="tab" data-bs-target="#vitales" type="button" role="tab">
+      <button class="nav-link" id="vitales-tab" data-bs-toggle="tab" data-bs-target="#vitales" type="button" role="tab"
+      [disabled]="!pacienteGuardado">
         ❤️ Signos Vitales
       </button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="exploracion-tab" data-bs-toggle="tab" data-bs-target="#exploracion" type="button"
-        role="tab">
+        role="tab" [disabled]="!pacienteGuardado">
         🧠 Cabeza y Cuello
       </button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="estomatognatico-tab" data-bs-toggle="tab" data-bs-target="#estomatognatico"
-        type="button" role="tab">
+        type="button" role="tab" [disabled]="!pacienteGuardado">
         👄 Estomatognático
       </button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="tejidos-tab" data-bs-toggle="tab" data-bs-target="#tejidos" type="button" role="tab">
+      <button class="nav-link" id="tejidos-tab" data-bs-toggle="tab" data-bs-target="#tejidos" type="button" role="tab"
+      [disabled]="!pacienteGuardado">
         🧫 Tejidos Blandos
       </button>
     </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="tutor-tab" data-bs-toggle="tab" data-bs-target="#tutor" type="button" role="tab">
+    <li class="nav-item" role="presentation" *ngIf="esMayorEdad">
+      <button class="nav-link" id="tutor-tab" data-bs-toggle="tab" data-bs-target="#tutor" type="button" role="tab"
+      [disabled]="!pacienteGuardado">
         👥 Datos del Tutor
       </button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="diagnostico-tab" data-bs-toggle="tab" data-bs-target="#diagnostico" type="button"
-        role="tab">
+        role="tab" [disabled]="!pacienteGuardado">
         📝 Diagnóstico y Tratamiento
       </button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="evolucion-tab" data-bs-toggle="tab" data-bs-target="#evolucion" type="button"
-        role="tab">
+        role="tab" [disabled]="!pacienteGuardado">
         📈Evolución del paciente
       </button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="fotosInicio-tab" data-bs-toggle="tab" data-bs-target="#fotosInicio" type="button"
-        role="tab">
+        role="tab" [disabled]="!pacienteGuardado">
        📷 Fotos
       </button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="autorizacion-tab" data-bs-toggle="tab" data-bs-target="#autorizacion" type="button"
-        role="tab">
+        role="tab" [disabled]="!pacienteGuardado">
         ✅ Autorización
       </button>
     </li>
@@ -122,6 +125,7 @@
           <div class="col-md-4">
             <label for="sexo" class="form-label">Sexo</label>
             <select id="sexo" class="form-select" [(ngModel)]="sexo" name="sexo">
+              <option value="">Seleccione...</option>
               <option value="Masculino">Masculino</option>
               <option value="Femenino">Femenino</option>
             </select>
@@ -212,89 +216,139 @@
           <button type="submit" class="btn btn-primary" (click)="addDatosPaciente()">
             Guardar avances
           </button>
-          <button type="submit" class="btn btn-primary" (click)="listDatosPaciente()">
+          <!-- <button type="button" class="btn btn-primary" (click)="listDatosPaciente()">
             mostrar
-          </button>
+          </button> -->
         </div>
       </form>
     </div>
 
-    <!-- Antecedentes patologicos heredofamiliares -->
+   <div class="tab-pane fade" id="heredo" role="tabpanel">
+  <form class="tab-content mt-3">
+    <div class="tab-pane fade show active" id="heredo-content" role="tabpanel">
 
-    <div class="tab-pane fade" id="heredo" role="tabpanel">
-      <form class="tab-content mt-3">
-        <div class="tab-pane fade show active" id="heredo" role="tabpanel">
+      <div class="form-section mb-3">
+        <p><strong>Nota:</strong> Especificar familiares en línea directa.</p>
+      </div>
 
-          <div class="form-section mb-3">
-            <p><strong>Nota:</strong> Especificar familiares en línea directa.</p>
+      <div class="row g-3">
+        <div class="col-md-4 mb-3" *ngFor="let antecedente of antecedentesHeredofamiliaresList; let i = index">
+
+          <label>{{ antecedente.descripcionAntecedentes }}</label>
+
+          <select
+            class="form-select"
+            [ngClass]="{ 'is-invalid': !antecedente.respuesta || antecedente.respuesta.trim() === '' }"
+            [(ngModel)]="antecedente.respuesta"
+            name="heredoRespuesta{{i}}"
+            required>
+
+            <option value="">Seleccione...</option>
+            <option value="Sí">Sí</option>
+            <option value="No">No</option>
+          </select>
+
+          <div
+            *ngIf="!antecedente.respuesta || antecedente.respuesta.trim() === ''"
+            class="invalid-feedback d-block">
+            Debe seleccionar una respuesta.
           </div>
 
-          <div class="row g-3">
-            <div class="col-md-4 mb-3" *ngFor="let antecedente of antecedentesHeredofamiliaresList; let i = index">
+          <input
+            type="text"
+            class="form-control mt-1"
+            placeholder="Detalle"
+            [(ngModel)]="antecedente.detalle"
+            name="heredoDetalle{{i}}"
+            [ngClass]="{
+              'is-invalid': antecedente.respuesta === 'Sí' && (!antecedente.detalle || antecedente.detalle.trim() === '')
+            }">
 
-              <label>{{ antecedente.descripcionAntecedentes }}</label>
-
-              <select class="form-select" [ngClass]="{ 'is-invalid': antecedente.respuesta === '' }"
-                [(ngModel)]="antecedente.respuesta" name="respuesta{{i}}" required>
-                <option value="">Seleccione...</option>
-                <option value="Sí">Sí</option>
-                <option value="No">No</option>
-              </select>
-
-              <div *ngIf="antecedente.respuesta === ''" class="invalid-feedback d-block">
-                Debe seleccionar una respuesta.
-              </div>
-
-              <input type="text" class="form-control mt-1" placeholder="Detalle" [(ngModel)]="antecedente.detalle"
-                name="detalle{{i}}">
-
-            </div>
+          <div
+            *ngIf="antecedente.respuesta === 'Sí' && (!antecedente.detalle || antecedente.detalle.trim() === '')"
+            class="invalid-feedback d-block">
+            Debe especificar el detalle.
           </div>
-          <div class="text-end mt-4">
-            <button type="submit" class="btn btn-primary" (click)="addAntecedentesHeredofamiliares()">
-              Guardar avances
-            </button>
-          </div>
+
         </div>
-      </form>
-    </div>
+      </div>
 
-
-    <!-- Antecedentes patologicos personales -->
-
-    <div class="tab-pane fade" id="personales" role="tabpanel">
-      <form class="tab-content mt-3">
-        <div class="tab-pane fade show active" id="heredo" role="tabpanel">
-
-          <div class="form-section mb-1">
-            <p><strong>Nota:</strong> Especificar.</p>
-          </div>
-
-          <div class="row g-3">
-            <div class="col-md-4 mb-3" *ngFor="let antecedentesP of antecedentesPersonales; let i = index">
-              <label>{{ antecedentesP.descripcionAntecedentes }}</label>
-              <select class="form-select" [ngClass]="{ 'is-invalid': antecedentesP.respuesta === '' }"
-                [(ngModel)]="antecedentesP.respuesta" name="respuesta{{i}}" required>
-                <option value="">Seleccione...</option>
-                <option value="Sí">Sí</option>
-                <option value="No">No</option>
-              </select>
-              <div *ngIf="antecedentesP.respuesta === ''" class="invalid-feedback d-block">
-                Debe seleccionar una respuesta.
-              </div>
-              <input type="text" class="form-control mt-1" placeholder="Detalle" [(ngModel)]="antecedentesP.detalle"
-                name="detalle{{i}}">
-            </div>
-          </div>
-          <div class="text-end mt-4">
-            <button type="submit" class="btn btn-primary" (click)="addAntecedentesPersonales()">
-              Guardar avances
-            </button>
-          </div>
-        </div>
-      </form>
+      <div class="text-end mt-4">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="addAntecedentesHeredofamiliares()">
+          Guardar avances
+        </button>
+      </div>
 
     </div>
+  </form>
+</div>
+
+
+<div class="tab-pane fade" id="personales" role="tabpanel">
+  <form class="tab-content mt-3">
+    <div class="tab-pane fade show active" id="personales-content" role="tabpanel">
+
+      <div class="form-section mb-1">
+        <p><strong>Nota:</strong> Especificar.</p>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-4 mb-3" *ngFor="let antecedentesP of antecedentesPersonales; let i = index">
+
+          <label>{{ antecedentesP.descripcionAntecedentes }}</label>
+
+          <select
+            class="form-select"
+            [ngClass]="{ 'is-invalid': !antecedentesP.respuesta || antecedentesP.respuesta.trim() === '' }"
+            [(ngModel)]="antecedentesP.respuesta"
+            name="personalRespuesta{{i}}"
+            required>
+
+            <option value="">Seleccione...</option>
+            <option value="Sí">Sí</option>
+            <option value="No">No</option>
+          </select>
+
+          <div
+            *ngIf="!antecedentesP.respuesta || antecedentesP.respuesta.trim() === ''"
+            class="invalid-feedback d-block">
+            Debe seleccionar una respuesta.
+          </div>
+
+          <input
+            type="text"
+            class="form-control mt-1"
+            placeholder="Detalle"
+            [(ngModel)]="antecedentesP.detalle"
+            name="personalDetalle{{i}}"
+            [ngClass]="{
+              'is-invalid': antecedentesP.respuesta === 'Sí' && (!antecedentesP.detalle || antecedentesP.detalle.trim() === '')
+            }">
+
+          <div
+            *ngIf="antecedentesP.respuesta === 'Sí' && (!antecedentesP.detalle || antecedentesP.detalle.trim() === '')"
+            class="invalid-feedback d-block">
+            Debe especificar el detalle.
+          </div>
+
+        </div>
+      </div>
+
+      <div class="text-end mt-4">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="addAntecedentesPersonales()">
+          Guardar avances
+        </button>
+      </div>
+
+    </div>
+  </form>
+</div>
 
     <!--antecedentes personales no patologicos -->
     <div class="tab-pane fade" id="personalesnopat" role="tabpanel">
@@ -308,6 +362,7 @@
           <div class="col-md-4">
             <label for="auxiliares">usa auxiliares de higiene bucal?</label>
             <select id="auxiliares" class="form-select" [(ngModel)]="usaAuxiliaresHigiene" name="usaAuxiliaresHigiene">
+              <option value="">Seleccione...</option>
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
@@ -328,6 +383,7 @@
           <div class="col-md-3">
             <label>¿Tiene Cartilla de vacunación?</label>
             <select id="cartilla" class="form-select" [(ngModel)]="cartillaVacunacion" name="cartillaVacunacion">
+              <option value="">Seleccione...</option>
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
@@ -335,6 +391,7 @@
           <div class="col-md-3">
             <label>¿Tiene el esquema Completo?</label>
             <select id="esquema" class="form-select" [(ngModel)]="esquemaCompleto" name="esquemaCompleto">
+              <option value="">Seleccione...</option>
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
@@ -348,6 +405,7 @@
             <label>Antecedentes alergicos</label>
             <select id="antecedentesAlergicos" class="form-select" [(ngModel)]="antecedentesAlergicos"
               name="antecedentesAlergicos">
+              <option value="">Seleccione...</option>
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
@@ -381,6 +439,7 @@
           <div class="col-md-3">
             <label>¿Consume golosinas entre comidas?</label>
             <select id="golosinas" class="form-select" [(ngModel)]="golosinas" name="golosinas">
+              <option value="">Seleccione...</option>
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
@@ -388,6 +447,7 @@
           <div class="col-md-3">
             <label>Adicciones</label>
             <select id="adicciones" class="form-select" [(ngModel)]="tieneAdicciones" name="tieneAdicciones">
+              <option value="">Seleccione...</option>
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
@@ -409,6 +469,7 @@
             <label>¿Ha sido hospitalizado?</label>
             <select id="hospitalizacion" class="form-select" [(ngModel)]="haSidoHospitalizado"
               name="haSidoHospitalizado">
+              <option value="">Seleccione...</option>
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
@@ -430,6 +491,7 @@
           <div class="col-md-3">
             <label>¿Ha sido anestesiado?</label>
             <select id="anestesiado" class="form-select" [(ngModel)]="haSidoAnestesiado" name="haSidoAnestesiado">
+              <option value="">Seleccione...</option>
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
@@ -438,6 +500,7 @@
             <label>¿Ha recibido transfusión?</label>
             <select id="transfusion" class="form-select" [(ngModel)]="haRecibidoTransfusion"
               name="haRecibidoTransfusion">
+              <option value="">Seleccione...</option>
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
@@ -446,6 +509,7 @@
             <label>¿Tatuajes o perforaciones?</label>
             <select id="tatuajesperforaciones" class="form-select" [(ngModel)]="haRecibidoPerforaciones"
               name="haRecibidoPerforaciones">
+              <option value="">Seleccione...</option>
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
@@ -453,6 +517,7 @@
           <div class="col-md-3">
             <label>¿Intervensiones quirurgicas?</label>
             <select id="quirurgicas" class="form-select" [(ngModel)]="tieneIntervenciones" name="tieneIntervenciones">
+              <option value="">Seleccione...</option>
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
@@ -460,6 +525,7 @@
           <div class="col-md-4">
             <label>¿Consume algun medicamento?</label>
             <select id="medicamento" class="form-select" [(ngModel)]="consumeMedicamento" name="consumeMedicamento">
+              <option value="">Seleccione...</option>
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
@@ -467,13 +533,7 @@
           <div class="col-md-2">
             <label>¿Discapacidades?</label>
             <select id="discapacidades" class="form-select" [(ngModel)]="discapacidad" name="discapacidad">
-              <option value="Si">Si</option>
-              <option value="No">No</option>
-            </select>
-          </div>
-          <div class="col-md-2">
-            <label>¿Embarazo?</label>
-            <select id="Embarazo" class="form-select" [(ngModel)]="embarazo" name="embarazo">
+              <option value="">Seleccione...</option>
               <option value="Si">Si</option>
               <option value="No">No</option>
             </select>
@@ -482,6 +542,15 @@
             <label>¿Que parte del cuerpo?</label>
             <input type="text" class="form-control" [(ngModel)]="parteCuerpo" name="parteCuerpo">
           </div>
+          <div class="col-md-2">
+            <label>¿Embarazo?</label>
+            <select id="Embarazo" class="form-select" [(ngModel)]="embarazo" name="embarazo">
+              <option value="">Seleccione...</option>
+              <option value="Si">Si</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+
         </div>
         <div class="text-end mt-4">
           <button type="submit" class="btn btn-primary" (click)="addAntecedentesNoPatologicos()">
@@ -518,7 +587,7 @@
           </div>
         </div>
         <div class="text-end mt-4">
-          <button type="submit" class="btn btn-primary" (click)="addSignosVitales()">
+          <button type="button" class="btn btn-primary" (click)="addSignosVitales()">
             Guardar avances
           </button>
         </div>
@@ -741,12 +810,12 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="text-end mt-4">
-          <button type="submit" class="btn btn-primary" (click)="addCabezaCuello()">
-            Guardar avances
-          </button>
-        </div>
+          </div>
+          <div class="text-end mt-4">
+            <button type="button" class="btn btn-primary" (click)="addCabezaCuello()">
+              Guardar avances
+            </button>
+          </div>
       </form>
     </div>
 
@@ -857,13 +926,13 @@
                 </label>
               </div>
             </div>
-          </div>
-          <div class="text-end mt-4">
-            <button type="submit" class="btn btn-primary" (click)="addEstomatognatico()">
-              Guardar avances
-            </button>
-          </div>
-        </div>
+            </div>
+            <div class="text-end mt-4">
+              <button type="button" class="btn btn-primary" (click)="addEstomatognatico()">
+                Guardar avances
+              </button>
+            </div>
+            </div>
       </form>
     </div>
 
@@ -1042,9 +1111,9 @@
         </div>
       </div>
       <div class="text-end mt-4">
-        <button type="submit" class="btn btn-primary" (click)="addTejidosBlandos()">
-          Guardar avances
-        </button>
+      <button type="button" class="btn btn-primary" (click)="addTejidosBlandos()">
+        Guardar avances
+      </button>
       </div>
     </div>
 
@@ -1085,13 +1154,11 @@
         </div>
       </div>
       <div class="text-end mt-4">
-        <button type="submit" class="btn btn-primary" (click)="addTutor()">
+        <button type="button" class="btn btn-primary" (click)="addTutor()">
           Guardar avances
         </button>
       </div>
     </div>
-
-
 
 
     <!-- Diagnóstico y Tratamiento -->
@@ -1116,7 +1183,7 @@
         </div>
       </div>
       <div class="text-end mt-4">
-        <button type="submit" class="btn btn-primary" (click)="addDiagnosticoTratamiento()">
+        <button type="button" class="btn btn-primary" (click)="addDiagnosticoTratamiento()">
           Guardar avances
         </button>
       </div>
@@ -1138,7 +1205,7 @@
           name="comentarioControl"></textarea>
       </div>
       <div class="text-end mt-4">
-        <button type="submit" class="btn btn-primary" (click)="addEvolucion()">
+        <button type="button" class="btn btn-primary" (click)="addEvolucion()">
           Guardar avances
         </button>
       </div>
@@ -1182,7 +1249,8 @@
         </div>
       </div>
     </div>
-
+    
+ <!-- Fotos del paciente -->
 
     <div class="tab-pane fade" id="fotosInicio" role="tabpanel" aria-labelledby="fotosInicio-tab">
       <div class="card shadow p-4">

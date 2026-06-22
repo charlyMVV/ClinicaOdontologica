@@ -31,11 +31,6 @@ import { Fotosinicioservice } from '../../service/fotosinicioservice';
 import { Fotosinicio } from '../../fotosinicio';
 import { HistoriaClinicaService } from '../../service/historiaclinicaservice';
 
-
-
-
-
-
 @Component({
   selector: 'app-historia-clinica',
   standalone: false,
@@ -204,7 +199,7 @@ export class HistoriaClinica implements OnInit {
   previews: string[] = [];
   firmaPendiente: string | null = null;
 
-
+  pacienteGuardado: boolean = false;
 
 
   antecedentesHeredofamiliaresList = [
@@ -252,19 +247,22 @@ export class HistoriaClinica implements OnInit {
     }
   }
 
+  get esMayorEdad(): boolean {
+    return Number(this.edad) < 18;
+  }
 
   cargarHistoriaClinicaPorId(idHistoriaClinica: number): void {
-  this.historiaClinicaService.getHistoriaClinicaPorId(idHistoriaClinica).subscribe({
-    next: (historia) => {
-      this.idHistoriaClinica = historia.idHistoriaClinica;
-      this.aplicarHistoriaClinica(historia);
-      this.datosEditados = true;
-    },
-    error: (error) => {
-      console.error('Error al cargar la historia clinica:', error);
-    }
-  });
-}
+    this.historiaClinicaService.getHistoriaClinicaPorId(idHistoriaClinica).subscribe({
+      next: (historia) => {
+        this.idHistoriaClinica = historia.idHistoriaClinica;
+        this.aplicarHistoriaClinica(historia);
+        this.datosEditados = true;
+      },
+      error: (error) => {
+        console.error('Error al cargar la historia clinica:', error);
+      }
+    });
+  }
 
   constructor(
     private authService: AuthService,
@@ -311,6 +309,7 @@ export class HistoriaClinica implements OnInit {
 
   aplicarHistoriaClinica(historia: any): void {
     this.curp = historia?.curp || '';
+    this.pacienteGuardado = !!this.curp;
     this.aplicarDatosPaciente(historia?.paciente);
     this.aplicarAntecedentes(historia?.antecedentes || []);
     this.aplicarCampos(historia?.antecedentesNoPatologicos, [
@@ -443,111 +442,153 @@ export class HistoriaClinica implements OnInit {
       .trim();
   }
 
+private validarDatosPaciente(): boolean {
+  const faltantes: string[] = [];
 
+  if (!this.nombrePaciente?.trim()) faltantes.push('Nombre completo del paciente');
+  if (!this.curp?.trim()) faltantes.push('CURP');
+  if (!this.sexo?.trim()) faltantes.push('Sexo');
+  if (!this.edad) faltantes.push('Edad');
+  if (!this.fechaNacimiento) faltantes.push('Fecha de nacimiento');
+  if (!this.domicilio?.trim()) faltantes.push('Domicilio completo');
+  if (!this.telefonoCasa?.trim()) faltantes.push('Teléfono de casa/trabajo');
+  if (!this.telefonoCelular?.trim()) faltantes.push('Teléfono celular');
+  if (!this.religion?.trim()) faltantes.push('Religión');
+  if (!this.ocupacion?.trim()) faltantes.push('Ocupación');
+  if (!this.escolaridad?.trim()) faltantes.push('Escolaridad');
+  if (!this.estadoCivil?.trim()) faltantes.push('Estado civil');
+  if (!this.derechohabiente?.trim()) faltantes.push('Derechohabiente');
+  if (!this.medicoFamiliar?.trim()) faltantes.push('Nombre del médico familiar');
+  if (!this.numeroMedico?.trim()) faltantes.push('Teléfono del médico');
+  if (!this.ultimaConsulta?.trim()) faltantes.push('Fecha y motivo de la última consulta');
+
+  if (faltantes.length > 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Campos obligatorios',
+      html: `
+        Complete los siguientes datos del paciente:
+        <br><br>
+        ${faltantes.map(c => `• ${c}`).join('<br>')}
+      `,
+      confirmButtonText: 'Aceptar'
+    });
+
+    return false;
+  }
+
+  return true;
+}
 
 
   addDatosPaciente() {
-  Swal.fire({
-    title: '¿Estás seguro?',
-    text: 'Revise que todos los datos personales sean correctos.',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Sí, guardar',
-    cancelButtonText: 'Cancelar'
-  }).then((result) => {
+    if (!this.validarDatosPaciente()) {
+    return;
+  }
+  
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Revise que todos los datos personales sean correctos.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, guardar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
 
-    if (!result.isConfirmed) {
-      return;
-    }
-
-    const matricula = sessionStorage.getItem('matricula');
-
-    const datospaciente = new DatosPacientes(
-      this.nombrePaciente,
-      this.curp,
-      this.sexo,
-      this.edad,
-      this.fechaNacimiento,
-      this.domicilio,
-      this.telefonoCasa,
-      this.telefonoCelular,
-      this.religion,
-      this.ocupacion,
-      this.escolaridad,
-      this.estadoCivil,
-      this.derechohabiente,
-      this.medicoFamiliar,
-      this.numeroMedico,
-      this.ultimaConsulta
-    );
-
-    const payload = {
-      paciente: datospaciente,
-      matricula: matricula
-    };
-
-    this.datosService.existePacientePorCurp(this.curp).subscribe({
-      next: (existe) => {
-
-        if (existe) {
-
-          this.datosService.updateDatosPaciente(this.curp, datospaciente).subscribe({
-            next: () => {
-              Swal.fire({
-                title: '¡Actualizado!',
-                text: 'Los datos del paciente fueron actualizados correctamente.',
-                icon: 'success',
-                confirmButtonText: 'OK'
-              });
-            },
-            error: (err) => {
-              console.error(err);
-              Swal.fire({
-                title: 'Error',
-                text: 'Ocurrió un error al actualizar el paciente.',
-                icon: 'error',
-                confirmButtonText: 'OK'
-              });
-            }
-          });
-
-        } else {
-
-          this.datosService.createDatosPaciente(payload).subscribe({
-            next: () => {
-              Swal.fire({
-                title: '¡Guardado!',
-                text: 'Los datos del paciente fueron guardados exitosamente, puedes continuar a la siguiente sección.',
-                icon: 'success',
-                confirmButtonText: 'OK'
-              });
-            },
-            error: (err) => {
-              console.error(err);
-              Swal.fire({
-                title: 'Error',
-                text: 'Ocurrió un error al guardar el paciente.',
-                icon: 'error',
-                confirmButtonText: 'OK'
-              });
-            }
-          });
-
-        }
-      },
-      error: (err) => {
-        console.error(err);
-        Swal.fire({
-          title: 'Error',
-          text: 'No se pudo verificar la existencia del paciente.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
+      if (!result.isConfirmed) {
+        return;
       }
-    });
 
-  });
-}
+      const matricula = sessionStorage.getItem('matricula');
+
+      const datospaciente = new DatosPacientes(
+        this.nombrePaciente,
+        this.curp,
+        this.sexo,
+        this.edad,
+        this.fechaNacimiento,
+        this.domicilio,
+        this.telefonoCasa,
+        this.telefonoCelular,
+        this.religion,
+        this.ocupacion,
+        this.escolaridad,
+        this.estadoCivil,
+        this.derechohabiente,
+        this.medicoFamiliar,
+        this.numeroMedico,
+        this.ultimaConsulta
+      );
+
+      const payload = {
+        paciente: datospaciente,
+        matricula: matricula
+      };
+
+      this.datosService.existePacientePorCurp(this.curp).subscribe({
+        next: (existe) => {
+
+          if (existe) {
+
+            this.datosService.updateDatosPaciente(this.curp, datospaciente).subscribe({
+              next: () => {
+                this.pacienteGuardado = true;
+                Swal.fire({
+                  title: '¡Actualizado!',
+                  text: 'Los datos del paciente fueron actualizados correctamente.',
+                  icon: 'success',
+                  confirmButtonText: 'OK'
+                });
+              },
+              error: (err) => {
+                console.error(err);
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Ocurrió un error al actualizar el paciente.',
+                  icon: 'error',
+                  confirmButtonText: 'OK'
+                });
+              }
+            });
+
+          } else {
+
+            this.datosService.createDatosPaciente(payload).subscribe({
+              next: () => {
+                this.pacienteGuardado = true;
+                Swal.fire({
+                  title: '¡Guardado!',
+                  text: 'Los datos del paciente fueron guardados exitosamente, puedes continuar a la siguiente sección.',
+                  icon: 'success',
+                  confirmButtonText: 'OK'
+                });
+              },
+              error: (err) => {
+                console.error(err);
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Ocurrió un error al guardar el paciente.',
+                  icon: 'error',
+                  confirmButtonText: 'OK'
+                });
+              }
+            });
+
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          Swal.fire({
+            title: 'Error',
+            text: 'No se pudo verificar la existencia del paciente.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        }
+      });
+
+    });
+  }
 
   listDatosPaciente() {
     this.datosService.getDatosPaciente().subscribe(
@@ -561,67 +602,140 @@ export class HistoriaClinica implements OnInit {
     );
   }
 
+  validarAntecedentes(lista: any[]): boolean {
+
+    const faltanRespuesta = lista.filter(
+      a => !a.respuesta || a.respuesta.trim() === ''
+    );
+
+    if (faltanRespuesta.length > 0) {
+
+      const mensaje = faltanRespuesta
+        .map(a => `• ${a.descripcionAntecedentes}`)
+        .join('<br>');
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Formulario incompleto',
+        html: `
+        Debe seleccionar una respuesta para los siguientes antecedentes:
+        <br><br>
+        ${mensaje}
+      `,
+        confirmButtonText: 'Aceptar'
+      });
+
+      return false;
+    }
+
+    const faltanDetalle = lista.filter(
+      a =>
+        a.respuesta === 'Sí' &&
+        (!a.detalle || a.detalle.trim() === '')
+    );
+
+    if (faltanDetalle.length > 0) {
+
+      const mensaje = faltanDetalle
+        .map(a => `• ${a.descripcionAntecedentes}`)
+        .join('<br>');
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Detalles faltantes',
+        html: `
+        Debe especificar un detalle para:
+        <br><br>
+        ${mensaje}
+      `,
+        confirmButtonText: 'Aceptar'
+      });
+
+      return false;
+    }
+
+    return true;
+  }
+
   addAntecedentesPersonales() {
-  if (!this.curp || this.curp.trim() === '') {
-    console.error('No se ha especificado la CURP del paciente.');
-    return;
-  }
-
-  const descripcionesFaltantes = this.antecedentesPersonales.filter(
-    (antecedente) => !antecedente.respuesta || antecedente.respuesta.trim() === ''
-  );
-
-  if (descripcionesFaltantes.length > 0) {
-    const listaDescripciones = descripcionesFaltantes
-      .map((a) => `- ${a.descripcionAntecedentes}`)
-      .join('\n');
-
-    console.warn('Faltan respuestas en:', listaDescripciones);
-    return;
-  }
-
-  const peticiones = this.antecedentesPersonales.map((antecedente) => {
-    return this.antecedentesService.upsertAntecedente({
-      ...antecedente,
-      curp: this.curp
-    });
-  });
-
-  forkJoin(peticiones).subscribe({
-    next: () => {
-      console.log('Antecedentes personales guardados/actualizados correctamente.');
-    },
-    error: (err) => {
-      console.error('Error al guardar/actualizar antecedentes personales:', err);
+    if (!this.curp || this.curp.trim() === '') {
+      console.error('No se ha especificado la CURP del paciente.');
+      return;
     }
-  });
-}
 
+    if (!this.validarAntecedentes(this.antecedentesPersonales)) {
+      return;
+    }
 
+    const peticiones = this.antecedentesPersonales.map((antecedente) => {
+      return this.antecedentesService.upsertAntecedente({
+        ...antecedente,
+        curp: this.curp
+      });
+    });
 
- addAntecedentesHeredofamiliares() {
-  if (!this.curp || this.curp.trim() === '') {
-    console.error('No se ha especificado la CURP del paciente.');
-    return;
+    forkJoin(peticiones).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Guardado correctamente',
+          text: 'Los antecedentes personales fueron guardados correctamente.',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      },
+      error: (err) => {
+        console.error(err);
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Ocurrió un error al guardar la información.'
+        });
+      }
+    });
   }
 
-  const peticiones = this.antecedentesHeredofamiliaresList.map((antecedente) => {
-    return this.antecedentesService.upsertAntecedente({
-      ...antecedente,
-      curp: this.curp
-    });
-  });
 
-  forkJoin(peticiones).subscribe({
-    next: () => {
-      console.log('Antecedentes heredofamiliares guardados/actualizados correctamente.');
-    },
-    error: (err) => {
-      console.error('Error al guardar/actualizar antecedentes heredofamiliares:', err);
+
+  addAntecedentesHeredofamiliares() {
+    if (!this.curp || this.curp.trim() === '') {
+      console.error('No se ha especificado la CURP del paciente.');
+      return;
     }
-  });
-}
 
+    if (!this.validarAntecedentes(this.antecedentesHeredofamiliaresList)) {
+      return;
+    }
+
+    const peticiones = this.antecedentesHeredofamiliaresList.map((antecedente) => {
+      return this.antecedentesService.upsertAntecedente({
+        ...antecedente,
+        curp: this.curp
+      });
+    });
+
+    forkJoin(peticiones).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Guardado correctamente',
+          text: 'Los antecedentes heredofamiliares fueron guardados correctamente.',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      },
+      error: (err) => {
+        console.error(err);
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Ocurrió un error al guardar la información.'
+        });
+      }
+    });
+  }
 
   puedeSalir(): Promise<boolean> {
     if (!this.datosEditados) {
@@ -689,451 +803,1138 @@ export class HistoriaClinica implements OnInit {
     this.ultimaConsulta = "";
   }
 
+
+  private validarAntecedentesNoPatologicos(): boolean {
+
+    const faltantes: string[] = [];
+
+    if (!this.frecuenciaLavadoDientes?.trim())
+      faltantes.push('Frecuencia de lavado de dientes');
+
+    if (!this.usaAuxiliaresHigiene)
+      faltantes.push('Uso de auxiliares de higiene');
+
+    if (!this.grupoSanguineo?.trim())
+      faltantes.push('Grupo sanguíneo');
+
+    if (!this.factorRh?.trim())
+      faltantes.push('Factor RH');
+
+    if (!this.cartillaVacunacion)
+      faltantes.push('Cartilla de vacunación');
+
+    if (!this.esquemaCompleto)
+      faltantes.push('Esquema completo');
+
+    if (!this.antecedentesAlergicos)
+      faltantes.push('Antecedentes alérgicos');
+
+    if (!this.golosinas)
+      faltantes.push('Consumo de golosinas');
+
+    if (!this.tieneAdicciones)
+      faltantes.push('Adicciones');
+
+    if (!this.haSidoHospitalizado)
+      faltantes.push('Hospitalización');
+
+    if (!this.haSidoAnestesiado)
+      faltantes.push('Anestesia');
+
+    if (!this.haRecibidoTransfusion)
+      faltantes.push('Transfusiones');
+
+    if (!this.haRecibidoPerforaciones)
+      faltantes.push('Tatuajes o perforaciones');
+
+    if (!this.tieneIntervenciones)
+      faltantes.push('Intervenciones quirúrgicas');
+
+    if (!this.consumeMedicamento)
+      faltantes.push('Consume medicamento');
+
+    if (!this.discapacidad)
+      faltantes.push('Discapacidad');
+
+    if (!this.embarazo)
+      faltantes.push('Embarazo');
+
+    if (faltantes.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos obligatorios',
+        html: faltantes.map(x => `• ${x}`).join('<br>')
+      });
+
+      return false;
+    }
+
+    if (
+      this.usaAuxiliaresHigiene === 'Si' &&
+      !this.tiposAuxiliaresHigiene?.trim()
+    ) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Información faltante',
+        text: 'Debe especificar cuáles auxiliares de higiene utiliza.'
+      });
+      return false;
+    }
+
+    if (
+      this.esquemaCompleto === 'No' &&
+      !this.vacunasFaltantes?.trim()
+    ) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Información faltante',
+        text: 'Debe especificar cuáles vacunas faltan.'
+      });
+      return false;
+    }
+
+    if (
+      this.antecedentesAlergicos === 'Si' &&
+      !this.cualAlergicos?.trim()
+    ) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Información faltante',
+        text: 'Debe especificar las alergias.'
+      });
+      return false;
+    }
+
+    if (
+      this.tieneAdicciones === 'Si' &&
+      !this.tabaco?.trim() &&
+      !this.alcohol?.trim() &&
+      !this.otrasAdicciones?.trim()
+    ) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Información faltante',
+        text: 'Debe indicar alguna adicción.'
+      });
+      return false;
+    }
+
+    if (
+      this.haSidoHospitalizado === 'Si'
+    ) {
+
+      if (!this.fechaHospitalizacion) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Información faltante',
+          text: 'Debe indicar la fecha de hospitalización.'
+        });
+        return false;
+      }
+
+      if (!this.motivoHospitalizacion?.trim()) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Información faltante',
+          text: 'Debe indicar el motivo de hospitalización.'
+        });
+        return false;
+      }
+    }
+
+    if (
+      this.discapacidad === 'Si' &&
+      !this.parteCuerpo?.trim()
+    ) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Información faltante',
+        text: 'Debe indicar qué parte del cuerpo presenta discapacidad.'
+      });
+      return false;
+    }
+
+    return true;
+  }
+
   addAntecedentesNoPatologicos() {
-  if (!this.curp || this.curp.trim() === '') {
-    console.error('No se ha especificado la CURP del paciente.');
-    return;
+    if (!this.curp || this.curp.trim() === '') {
+      console.error('No se ha especificado la CURP del paciente.');
+      return;
+    }
+
+    if (!this.validarAntecedentesNoPatologicos()) {
+      return;
+    }
+
+    const antecedentesNoPatologicos = new Nopatologicos(
+      this.curp,
+      this.frecuenciaLavadoDientes,
+      this.usaAuxiliaresHigiene,
+      this.tiposAuxiliaresHigiene,
+      this.grupoSanguineo,
+      this.factorRh,
+      this.cartillaVacunacion,
+      this.esquemaCompleto,
+      this.vacunasFaltantes,
+      this.antecedentesAlergicos,
+      this.cualAlergicos,
+      this.antibioticos,
+      this.analgesicos,
+      this.anestesicos,
+      this.alimentos,
+      this.otrasAlergias,
+      this.tieneAdicciones,
+      this.golosinas,
+      this.tabaco,
+      this.alcohol,
+      this.otrasAdicciones,
+      this.haSidoHospitalizado,
+      this.fechaHospitalizacion,
+      this.motivoHospitalizacion,
+      this.padecimientoActual,
+      this.haSidoAnestesiado,
+      this.haRecibidoTransfusion,
+      this.haRecibidoPerforaciones,
+      this.consumeMedicamento,
+      this.embarazo,
+      this.discapacidad,
+      this.tieneIntervenciones,
+      this.parteCuerpo
+    );
+
+    this.nopatologicosService.existenAntecedentesPorCurp(this.curp).subscribe({
+      next: (existe) => {
+
+        if (existe) {
+
+          this.nopatologicosService
+            .updateAntecedentesnoPatologicos(this.curp, antecedentesNoPatologicos)
+            .subscribe({
+              next: () => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Guardado correctamente',
+                  text: 'Los antecedentes no patológicos fueron actualizados correctamente.',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              },
+              error: (err) => {
+                console.error(err);
+
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Ocurrió un error al actualizar los antecedentes no patológicos.'
+                });
+              }
+            });
+
+        } else {
+
+          this.nopatologicosService
+            .createAntecedentesnoPatologicos(antecedentesNoPatologicos)
+            .subscribe({
+              next: () => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Guardado correctamente',
+                  text: 'Los antecedentes no patológicos fueron guardados correctamente.',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              },
+              error: (err) => {
+                console.error(err);
+
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Ocurrió un error al guardar los antecedentes no patológicos.'
+                });
+              }
+            });
+
+        }
+
+      },
+      error: (err) => {
+
+        console.error(err);
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No fue posible verificar si existen antecedentes no patológicos para este paciente.'
+        });
+
+      }
+    });
   }
 
-  const antecedentesNoPatologicos = new Nopatologicos(
-    this.curp,
-    this.frecuenciaLavadoDientes,
-    this.usaAuxiliaresHigiene,
-    this.tiposAuxiliaresHigiene,
-    this.grupoSanguineo,
-    this.factorRh,
-    this.cartillaVacunacion,
-    this.esquemaCompleto,
-    this.vacunasFaltantes,
-    this.antecedentesAlergicos,
-    this.cualAlergicos,
-    this.antibioticos,
-    this.analgesicos,
-    this.anestesicos,
-    this.alimentos,
-    this.otrasAlergias,
-    this.tieneAdicciones,
-    this.golosinas,
-    this.tabaco,
-    this.alcohol,
-    this.otrasAdicciones,
-    this.haSidoHospitalizado,
-    this.fechaHospitalizacion,
-    this.motivoHospitalizacion,
-    this.padecimientoActual,
-    this.haSidoAnestesiado,
-    this.haRecibidoTransfusion,
-    this.haRecibidoPerforaciones,
-    this.consumeMedicamento,
-    this.embarazo,
-    this.discapacidad,
-    this.tieneIntervenciones,
-    this.parteCuerpo
-  );
+  private validarSignosVitales(): boolean {
 
-  this.nopatologicosService.existenAntecedentesPorCurp(this.curp).subscribe({
-    next: (existe) => {
-      if (existe) {
-        this.nopatologicosService
-          .updateAntecedentesnoPatologicos(this.curp, antecedentesNoPatologicos)
-          .subscribe({
-            next: () => {
-              console.log('Antecedentes no patológicos actualizados correctamente.');
-            },
-            error: (err) => {
-              console.error('Error al actualizar antecedentes no patológicos:', err);
-            }
-          });
-      } else {
-        this.nopatologicosService
-          .createAntecedentesnoPatologicos(antecedentesNoPatologicos)
-          .subscribe({
-            next: () => {
-              console.log('Antecedentes no patológicos guardados correctamente.');
-            },
-            error: (err) => {
-              console.error('Error al guardar antecedentes no patológicos:', err);
-            }
-          });
-      }
-    },
-    error: (err) => {
-      console.error('Error al verificar existencia de antecedentes no patológicos:', err);
+    const campos = [
+      { valor: this.temperatura, nombre: 'Temperatura' },
+      { valor: this.frecuenciaRespiratoria, nombre: 'Frecuencia respiratoria' },
+      { valor: this.tensionArterial, nombre: 'Tensión arterial' },
+      { valor: this.frecuenciaCardiaca, nombre: 'Frecuencia cardíaca' },
+      { valor: this.peso, nombre: 'Peso' },
+      { valor: this.talla, nombre: 'Talla' }
+    ];
+
+    const faltante = campos.find(
+      c => !c.valor || c.valor.toString().trim() === ''
+    );
+
+    if (faltante) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campo obligatorio',
+        text: `Debe capturar: ${faltante.nombre}`
+      });
+      return false;
     }
-  });
-}
 
-addSignosVitales() {
-  if (!this.curp || this.curp.trim() === '') {
-    console.error('No se ha especificado la CURP del paciente.');
-    return;
+    return true;
   }
 
-  const signosVitales = {
-    temperatura: this.temperatura,
-    frecuenciaRespiratoria: this.frecuenciaRespiratoria,
-    tensionArterial: this.tensionArterial,
-    frecuenciaCardiaca: this.frecuenciaCardiaca,
-    peso: this.peso,
-    talla: this.talla,
-    curp: this.curp
-  };
-
-  this.signosvitalesService.existenSignosVitalesPorCurp(this.curp).subscribe({
-    next: (existe) => {
-      if (existe) {
-        this.signosvitalesService
-          .updateSignosVitales(this.curp, signosVitales)
-          .subscribe({
-            next: () => {
-              console.log('Signos vitales actualizados correctamente.');
-            },
-            error: (err) => {
-              console.error('Error al actualizar signos vitales:', err);
-            }
-          });
-      } else {
-        this.signosvitalesService
-          .createSignosVitales(signosVitales)
-          .subscribe({
-            next: () => {
-              console.log('Signos vitales guardados correctamente.');
-            },
-            error: (err) => {
-              console.error('Error al guardar signos vitales:', err);
-            }
-          });
-      }
-    },
-    error: (err) => {
-      console.error('Error al verificar existencia de signos vitales:', err);
+  addSignosVitales() {
+    if (!this.curp || this.curp.trim() === '') {
+      console.error('No se ha especificado la CURP del paciente.');
+      return;
     }
-  });
-}
 
+    if (!this.validarSignosVitales()) {
+      return;
+    }
+
+
+    const signosVitales = {
+      temperatura: this.temperatura,
+      frecuenciaRespiratoria: this.frecuenciaRespiratoria,
+      tensionArterial: this.tensionArterial,
+      frecuenciaCardiaca: this.frecuenciaCardiaca,
+      peso: this.peso,
+      talla: this.talla,
+      curp: this.curp
+    };
+
+    this.signosvitalesService.existenSignosVitalesPorCurp(this.curp).subscribe({
+      next: (existe) => {
+
+        if (existe) {
+
+          this.signosvitalesService
+            .updateSignosVitales(this.curp, signosVitales)
+            .subscribe({
+              next: () => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Actualizado',
+                  text: 'Los signos vitales fueron actualizados correctamente.',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              },
+              error: (err) => {
+                console.error(err);
+
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Ocurrió un error al actualizar los signos vitales.'
+                });
+              }
+            });
+
+        } else {
+
+          this.signosvitalesService
+            .createSignosVitales(signosVitales)
+            .subscribe({
+              next: () => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Guardado',
+                  text: 'Los signos vitales fueron guardados correctamente.',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              },
+              error: (err) => {
+                console.error(err);
+
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Ocurrió un error al guardar los signos vitales.'
+                });
+              }
+            });
+
+        }
+
+      },
+      error: (err) => {
+
+        console.error(err);
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No fue posible verificar los signos vitales del paciente.'
+        });
+
+      }
+    });
+  }
+
+  private validarCabezaCuello(): boolean {
+    const faltantes: string[] = [];
+
+    const cabezaSeleccionada =
+      this.cabezaCuello.exostosis ||
+      this.cabezaCuello.endotosis;
+
+    const craneoSeleccionado =
+      this.cabezaCuello.dolicocefalico ||
+      this.cabezaCuello.mesocefalico ||
+      this.cabezaCuello.branquicefalico;
+
+    const caraSeleccionada =
+      this.cabezaCuello.asimetriaTransversal ||
+      this.cabezaCuello.asimetriaLongitudinal;
+
+    const perfilSeleccionado =
+      this.cabezaCuello.perfilConcavo ||
+      this.cabezaCuello.perfilConvexo ||
+      this.cabezaCuello.perfilRecto;
+
+    const pielSeleccionada =
+      this.cabezaCuello.pielNormal ||
+      this.cabezaCuello.pielPalida ||
+      this.cabezaCuello.pielCianotica ||
+      this.cabezaCuello.pielEnrojecida;
+
+    const musculosSeleccionado =
+      this.cabezaCuello.musculosHipotonicos ||
+      this.cabezaCuello.musculosHipertonicos ||
+      this.cabezaCuello.musculosEspasticos;
+
+    if (!cabezaSeleccionada) faltantes.push('Cabeza');
+    if (!craneoSeleccionado) faltantes.push('Cráneo');
+    if (!caraSeleccionada) faltantes.push('Cara / Asimetrías');
+    if (!perfilSeleccionado) faltantes.push('Perfil');
+    if (!pielSeleccionada) faltantes.push('Piel');
+    if (!musculosSeleccionado) faltantes.push('Músculos');
+
+    if (faltantes.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        html: `
+        Debe seleccionar al menos una opción en:
+        <br><br>
+        ${faltantes.map(x => `• ${x}`).join('<br>')}
+      `,
+        confirmButtonText: 'Aceptar'
+      });
+
+      return false;
+    }
+
+    return true;
+  }
 
   addCabezaCuello() {
-  if (!this.curp || this.curp.trim() === '') {
-    console.error('No se ha especificado la CURP del paciente.');
-    return;
+    if (!this.curp || this.curp.trim() === '') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'CURP faltante',
+        text: 'No se ha especificado la CURP del paciente.'
+      });
+      return;
+    }
+
+    if (!this.validarCabezaCuello()) {
+      return;
+    }
+
+    const cabezaCuello = new Cabezacuello(
+      this.cabezaCuello.exostosis,
+      this.cabezaCuello.endotosis,
+      this.cabezaCuello.dolicocefalico,
+      this.cabezaCuello.mesocefalico,
+      this.cabezaCuello.branquicefalico,
+      this.cabezaCuello.asimetriaTransversal,
+      this.cabezaCuello.asimetriaLongitudinal,
+      this.cabezaCuello.perfilConcavo,
+      this.cabezaCuello.perfilConvexo,
+      this.cabezaCuello.perfilRecto,
+      this.cabezaCuello.pielNormal,
+      this.cabezaCuello.pielPalida,
+      this.cabezaCuello.pielCianotica,
+      this.cabezaCuello.pielEnrojecida,
+      this.cabezaCuello.musculosHipotonicos,
+      this.cabezaCuello.musculosHipertonicos,
+      this.cabezaCuello.musculosEspasticos,
+      this.cabezaCuello.cadenaGanglionar,
+      this.curp
+    );
+
+    this.cabezacuelloService.existenCabezaCuelloPorCurp(this.curp).subscribe({
+      next: (existe) => {
+        if (existe) {
+          this.cabezacuelloService
+            .updateExploracionCabezaCuello(this.curp, cabezaCuello)
+            .subscribe({
+              next: () => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Actualizado',
+                  text: 'Los datos de cabeza y cuello fueron actualizados correctamente.',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              },
+              error: (err) => {
+                console.error(err);
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Ocurrió un error al actualizar cabeza y cuello.'
+                });
+              }
+            });
+        } else {
+          this.cabezacuelloService
+            .createExploracionCabezaCuello(cabezaCuello)
+            .subscribe({
+              next: () => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Guardado',
+                  text: 'Los datos de cabeza y cuello fueron guardados correctamente.',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              },
+              error: (err) => {
+                console.error(err);
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Ocurrió un error al guardar cabeza y cuello.'
+                });
+              }
+            });
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo verificar si ya existe cabeza y cuello para este paciente.'
+        });
+      }
+    });
   }
 
-  const cabezaCuello = new Cabezacuello(
-    this.cabezaCuello.exostosis,
-    this.cabezaCuello.endotosis,
-    this.cabezaCuello.dolicocefalico,
-    this.cabezaCuello.mesocefalico,
-    this.cabezaCuello.branquicefalico,
-    this.cabezaCuello.asimetriaTransversal,
-    this.cabezaCuello.asimetriaLongitudinal,
-    this.cabezaCuello.perfilConcavo,
-    this.cabezaCuello.perfilConvexo,
-    this.cabezaCuello.perfilRecto,
-    this.cabezaCuello.pielNormal,
-    this.cabezaCuello.pielPalida,
-    this.cabezaCuello.pielCianotica,
-    this.cabezaCuello.pielEnrojecida,
-    this.cabezaCuello.musculosHipotonicos,
-    this.cabezaCuello.musculosHipertonicos,
-    this.cabezaCuello.musculosEspasticos,
-    this.cabezaCuello.cadenaGanglionar,
-    this.curp
-  );
+  private validarEstomatognatico(): boolean {
+    const seleccionado =
+      this.estomatognatico.ruidos ||
+      this.estomatognatico.lateralidad ||
+      this.estomatognatico.apertura ||
+      this.estomatognatico.chasquidos ||
+      this.estomatognatico.crepitacion ||
+      this.estomatognatico.dificultadAbrirboca ||
+      this.estomatognatico.dolorAberturaLateralidad ||
+      this.estomatognatico.fatigaDolorMuscular ||
+      this.estomatognatico.disminuicionAbertura ||
+      this.estomatognatico.desviacionAberturaCierre;
 
-  this.cabezacuelloService.existenCabezaCuelloPorCurp(this.curp).subscribe({
-    next: (existe) => {
-      if (existe) {
-        this.cabezacuelloService
-          .updateExploracionCabezaCuello(this.curp, cabezaCuello)
-          .subscribe({
-            next: () => {
-              console.log('Datos de Cabeza y Cuello actualizados exitosamente.');
-            },
-            error: (err) => {
-              console.error('Error al actualizar datos de Cabeza y Cuello:', err);
-            }
-          });
-      } else {
-        this.cabezacuelloService
-          .createExploracionCabezaCuello(cabezaCuello)
-          .subscribe({
-            next: () => {
-              console.log('Datos de Cabeza y Cuello guardados exitosamente.');
-            },
-            error: (err) => {
-              console.error('Error al guardar datos de Cabeza y Cuello:', err);
-            }
-          });
-      }
-    },
-    error: (err) => {
-      console.error('No se pudo verificar si ya existen registros para la CURP:', err);
+    if (!seleccionado) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        text: 'Debe seleccionar al menos una opción en exploración del aparato estomatognático.',
+        confirmButtonText: 'Aceptar'
+      });
+
+      return false;
     }
-  });
-}
+
+    return true;
+  }
 
   addEstomatognatico() {
-  if (!this.curp || this.curp.trim() === '') {
-    console.error('No se ha especificado la CURP del paciente.');
-    return;
+    if (!this.curp || this.curp.trim() === '') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'CURP faltante',
+        text: 'No se ha especificado la CURP del paciente.'
+      });
+      return;
+    }
+
+    const estomatognatico = new Estomatognatico(
+      this.estomatognatico.ruidos,
+      this.estomatognatico.lateralidad,
+      this.estomatognatico.apertura,
+      this.estomatognatico.chasquidos,
+      this.estomatognatico.crepitacion,
+      this.estomatognatico.dificultadAbrirboca,
+      this.estomatognatico.dolorAberturaLateralidad,
+      this.estomatognatico.fatigaDolorMuscular,
+      this.estomatognatico.disminuicionAbertura,
+      this.estomatognatico.desviacionAberturaCierre,
+      this.curp
+    );
+
+    this.estomatognaticoService.existenEstomatognaticoCurp(this.curp).subscribe({
+      next: (existe) => {
+        if (existe) {
+          this.estomatognaticoService
+            .updateEstomatognatico(this.curp, estomatognatico)
+            .subscribe({
+              next: () => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Actualizado',
+                  text: 'Los datos del sistema estomatognático fueron actualizados correctamente.',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              },
+              error: (err) => {
+                console.error(err);
+
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Ocurrió un error al actualizar el sistema estomatognático.'
+                });
+              }
+            });
+        } else {
+          this.estomatognaticoService
+            .createEstomatognatico(estomatognatico)
+            .subscribe({
+              next: () => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Guardado',
+                  text: 'Los datos del sistema estomatognático fueron guardados correctamente.',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              },
+              error: (err) => {
+                console.error(err);
+
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Ocurrió un error al guardar el sistema estomatognático.'
+                });
+              }
+            });
+        }
+      },
+      error: (err) => {
+        console.error(err);
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo verificar si ya existen datos del sistema estomatognático.'
+        });
+      }
+    });
   }
 
-  const estomatognatico = new Estomatognatico(
-    this.estomatognatico.ruidos,
-    this.estomatognatico.lateralidad,
-    this.estomatognatico.apertura,
-    this.estomatognatico.chasquidos,
-    this.estomatognatico.crepitacion,
-    this.estomatognatico.dificultadAbrirboca,
-    this.estomatognatico.dolorAberturaLateralidad,
-    this.estomatognatico.fatigaDolorMuscular,
-    this.estomatognatico.disminuicionAbertura,
-    this.estomatognatico.desviacionAberturaCierre,
-    this.curp
-  );
 
-  this.estomatognaticoService.existenEstomatognaticoCurp(this.curp).subscribe({
-    next: (existe) => {
 
-      if (existe) {
 
-        this.estomatognaticoService
-          .updateEstomatognatico(this.curp, estomatognatico)
-          .subscribe({
-            next: () => {
-              console.log('Datos del sistema estomatognático actualizados exitosamente.');
-            },
-            error: (err) => {
-              console.error('Error al actualizar datos del sistema estomatognático:', err);
-            }
-          });
+  private validarTejidosBlandos(): boolean {
+    const campos = [
+      { valor: this.ganglios, nombre: 'Ganglios' },
+      { valor: this.glandulasSalivales, nombre: 'Glándulas salivales' },
+      { valor: this.labioExterno, nombre: 'Labio externo' },
+      { valor: this.bordeBermellon, nombre: 'Borde bermellón' },
+      { valor: this.labioInterno, nombre: 'Labio interno' },
+      { valor: this.comisuras, nombre: 'Comisuras' },
+      { valor: this.carrillos, nombre: 'Carrillos' },
+      { valor: this.fondoDeSaco, nombre: 'Fondo de saco' },
+      { valor: this.frenillos, nombre: 'Frenillos' },
+      { valor: this.lenguaTercioMedio, nombre: 'Lengua tercio medio' },
+      { valor: this.paladarDuro, nombre: 'Paladar duro' },
+      { valor: this.paladarBlando, nombre: 'Paladar blando' },
+      { valor: this.istmoBucofaringe, nombre: 'Istmo bucofaríngeo' },
+      { valor: this.lenguaDorso, nombre: 'Lengua dorso' },
+      { valor: this.lenguaBordes, nombre: 'Lengua bordes' },
+      { valor: this.lenguaVentral, nombre: 'Lengua ventral' },
+      { valor: this.pisoBoca, nombre: 'Piso de la boca' },
+      { valor: this.dientes, nombre: 'Dientes' },
+      { valor: this.mucosaAlveolar, nombre: 'Mucosa del borde alveolar' },
+      { valor: this.encia, nombre: 'Encía' }
+    ];
 
-      } else {
+    const faltantes = campos.filter(
+      c => !c.valor || c.valor.toString().trim() === ''
+    );
 
-        this.estomatognaticoService
-          .createEstomatognatico(estomatognatico)
-          .subscribe({
-            next: () => {
-              console.log('Datos del sistema estomatognático guardados exitosamente.');
-            },
-            error: (err) => {
-              console.error('Error al guardar datos del sistema estomatognático:', err);
-            }
-          });
+    if (faltantes.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos obligatorios',
+        html: `
+        Debe capturar descripción en:
+        <br><br>
+        ${faltantes.map(c => `• ${c.nombre}`).join('<br>')}
+      `,
+        confirmButtonText: 'Aceptar'
+      });
 
-      }
-    },
-    error: (err) => {
-      console.error(
-        'No se pudo verificar si ya existen registros del sistema estomatognático para la CURP:',
-        err
-      );
+      return false;
     }
-  });
-}
 
-
-
+    return true;
+  }
 
   addTejidosBlandos() {
-  if (!this.curp || this.curp.trim() === '') {
-    console.error('No se ha especificado la CURP del paciente.');
-    return;
-  }
+    if (!this.curp || this.curp.trim() === '') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'CURP faltante',
+        text: 'No se ha especificado la CURP del paciente.'
+      });
+      return;
+    }
 
-  const tejidosBlandos = new Tejidosblandos(
-    this.ganglios,
-    this.glandulasSalivales,
-    this.labioExterno,
-    this.bordeBermellon,
-    this.labioInterno,
-    this.comisuras,
-    this.carrillos,
-    this.fondoDeSaco,
-    this.frenillos,
-    this.lenguaTercioMedio,
-    this.paladarDuro,
-    this.paladarBlando,
-    this.istmoBucofaringe,
-    this.lenguaDorso,
-    this.lenguaBordes,
-    this.lenguaVentral,
-    this.pisoBoca,
-    this.dientes,
-    this.mucosaAlveolar,
-    this.encia,
-    this.curp
-  );
+    if (!this.validarTejidosBlandos()) {
+      return;
+    }
 
-  this.tejidosblandosService.existenTejidosBlandosPorCurp(this.curp).subscribe({
-    next: (existe) => {
-      if (existe) {
-        this.tejidosblandosService.updateTejidosBlandos(this.curp, tejidosBlandos).subscribe({
-          next: () => {
-            console.log('Datos de tejidos blandos actualizados exitosamente.');
-          },
-          error: (err) => {
-            console.error('Error al actualizar datos de tejidos blandos:', err);
-          }
-        });
-      } else {
-        this.tejidosblandosService.createTejidosBlandos(tejidosBlandos).subscribe({
-          next: () => {
-            console.log('Datos de tejidos blandos guardados exitosamente.');
-          },
-          error: (err) => {
-            console.error('Error al guardar datos de tejidos blandos:', err);
-          }
+    const tejidosBlandos = new Tejidosblandos(
+      this.ganglios,
+      this.glandulasSalivales,
+      this.labioExterno,
+      this.bordeBermellon,
+      this.labioInterno,
+      this.comisuras,
+      this.carrillos,
+      this.fondoDeSaco,
+      this.frenillos,
+      this.lenguaTercioMedio,
+      this.paladarDuro,
+      this.paladarBlando,
+      this.istmoBucofaringe,
+      this.lenguaDorso,
+      this.lenguaBordes,
+      this.lenguaVentral,
+      this.pisoBoca,
+      this.dientes,
+      this.mucosaAlveolar,
+      this.encia,
+      this.curp
+    );
+
+    this.tejidosblandosService.existenTejidosBlandosPorCurp(this.curp).subscribe({
+      next: (existe) => {
+        if (existe) {
+          this.tejidosblandosService.updateTejidosBlandos(this.curp, tejidosBlandos).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Actualizado',
+                text: 'Los datos de tejidos blandos fueron actualizados correctamente.',
+                timer: 2000,
+                showConfirmButton: false
+              });
+            },
+            error: (err) => {
+              console.error(err);
+
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al actualizar tejidos blandos.'
+              });
+            }
+          });
+        } else {
+          this.tejidosblandosService.createTejidosBlandos(tejidosBlandos).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Guardado',
+                text: 'Los datos de tejidos blandos fueron guardados correctamente.',
+                timer: 2000,
+                showConfirmButton: false
+              });
+            },
+            error: (err) => {
+              console.error(err);
+
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al guardar tejidos blandos.'
+              });
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error(err);
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo verificar si ya existen datos de tejidos blandos.'
         });
       }
-    },
-    error: (err) => {
-      console.error('No se pudo verificar si ya existen registros de tejidos blandos para la CURP:', err);
+    });
+  }
+  private validarTutor(): boolean {
+    const faltantes: string[] = [];
+
+    if (!this.nombreTutor?.trim()) {
+      faltantes.push('Nombre del tutor');
     }
-  });
-}
+
+    if (!this.edadTutor) {
+      faltantes.push('Edad del tutor');
+    }
+
+    if (!this.domicilioTutor?.trim()) {
+      faltantes.push('Domicilio completo');
+    }
+
+    if (!this.telefonoCasaTutor?.trim()) {
+      faltantes.push('Teléfono de casa o trabajo');
+    }
+
+    if (!this.celularTutor?.trim()) {
+      faltantes.push('Teléfono celular');
+    }
+
+    if (faltantes.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos obligatorios',
+        html: `
+        Complete los siguientes datos del tutor:
+        <br><br>
+        ${faltantes.map(c => `• ${c}`).join('<br>')}
+      `,
+        confirmButtonText: 'Aceptar'
+      });
+
+      return false;
+    }
+
+    return true;
+  }
+
 
   addTutor() {
-  if (!this.curp || this.curp.trim() === '') {
-    console.error('No se ha especificado la CURP del paciente.');
-    return;
+    if (!this.curp || this.curp.trim() === '') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'CURP faltante',
+        text: 'No se ha especificado la CURP del paciente.'
+      });
+      return;
+    }
+
+    if (!this.validarTutor()) {
+      return;
+    }
+
+    const tutor = new Tutor(
+      this.nombreTutor,
+      this.edadTutor,
+      this.domicilioTutor,
+      this.telefonoCasaTutor,
+      this.celularTutor,
+      this.curp
+    );
+
+    this.tutorService.existeTutorPorCurp(this.curp).subscribe({
+      next: (existe) => {
+        if (existe) {
+          this.tutorService.updateTutor(this.curp, tutor).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Actualizado',
+                text: 'Los datos del tutor fueron actualizados correctamente.',
+                timer: 2000,
+                showConfirmButton: false
+              });
+            },
+            error: (err) => {
+              console.error(err);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al actualizar los datos del tutor.'
+              });
+            }
+          });
+        } else {
+          this.tutorService.createTutor(tutor).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Guardado',
+                text: 'Los datos del tutor fueron guardados correctamente.',
+                timer: 2000,
+                showConfirmButton: false
+              });
+            },
+            error: (err) => {
+              console.error(err);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al guardar los datos del tutor.'
+              });
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo verificar si ya existen datos del tutor.'
+        });
+      }
+    });
   }
 
-  const tutor = new Tutor(
-    this.nombreTutor,
-    this.edadTutor,
-    this.domicilioTutor,
-    this.telefonoCasaTutor,
-    this.celularTutor,
-    this.curp
-  );
+  private validarDiagnosticoTratamiento(): boolean {
+    const faltantes: string[] = [];
 
-  this.tutorService.existeTutorPorCurp(this.curp).subscribe({
-    next: (existe) => {
-
-      if (existe) {
-
-        this.tutorService.updateTutor(this.curp, tutor).subscribe({
-          next: () => {
-            console.log('Datos del tutor actualizados exitosamente.');
-          },
-          error: (err) => {
-            console.error('Error al actualizar datos del tutor:', err);
-          }
-        });
-
-      } else {
-
-        this.tutorService.createTutor(tutor).subscribe({
-          next: () => {
-            console.log('Datos del tutor guardados exitosamente.');
-          },
-          error: (err) => {
-            console.error('Error al guardar datos del tutor:', err);
-          }
-        });
-
-      }
-    },
-    error: (err) => {
-      console.error(
-        'No se pudo verificar si ya existen registros del tutor para la CURP:',
-        err
-      );
+    if (!this.interpretacionRx?.trim()) {
+      faltantes.push('Interpretación RX');
     }
-  });
-}
 
+    if (!this.diagnostico?.trim()) {
+      faltantes.push('Diagnóstico');
+    }
+
+    if (!this.resumenTratamiento?.trim()) {
+      faltantes.push('Resumen del tratamiento');
+    }
+
+    if (faltantes.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos obligatorios',
+        html: `
+        Complete los siguientes campos:
+        <br><br>
+        ${faltantes.map(c => `• ${c}`).join('<br>')}
+      `,
+        confirmButtonText: 'Aceptar'
+      });
+
+      return false;
+    }
+
+    return true;
+  }
 
   addDiagnosticoTratamiento() {
-  if (!this.curp || this.curp.trim() === '') {
-    console.error('No se ha especificado la CURP del paciente.');
-    return;
-  }
-
-  const diagnostico = new Diagnosticotratamiento(
-    this.interpretacionRx,
-    this.diagnostico,
-    this.resumenTratamiento,
-    this.curp
-  );
-
-  this.diagnosticotratamientoService.existenDiagnosticoTratamientoCurp(this.curp).subscribe({
-    next: (existe) => {
-      if (existe) {
-        this.diagnosticotratamientoService
-          .updateDiagnosticoTratamiento(this.curp, diagnostico)
-          .subscribe({
-            next: () => {
-              console.log('Datos de diagnóstico y tratamiento actualizados exitosamente.');
-            },
-            error: (err) => {
-              console.error('Error al actualizar diagnóstico y tratamiento:', err);
-            }
-          });
-      } else {
-        this.diagnosticotratamientoService
-          .createDiagnosticoTratamiento(diagnostico)
-          .subscribe({
-            next: () => {
-              console.log('Datos de diagnóstico y tratamiento guardados exitosamente.');
-            },
-            error: (err) => {
-              console.error('Error al guardar diagnóstico y tratamiento:', err);
-            }
-          });
-      }
-    },
-    error: (err) => {
-      console.error('Error al verificar registros de diagnóstico para la CURP:', err);
+    if (!this.curp || this.curp.trim() === '') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'CURP faltante',
+        text: 'No se ha especificado la CURP del paciente.'
+      });
+      return;
     }
-  });
-}
+
+    if (!this.validarDiagnosticoTratamiento()) {
+      return;
+    }
+
+    const diagnostico = new Diagnosticotratamiento(
+      this.interpretacionRx,
+      this.diagnostico,
+      this.resumenTratamiento,
+      this.curp
+    );
+
+    this.diagnosticotratamientoService.existenDiagnosticoTratamientoCurp(this.curp).subscribe({
+      next: (existe) => {
+        if (existe) {
+          this.diagnosticotratamientoService
+            .updateDiagnosticoTratamiento(this.curp, diagnostico)
+            .subscribe({
+              next: () => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Actualizado',
+                  text: 'Los datos de diagnóstico y tratamiento fueron actualizados correctamente.',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              },
+              error: (err) => {
+                console.error(err);
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Ocurrió un error al actualizar diagnóstico y tratamiento.'
+                });
+              }
+            });
+        } else {
+          this.diagnosticotratamientoService
+            .createDiagnosticoTratamiento(diagnostico)
+            .subscribe({
+              next: () => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Guardado',
+                  text: 'Los datos de diagnóstico y tratamiento fueron guardados correctamente.',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              },
+              error: (err) => {
+                console.error(err);
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Ocurrió un error al guardar diagnóstico y tratamiento.'
+                });
+              }
+            });
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo verificar si ya existen datos de diagnóstico y tratamiento.'
+        });
+      }
+    });
+  }
+  private validarEvolucion(): boolean {
+    const faltantes: string[] = [];
+
+    if (!this.fecha) {
+      faltantes.push('Fecha');
+    }
+
+    if (!this.comentarioControl?.trim()) {
+      faltantes.push('Evolución del paciente');
+    }
+
+    if (faltantes.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos obligatorios',
+        html: `
+        Complete los siguientes campos:
+        <br><br>
+        ${faltantes.map(c => `• ${c}`).join('<br>')}
+      `,
+        confirmButtonText: 'Aceptar'
+      });
+
+      return false;
+    }
+
+    return true;
+  }
 
   addEvolucion() {
-  if (!this.curp || this.curp.trim() === '') {
-    console.error('No se ha especificado la CURP del paciente.');
-    return;
-  }
-
-  const evolucion = new Evolucion(
-    this.fecha,
-    this.comentarioControl,
-    this.curp
-  );
-
-  this.evolucionService.existenEvolucionPorCurp(this.curp).subscribe({
-    next: (existe) => {
-
-      if (existe) {
-
-        this.evolucionService.updateEvolucion(this.curp, evolucion).subscribe({
-          next: () => {
-            console.log('Datos de evolución actualizados exitosamente.');
-          },
-          error: (err) => {
-            console.error('Error al actualizar evolución:', err);
-          }
-        });
-
-      } else {
-
-        this.evolucionService.createEvolucion(evolucion).subscribe({
-          next: () => {
-            console.log('Datos de evolución guardados exitosamente.');
-          },
-          error: (err) => {
-            console.error('Error al guardar evolución:', err);
-          }
-        });
-
-      }
-    },
-    error: (err) => {
-      console.error('Error al verificar registros de evolución para la CURP:', err);
+    if (!this.curp || this.curp.trim() === '') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'CURP faltante',
+        text: 'No se ha especificado la CURP del paciente.'
+      });
+      return;
     }
-  });
-}
+
+    if (!this.validarEvolucion()) {
+      return;
+    }
+
+    const evolucion = new Evolucion(
+      this.fecha,
+      this.comentarioControl,
+      this.curp
+    );
+
+    this.evolucionService.existenEvolucionPorCurp(this.curp).subscribe({
+      next: (existe) => {
+        if (existe) {
+          this.evolucionService.updateEvolucion(this.curp, evolucion).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Actualizado',
+                text: 'Los datos de evolución fueron actualizados correctamente.',
+                timer: 2000,
+                showConfirmButton: false
+              });
+            },
+            error: (err) => {
+              console.error(err);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al actualizar la evolución.'
+              });
+            }
+          });
+        } else {
+          this.evolucionService.createEvolucion(evolucion).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Guardado',
+                text: 'Los datos de evolución fueron guardados correctamente.',
+                timer: 2000,
+                showConfirmButton: false
+              });
+            },
+            error: (err) => {
+              console.error(err);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al guardar la evolución.'
+              });
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo verificar si ya existen datos de evolución.'
+        });
+      }
+    });
+  }
 
   ngAfterViewInit() {
     this.signaturePad = new SignaturePad(this.canvasRef.nativeElement);
@@ -1194,124 +1995,154 @@ addSignosVitales() {
   }
 
   fotosGuardadas = false;
+  private validarFotosInicio(): boolean {
+    if (!this.curp || this.curp.trim() === '') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'CURP faltante',
+        text: 'No se ha especificado la CURP del paciente.'
+      });
+      return false;
+    }
 
-addFotosInicio(): void {
-  if (!this.curp || this.listaFotos.length === 0) {
-    return;
+    if (!this.listaFotos || this.listaFotos.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Imagen requerida',
+        text: 'Debe seleccionar al menos una foto del paciente.'
+      });
+      return false;
+    }
+
+    return true;
   }
 
-  const fotosParaGuardar = this.listaFotos.map(
-    f => new Fotosinicio(f.fotos, this.curp)
-  );
-
-  console.log('Enviando fotos:', fotosParaGuardar);
-
-  this.fotosInicioService.guardarMultiplesFotos(fotosParaGuardar).subscribe({
-    next: () => {
-      this.fotosGuardadas = true;
-
-      // Solo limpia selección visual, NO la CURP
-      this.listaFotos = [];
-      this.previews = [];
-    },
-    error: (err) => {
-      console.error('Error al guardar imágenes', err);
+  addFotosInicio(): void {
+    if (!this.validarFotosInicio()) {
+      return;
     }
-  });
-}
+
+    const fotosParaGuardar = this.listaFotos.map(
+      f => new Fotosinicio(f.fotos, this.curp)
+    );
+
+    this.fotosInicioService.guardarMultiplesFotos(fotosParaGuardar).subscribe({
+      next: () => {
+        this.fotosGuardadas = true;
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Guardado',
+          text: 'Las fotos del paciente fueron guardadas correctamente.',
+          timer: 2000,
+          showConfirmButton: false
+        });
+
+        this.listaFotos = [];
+        this.previews = [];
+      },
+      error: (err) => {
+        console.error(err);
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Ocurrió un error al guardar las fotos del paciente.'
+        });
+      }
+    });
+  }
 
   validarHistoriaCompletaFront(): string[] {
-  const faltantes: string[] = [];
+    const faltantes: string[] = [];
 
-  if (!this.curp || this.curp.trim() === '') {
-    faltantes.push('Datos del paciente');
+    if (!this.curp || this.curp.trim() === '') {
+      faltantes.push('Datos del paciente');
+    }
+
+    if (!this.antecedentesPersonales?.length || !this.antecedentesHeredofamiliaresList?.length) {
+      faltantes.push('Antecedentes personales y heredofamiliares');
+    }
+
+    if (!this.frecuenciaLavadoDientes || !this.grupoSanguineo || !this.factorRh) {
+      faltantes.push('Antecedentes no patológicos');
+    }
+
+    if (!this.temperatura || !this.frecuenciaRespiratoria || !this.tensionArterial || !this.frecuenciaCardiaca || !this.peso || !this.talla) {
+      faltantes.push('Signos vitales');
+    }
+
+    if (
+      !this.cabezaCuello.exostosis &&
+      !this.cabezaCuello.endotosis &&
+      !this.cabezaCuello.dolicocefalico &&
+      !this.cabezaCuello.mesocefalico &&
+      !this.cabezaCuello.branquicefalico &&
+      !this.cabezaCuello.asimetriaTransversal &&
+      !this.cabezaCuello.asimetriaLongitudinal &&
+      !this.cabezaCuello.perfilConcavo &&
+      !this.cabezaCuello.perfilConvexo &&
+      !this.cabezaCuello.perfilRecto &&
+      !this.cabezaCuello.pielNormal &&
+      !this.cabezaCuello.pielPalida &&
+      !this.cabezaCuello.pielCianotica &&
+      !this.cabezaCuello.pielEnrojecida &&
+      !this.cabezaCuello.musculosHipotonicos &&
+      !this.cabezaCuello.musculosHipertonicos &&
+      !this.cabezaCuello.musculosEspasticos &&
+      !this.cabezaCuello.cadenaGanglionar
+    ) {
+      faltantes.push('Cabeza y cuello');
+    }
+
+    // if (
+    //   !this.estomatognatico.ruidos &&
+    //   !this.estomatognatico.lateralidad &&
+    //   !this.estomatognatico.apertura &&
+    //   !this.estomatognatico.chasquidos &&
+    //   !this.estomatognatico.crepitacion &&
+    //   !this.estomatognatico.dificultadAbrirboca &&
+    //   !this.estomatognatico.dolorAberturaLateralidad &&
+    //   !this.estomatognatico.fatigaDolorMuscular &&
+    //   !this.estomatognatico.disminuicionAbertura &&
+    //   !this.estomatognatico.desviacionAberturaCierre
+    // ) {
+    //   faltantes.push('Sistema estomatognático');
+    // }
+
+    if (!this.ganglios || !this.glandulasSalivales) {
+      faltantes.push('Tejidos blandos');
+    }
+
+    if (!this.diagnostico || !this.resumenTratamiento) {
+      faltantes.push('Diagnóstico y tratamiento');
+    }
+
+    if (!this.hayFotos()) {
+      faltantes.push('Fotografías');
+    }
+
+    if (!this.hayFirma()) {
+      faltantes.push('Firma');
+    }
+    return faltantes;
   }
 
-  if (!this.antecedentesPersonales?.length || !this.antecedentesHeredofamiliaresList?.length) {
-    faltantes.push('Antecedentes personales y heredofamiliares');
+  hayFotos(): boolean {
+    return this.fotosGuardadas || this.listaFotos.length > 0 || this.previews.length > 0;
   }
 
-  if (!this.frecuenciaLavadoDientes || !this.grupoSanguineo || !this.factorRh) {
-    faltantes.push('Antecedentes no patológicos');
+  hayFirma(): boolean {
+    if (this.firmaPendiente) {
+      return true;
+    }
+
+    if (this.signaturePad && !this.signaturePad.isEmpty()) {
+      return true;
+    }
+
+    return false;
   }
-
-  if (!this.temperatura || !this.frecuenciaRespiratoria || !this.tensionArterial || !this.frecuenciaCardiaca || !this.peso || !this.talla) {
-    faltantes.push('Signos vitales');
-  }
-
-  if (
-    !this.cabezaCuello.exostosis &&
-    !this.cabezaCuello.endotosis &&
-    !this.cabezaCuello.dolicocefalico &&
-    !this.cabezaCuello.mesocefalico &&
-    !this.cabezaCuello.branquicefalico &&
-    !this.cabezaCuello.asimetriaTransversal &&
-    !this.cabezaCuello.asimetriaLongitudinal &&
-    !this.cabezaCuello.perfilConcavo &&
-    !this.cabezaCuello.perfilConvexo &&
-    !this.cabezaCuello.perfilRecto &&
-    !this.cabezaCuello.pielNormal &&
-    !this.cabezaCuello.pielPalida &&
-    !this.cabezaCuello.pielCianotica &&
-    !this.cabezaCuello.pielEnrojecida &&
-    !this.cabezaCuello.musculosHipotonicos &&
-    !this.cabezaCuello.musculosHipertonicos &&
-    !this.cabezaCuello.musculosEspasticos &&
-    !this.cabezaCuello.cadenaGanglionar
-  ) {
-    faltantes.push('Cabeza y cuello');
-  }
-
-  if (
-    !this.estomatognatico.ruidos &&
-    !this.estomatognatico.lateralidad &&
-    !this.estomatognatico.apertura &&
-    !this.estomatognatico.chasquidos &&
-    !this.estomatognatico.crepitacion &&
-    !this.estomatognatico.dificultadAbrirboca &&
-    !this.estomatognatico.dolorAberturaLateralidad &&
-    !this.estomatognatico.fatigaDolorMuscular &&
-    !this.estomatognatico.disminuicionAbertura &&
-    !this.estomatognatico.desviacionAberturaCierre
-  ) {
-    faltantes.push('Sistema estomatognático');
-  }
-
-  if (!this.ganglios || !this.glandulasSalivales) {
-    faltantes.push('Tejidos blandos');
-  }
-
-  if (!this.diagnostico || !this.resumenTratamiento) {
-    faltantes.push('Diagnóstico y tratamiento');
-  }
-
- if (!this.hayFotos()) {
-  faltantes.push('Fotografías');
-}
-
-if (!this.hayFirma()) {
-  faltantes.push('Firma');
-}
-  return faltantes;
-}
-
-hayFotos(): boolean {
-  return this.fotosGuardadas || this.listaFotos.length > 0 || this.previews.length > 0;
-}
-
-hayFirma(): boolean {
-  if (this.firmaPendiente) {
-    return true;
-  }
-
-  if (this.signaturePad && !this.signaturePad.isEmpty()) {
-    return true;
-  }
-
-  return false;
-}
-
-
 
   enviarHC() {
     const faltantes = this.validarHistoriaCompletaFront();
@@ -1394,6 +2225,4 @@ hayFirma(): boolean {
       }
     });
   }
-
-
 }
