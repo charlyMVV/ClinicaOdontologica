@@ -85,7 +85,7 @@
                       ❌ Rechazar
                     </button>
               
-                    <button class="btn btn-primary btn-sm btn-accion" (click)="verHistoriaClinica(hc)">  🔍 Ver
+                    <button class="btn btn-primary btn-sm btn-accion" (click)="generarPdf(hc)">  🔍 Ver
                     </button>
                   </td>
                 </tr>
@@ -125,7 +125,7 @@
                       <button class="btn btn-danger btn-sm btn-accion" (click)="rechazarHC(hc)">
                         ❌ Rechazar
                       </button>
-                      <button class="btn btn-primary btn-sm btn-accion" (click)="verHistoriaClinica(hc)">🔍 Ver</button>
+                      <button class="btn btn-primary btn-sm btn-accion" (click)="generarPdf(hc)">🔍 Ver</button>
                     </td>
                     </tr>
                 </tbody>
@@ -155,7 +155,7 @@
                     <td>{{ hc.tipoHistoriaClinica.descripcion }}</td>
                     <td>{{ hc.fechaCreacion | date:'yyyy-MM-dd' }}</td>
                     <td>
-                      <button class="btn btn-primary btn-sm btn-accion" (click)="verHistoriaClinica(hc)">🔍 Ver</button>
+                      <button class="btn btn-primary btn-sm btn-accion" (click)="generarPdf(hc)">🔍 Ver</button>
                     </td>
                   </tr>
                 </tbody>

@@ -395,9 +395,32 @@ export class UsuariosList implements OnInit {
     );
   }
 
-  verHistoriaClinica(hc: any): void {
-    const curp = hc.paciente?.curp || hc.paciente?.CURP;
-    this.router.navigate(['/historia-clinica', curp]);
+  generarPdf(hc: any): void {
+
+    this.historiaClinicaService.obtenerPdf(hc.idHistoriaClinica).subscribe({
+
+        next: (pdf) => {
+
+          const blob = new Blob(
+            [pdf],
+            { type: 'application/pdf' }
+          );
+
+          const url = window.URL.createObjectURL(blob);
+
+          window.open(url, '_blank');
+        },
+
+        error: (err) => {
+          console.error(err);
+
+          Swal.fire(
+            'Error',
+            'No se pudo generar el PDF.',
+            'error'
+          );
+        }
+      });
   }
 
   aprobarHC(hc: any): void {

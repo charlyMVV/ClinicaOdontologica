@@ -40,6 +40,4 @@ export class UsuarioService {
     return this.http.put<any>(`${this.api}/${idHistoriaClinica}/rechazar`, {});
   }
 
-
-
 }

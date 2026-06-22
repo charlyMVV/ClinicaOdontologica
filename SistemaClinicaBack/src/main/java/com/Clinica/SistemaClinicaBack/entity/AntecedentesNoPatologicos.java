@@ -8,6 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -40,7 +42,7 @@ public class AntecedentesNoPatologicos {
     private String alcohol;
     private String otrasAdicciones;
     private String haSidoHospitalizado;
-    private Date fechaHospitalizacion;
+    private LocalDate fechaHospitalizacion;
     private String motivoHospitalizacion;
     private String padecimientoActual;
     private String haSidoAnestesiado;
@@ -55,7 +57,7 @@ public class AntecedentesNoPatologicos {
     public AntecedentesNoPatologicos() {
     }
 
-    public AntecedentesNoPatologicos(int idAntecedentesNoPatologicos, String curp, String frecuenciaLavadoDientes, String usaAuxiliaresHigiene, String tiposAuxiliaresHigiene, String grupoSanguineo, String factorRh, String cartillaVacunacion, String esquemaCompleto, String vacunasFaltantes, String AntecedentesAlergicos, String cualAlergicos, String antibioticos, String analgesicos, String anestesicos, String alimentos, String otrasAlergias, String golosinas, String tieneAdicciones, String tabaco, String alcohol, String otrasAdicciones, String haSidoHospitalizado, Date fechaHospitalizacion, String motivoHospitalizacion, String padecimientoActual, String haSidoAnestesiado, String haRecibidoTransfusion, String haRecibidoPerforaciones, String consumeMedicamento, String embarazo, String discapacidad, String tieneIntervenciones, String parteCuerpo) {
+    public AntecedentesNoPatologicos(int idAntecedentesNoPatologicos, String curp, String frecuenciaLavadoDientes, String usaAuxiliaresHigiene, String tiposAuxiliaresHigiene, String grupoSanguineo, String factorRh, String cartillaVacunacion, String esquemaCompleto, String vacunasFaltantes, String AntecedentesAlergicos, String cualAlergicos, String antibioticos, String analgesicos, String anestesicos, String alimentos, String otrasAlergias, String golosinas, String tieneAdicciones, String tabaco, String alcohol, String otrasAdicciones, String haSidoHospitalizado, LocalDate fechaHospitalizacion, String motivoHospitalizacion, String padecimientoActual, String haSidoAnestesiado, String haRecibidoTransfusion, String haRecibidoPerforaciones, String consumeMedicamento, String embarazo, String discapacidad, String tieneIntervenciones, String parteCuerpo) {
         this.idAntecedentesNoPatologicos = idAntecedentesNoPatologicos;
         this.curp = curp;
         this.frecuenciaLavadoDientes = frecuenciaLavadoDientes;
@@ -280,11 +282,11 @@ public class AntecedentesNoPatologicos {
         this.haSidoHospitalizado = haSidoHospitalizado;
     }
 
-    public Date getFechaHospitalizacion() {
+    public LocalDate getFechaHospitalizacion() {
         return fechaHospitalizacion;
     }
 
-    public void setFechaHospitalizacion(Date fechaHospitalizacion) {
+    public void setFechaHospitalizacion(LocalDate fechaHospitalizacion) {
         this.fechaHospitalizacion = fechaHospitalizacion;
     }
 

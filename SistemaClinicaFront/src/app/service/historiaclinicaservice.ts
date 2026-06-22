@@ -45,4 +45,8 @@ export class HistoriaClinicaService {
   crearNuevaHistoriaClinica(payload: any): Observable<any> {
     return this.http.post<any>(`${this.api}/nueva`, payload);
   }
+
+  obtenerPdf(idHistoriaClinica: number): Observable<Blob> { 
+    return this.http.get(`${this.api}/${idHistoriaClinica}/pdf`, {responseType: 'blob'});
+  }
 }
