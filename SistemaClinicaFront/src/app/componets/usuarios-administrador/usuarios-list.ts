@@ -37,7 +37,11 @@ export class UsuariosList implements OnInit {
   historiasAprobadas: any[] = [];
   filtroHistorias: string = '';
 
-  nombreUsuarioLogueado: string = ''; // Nombre del usuario logueado
+  nombreUsuarioLogueado: string = '';
+
+  nombreClinica: string = '';
+  responsableClinica: string = '';
+  clinicas: any[] = [];
 
   constructor(
     private usuarioService: UsuarioService,
@@ -467,6 +471,56 @@ rechazarHC(hc: any): void {
           Swal.fire('Error', 'No se pudo rechazar la historia clínica.', 'error');
         }
       });
+    }
+  });
+}
+
+guardarClinica(): void {
+  if (!this.nombreClinica.trim() || !this.responsableClinica.trim()) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Campos obligatorios',
+      text: 'Debe capturar el nombre y responsable de la clínica.'
+    });
+    return;
+  }
+
+  const clinica = {
+    nombreClinica: this.nombreClinica,
+    responsableClinica: this.responsableClinica
+  };
+
+  this.historiaClinicaService.guardarClinica(clinica).subscribe({
+    next: () => {
+      Swal.fire({
+        icon: 'success',
+        title: 'Guardado',
+        text: 'La clínica fue registrada correctamente.',
+        timer: 2000,
+        showConfirmButton: false
+      });
+
+      this.nombreClinica = '';
+      this.responsableClinica = '';
+      this.listarClinicas();
+    },
+    error: (err) => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: err.error || 'Ocurrió un error al guardar la clínica.'
+      });
+    }
+  });
+}
+
+listarClinicas(): void {
+  this.historiaClinicaService.listarClinicas().subscribe({
+    next: (data) => {
+      this.clinicas = data;
+    },
+    error: (err) => {
+      console.error(err);
     }
   });
 }

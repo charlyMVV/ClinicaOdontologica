@@ -29,6 +29,13 @@
         data-bs-target="#estudiantes" type="button" (click)="abrirEstudiantes()">👩‍🎓 Estudiantes</button></li>
     <li class="nav-item"><button class="nav-link" id="periodo-tab" data-bs-toggle="pill" data-bs-target="#periodos"
         type="button">📆Periodo</button></li>
+  <li class="nav-item">
+  <button class="nav-link" id="clinicas-tab" data-bs-toggle="pill" data-bs-target="#clinicas" type="button"
+   (click)="listarClinicas()">
+
+    🏥 Clínicas
+  </button>
+</li>
   </ul>
 
   <div class="tab-content" id="adminTabContent">
@@ -249,6 +256,49 @@
         </table>
       </div>
     </div>
+    <div class="tab-pane fade" id="clinicas">
+  <div class="container mt-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h4 class="card-title mb-4">🏥 Agregar Clínica</h4>
+
+        <form (ngSubmit)="guardarClinica()" #formClinica="ngForm">
+          <div class="mb-3">
+            <label for="nombreClinica" class="form-label fw-semibold">Nombre de la clínica</label>
+            <input type="text" id="nombreClinica" name="nombreClinica" class="form-control" [(ngModel)]="nombreClinica"
+              required placeholder="Ej: Clínica IESIT" />
+          </div>
+
+          <div class="mb-3">
+            <label for="responsableClinica" class="form-label fw-semibold">Responsable de la clínica</label>
+            <input type="text" id="responsableClinica" name="responsableClinica" class="form-control"
+              [(ngModel)]="responsableClinica" required placeholder="Nombre del responsable" />
+          </div>
+
+          <button type="submit" class="btn btn-success">
+            📥 Guardar Clínica
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mt-4">
+      <div class="card-body">
+        <h5 class="card-title mb-3">📋 Clínicas Registradas</h5>
+
+        <ul class="list-group">
+          <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let c of clinicas">
+            <div>
+              <strong>{{ c.nombreClinica }}</strong><br>
+              <small>Responsable: {{ c.responsableClinica }}</small>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
   </div>
 
   <!-- Periodo -->
@@ -296,5 +346,9 @@
     </div>
   </div>
 </div>
+
+
+
+
 
 </div>

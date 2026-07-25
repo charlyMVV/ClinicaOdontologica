@@ -3,10 +3,19 @@
     <span class="me-3 fw-semibold text-white">
       👋 Bienvenido, {{ nombreUsuarioLogueado }}
     </span>
-    <button class="btn btn-sm d-flex align-items-center gap-1"
-      style="background-color: rgba(255, 0, 0, 0.829); color: white; font-weight: bold ; border: none;"
+    <span class="me-3 fw-semibold text-white" *ngIf="clinicaSeleccionada">
+      🏥 Clínica: {{ clinicaSeleccionada.nombreClinica }}
+    </span>
+    <button class="btn btn-sm d-flex align-items-center gap-1 me-2"
+      style="background-color: rgba(255, 0, 0, 0.829); color: white; font-weight: bold; border: none;"
       (click)="logout()">
       <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+    </button>
+
+    <button class="btn btn-sm d-flex align-items-center gap-1"
+      style="background-color: rgba(55, 0, 255, 0.829); color: white; font-weight: bold; border: none;"
+      (click)="seleccionarClinica()">
+      Cambiar de clínica
     </button>
   </div>
 </div>

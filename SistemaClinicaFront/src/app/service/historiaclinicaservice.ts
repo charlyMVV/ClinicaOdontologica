@@ -49,4 +49,12 @@ export class HistoriaClinicaService {
   obtenerPdf(idHistoriaClinica: number): Observable<Blob> { 
     return this.http.get(`${this.api}/${idHistoriaClinica}/pdf`, {responseType: 'blob'});
   }
+
+  guardarClinica(clinica: any): Observable<any> {
+  return this.http.post<any>(`${this.api}/clinicas`, clinica);
+}
+
+listarClinicas(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.api}/clinicas`);
+}
 }
