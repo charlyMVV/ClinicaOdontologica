@@ -119,7 +119,9 @@
 
           <div class="col-md-4">
             <label for="curp" class="form-label">CURP</label>
-            <input [(ngModel)]="curp" type="text" id="curp" class="form-control" name="curp">
+            <input [(ngModel)]="curp" type="text" id="curp" class="form-control" name="curp" maxlength="18"
+              autocapitalize="characters" autocomplete="off" inputmode="text"
+              (input)="curp = normalizarCurpInput(curp)">
           </div>
 
           <div class="col-md-4">
@@ -134,13 +136,14 @@
 
           <div class="col-md-2">
             <label for="edad" class="form-label">Edad</label>
-            <input name="edad" type="number" id="edad" [(ngModel)]="edad" class="form-control">
+            <input name="edad" type="text" id="edad" [(ngModel)]="edad" class="form-control" readonly>
           </div>
 
           <div class="col-md-6">
             <label for="fechaNacimiento" class="form-label">Fecha de nacimiento</label>
             <input name="fechaNacimiento" type="date" id="fechaNacimiento" [(ngModel)]="fechaNacimiento"
-              class="form-control">
+              class="form-control" [attr.max]="fechaMaximaNacimiento" (change)="normalizarFecha('fechaNacimiento')"
+              (blur)="normalizarFecha('fechaNacimiento')">
           </div>
         </div>
 
@@ -154,13 +157,16 @@
         <div class="row g-3 mt-2">
           <div class="col-md-4">
             <label for="telefonoCasa" class="form-label">Teléfono de casa/trabajo</label>
-            <input type="text" id="telefonoCasa" name="telefonoCasa" [(ngModel)]="telefonoCasa" class="form-control">
+            <input type="text" id="telefonoCasa" name="telefonoCasa" [(ngModel)]="telefonoCasa" class="form-control"
+              maxlength="10" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
+              (keypress)="soloNumeros($event)" (input)="telefonoCasa = normalizarTelefonoInput(telefonoCasa)">
           </div>
 
           <div class="col-md-4">
             <label for="telefonoCelular" class="form-label">Teléfono celular</label>
             <input type="text" id="telefonoCelular" name="telefonoCelular" [(ngModel)]="telefonoCelular"
-              class="form-control">
+              class="form-control" maxlength="10" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
+              (keypress)="soloNumeros($event)" (input)="telefonoCelular = normalizarTelefonoInput(telefonoCelular)">
           </div>
 
           <div class="col-md-4">
@@ -202,8 +208,10 @@
 
         <div class="row g-3 mt-2">
           <div class="col-md-6">
-            <label for="numeroMedico" class="form-label">Teléfono del médico</label>
-            <input type="text" id="numeroMedico" name="numeroMedico" [(ngModel)]="numeroMedico" class="form-control">
+            <label for="numeroMedico" class="form-label">Teléfono del médico (opcional)</label>
+            <input type="text" id="numeroMedico" name="numeroMedico" [(ngModel)]="numeroMedico" class="form-control"
+              maxlength="10" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
+              (keypress)="soloNumeros($event)" (input)="numeroMedico = normalizarTelefonoInput(numeroMedico)">
           </div>
           <div class="col-md-12">
             <label for="ultimaConsulta" class="form-label">Fecha y motivo de la última consulta</label>
@@ -476,7 +484,9 @@
           </div>
           <div class="col-md-2">
             <label>Fecha</label>
-            <input type="Date" class="form-control" [(ngModel)]="fechaHospitalizacion" name="fechaHospitalizacion">
+            <input type="date" class="form-control" [(ngModel)]="fechaHospitalizacion" name="fechaHospitalizacion"
+              [attr.max]="fechaMaximaNacimiento" (change)="normalizarFecha('fechaHospitalizacion')"
+              (blur)="normalizarFecha('fechaHospitalizacion')">
           </div>
           <div class="col-md-4">
             <label>Motivo</label>
@@ -1125,31 +1135,34 @@
           <div class="col-12 col-md-9">
             <label for="nombreTutor" class="fw-semibold mb-1">Nombre del tutor</label>
             <input type="text" class="form-control" id="nombreTutor" name="nombreTutor"
-              placeholder="Escriba el nombre completo del tutor" [(ngModel)]="nombreTutor">
+              placeholder="Escriba el nombre completo del tutor" [(ngModel)]="nombreTutor" autocomplete="off">
           </div>
 
           <div class="col-12 col-md-3">
             <label for="edadTutor" class="fw-semibold mb-1">Edad</label>
-            <input type="number" class="form-control" id="edadTutor" name="edadTutor" placeholder="Edad del tutor"
-              [(ngModel)]="edadTutor">
+            <input type="text" class="form-control" id="edadTutor" name="edadTutor" placeholder="Edad del tutor"
+              [(ngModel)]="edadTutor" maxlength="3" inputmode="numeric" pattern="[0-9]*"
+              (keypress)="soloNumeros($event)" (input)="edadTutor = normalizarEdadInput(edadTutor)">
           </div>
 
           <div class="col-12">
             <label for="domicilioTutor" class="fw-semibold mb-1">Domicilio completo</label>
             <input type="text" class="form-control" id="domicilioTutor" name="domicilioTutor"
-              [(ngModel)]="domicilioTutor">
+              [(ngModel)]="domicilioTutor" autocomplete="off">
           </div>
 
           <div class="col-12 col-md-6">
             <label for="telefonoCasa" class="fw-semibold mb-1">Teléfono de casa o trabajo</label>
             <input type="tel" class="form-control" id="telefonoCasa" name="telefonoCasaTutor" placeholder=""
-              [(ngModel)]="telefonoCasaTutor">
+              [(ngModel)]="telefonoCasaTutor" maxlength="10" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
+              (keypress)="soloNumeros($event)" (input)="telefonoCasaTutor = normalizarTelefonoInput(telefonoCasaTutor)">
           </div>
 
           <div class="col-12 col-md-6">
             <label for="telefonoCelular" class="fw-semibold mb-1">Teléfono celular</label>
             <input type="tel" class="form-control" id="telefonoCelular" name="celularTutor" placeholder=""
-              [(ngModel)]="celularTutor">
+              [(ngModel)]="celularTutor" maxlength="10" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
+              (keypress)="soloNumeros($event)" (input)="celularTutor = normalizarTelefonoInput(celularTutor)">
           </div>
         </div>
       </div>
@@ -1195,7 +1208,9 @@
       <div class="row mb-3 justify-content-center">
         <div class="col-md-4">
           <label for="fecha" class="form-label fw-semibold">Fecha</label>
-          <input type="date" class="form-control" [(ngModel)]="fecha" name="fecha">
+          <input type="date" class="form-control" [(ngModel)]="fecha" name="fecha"
+            [attr.max]="fechaMaximaNacimiento" (change)="normalizarFecha('fecha')"
+            (blur)="normalizarFecha('fecha')">
         </div>
       </div>
 

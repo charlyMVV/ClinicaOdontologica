@@ -1,11 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import Swal from 'sweetalert2';
 import { AuthService } from '../../service/auth';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatosPacientes } from '../../datos-pacientes';
 import { Datospacienteservice } from '../../service/datospacienteservice';
-import { forkJoin } from 'rxjs';
 import { Antecedentes } from '../../service/antecedentes';
 import { Nopatologicos } from '../../nopatologicos';
 import { NopatologicosService } from '../../service/nopatologicosService';
@@ -30,6 +29,37 @@ import { Firma } from '../../firma';
 import { Fotosinicioservice } from '../../service/fotosinicioservice';
 import { Fotosinicio } from '../../fotosinicio';
 import { HistoriaClinicaService } from '../../service/historiaclinicaservice';
+import {
+  aplicarAntecedentes as aplicarAntecedentesHistoria,
+  aplicarCampos as aplicarCamposHistoria,
+  aplicarDatosPaciente as aplicarDatosPacienteHistoria,
+  aplicarFirma as aplicarFirmaHistoria,
+  aplicarFotos as aplicarFotosHistoria,
+  aplicarHistoriaClinica as aplicarHistoriaClinicaHistoria,
+  aplicarListaAntecedentes as aplicarListaAntecedentesHistoria,
+  normalizarTexto as normalizarTextoHistoria
+} from './historia-clinica.mapper';
+import {
+  obtenerAntecedentesSinDetalle,
+  obtenerAntecedentesSinRespuesta,
+  esCurpValida,
+  esEdadValida,
+  esFechaLocalDateValida,
+  esTelefonoValido,
+  obtenerFaltantesAntecedentesNoPatologicos,
+  obtenerFaltantesCabezaCuello,
+  obtenerFaltantesDatosPaciente,
+  obtenerFaltantesDiagnosticoTratamiento,
+  obtenerFaltantesEvolucion,
+  obtenerFaltantesFotosInicio,
+  obtenerFaltantesHistoriaCompletaFront,
+  obtenerFaltantesSignosVitales,
+  obtenerFaltantesTejidosBlandos,
+  obtenerFaltantesTutor,
+  tieneSeleccionEstomatognatico
+} from './historia-clinica.validators';
+import { guardarSeccionPorExistencia } from './historia-clinica.persistence';
+import { guardarListaEnBloque } from './historia-clinica.collections';
 
 @Component({
   selector: 'app-historia-clinica',
@@ -228,6 +258,8 @@ export class HistoriaClinica implements OnInit {
 
   datosEditados = true;
   nombreUsuarioLogueado: string = '';
+
+  fechaMaximaNacimiento: string = new Date().toLocaleDateString('en-CA');
   nombrePacienteLogueado: string = '';
 
   DatosPacientes: any;
@@ -248,7 +280,68 @@ export class HistoriaClinica implements OnInit {
   }
 
   get esMayorEdad(): boolean {
-    return Number(this.edad) < 18;
+    return Number(this.edad) >= 18;
+  }
+
+  private calcularEdadDesdeFechaNacimiento(fechaNacimiento: string): string {
+    if (!esFechaLocalDateValida(fechaNacimiento)) {
+      return '';
+    }
+
+    const nacimiento = new Date(`${fechaNacimiento}T00:00:00`);
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+
+    const mesActual = hoy.getMonth();
+    const mesNacimiento = nacimiento.getMonth();
+    const diaActual = hoy.getDate();
+    const diaNacimiento = nacimiento.getDate();
+
+    if (mesActual < mesNacimiento || (mesActual === mesNacimiento && diaActual < diaNacimiento)) {
+      edad -= 1;
+    }
+
+    return edad >= 0 ? String(edad) : '';
+  }
+
+  sincronizarEdadConFechaNacimiento(): void {
+    if (!this.fechaNacimiento) {
+      this.edad = '';
+      return;
+    }
+
+    if (!esFechaLocalDateValida(this.fechaNacimiento)) {
+      this.fechaNacimiento = '';
+      this.edad = '';
+      return;
+    }
+
+    this.edad = this.calcularEdadDesdeFechaNacimiento(this.fechaNacimiento);
+  }
+
+  normalizarFecha(campo: 'fechaNacimiento' | 'fechaHospitalizacion' | 'fecha'): void {
+    const valor = this[campo];
+
+    if (!valor) {
+      if (campo === 'fechaNacimiento') {
+        this.edad = '';
+      }
+      return;
+    }
+
+    if (!esFechaLocalDateValida(valor)) {
+      this[campo] = '';
+
+      if (campo === 'fechaNacimiento') {
+        this.edad = '';
+      }
+
+      return;
+    }
+
+    if (campo === 'fechaNacimiento') {
+      this.edad = this.calcularEdadDesdeFechaNacimiento(valor);
+    }
   }
 
   cargarHistoriaClinicaPorId(idHistoriaClinica: number): void {
@@ -288,6 +381,7 @@ export class HistoriaClinica implements OnInit {
     this.historiaClinicaService.getHistoriaClinicaPorCurp(curp).subscribe({
       next: (historia) => {
         this.aplicarHistoriaClinica(historia);
+        this.sincronizarEdadConFechaNacimiento();
         this.datosEditados = true;
       },
       error: (error) => {
@@ -308,120 +402,33 @@ export class HistoriaClinica implements OnInit {
   }
 
   aplicarHistoriaClinica(historia: any): void {
-    this.curp = historia?.curp || '';
-    this.pacienteGuardado = !!this.curp;
-    this.aplicarDatosPaciente(historia?.paciente);
-    this.aplicarAntecedentes(historia?.antecedentes || []);
-    this.aplicarCampos(historia?.antecedentesNoPatologicos, [
-      'frecuenciaLavadoDientes', 'usaAuxiliaresHigiene', 'tiposAuxiliaresHigiene', 'grupoSanguineo',
-      'factorRh', 'cartillaVacunacion', 'esquemaCompleto', 'vacunasFaltantes', 'antecedentesAlergicos',
-      'golosinas', 'cualAlergicos', 'antibioticos', 'analgesicos', 'anestesicos', 'alimentos',
-      'otrasAlergias', 'tieneAdicciones', 'tabaco', 'alcohol', 'otrasAdicciones', 'haSidoHospitalizado',
-      'fechaHospitalizacion', 'motivoHospitalizacion', 'padecimientoActual', 'haSidoAnestesiado',
-      'haRecibidoTransfusion', 'haRecibidoPerforaciones', 'consumeMedicamento', 'embarazo',
-      'discapacidad', 'tieneIntervenciones', 'parteCuerpo'
-    ]);
-    this.aplicarCampos(historia?.signosVitales, [
-      'temperatura', 'frecuenciaRespiratoria', 'tensionArterial', 'frecuenciaCardiaca', 'peso', 'talla'
-    ]);
-
-    if (historia?.cabezaCuello) {
-      Object.assign(this.cabezaCuello, historia.cabezaCuello);
-    }
-
-    if (historia?.estomatognatico) {
-      Object.assign(this.estomatognatico, historia.estomatognatico);
-    }
-
-    this.aplicarCampos(historia?.tejidosBlandos, [
-      'ganglios', 'glandulasSalivales', 'labioExterno', 'bordeBermellon', 'labioInterno', 'comisuras',
-      'carrillos', 'fondoDeSaco', 'frenillos', 'lenguaTercioMedio', 'paladarDuro', 'paladarBlando',
-      'istmoBucofaringe', 'lenguaDorso', 'lenguaBordes', 'lenguaVentral', 'pisoBoca', 'dientes',
-      'mucosaAlveolar', 'encia'
-    ]);
-    this.aplicarCampos(historia?.tutor, [
-      'nombreTutor', 'edadTutor', 'domicilioTutor', 'telefonoCasaTutor', 'celularTutor'
-    ]);
-    this.aplicarCampos(historia?.diagnosticoTratamiento, [
-      'interpretacionRx', 'diagnostico', 'resumenTratamiento'
-    ]);
-    const evoluciones = historia?.evolucionPaciente || [];
-
-    if (evoluciones.length > 0) {
-      const ultimaEvolucion = evoluciones[evoluciones.length - 1];
-
-      this.aplicarCampos(ultimaEvolucion, [
-        'fecha',
-        'comentarioControl'
-      ]);
-    }
-    this.aplicarFotos(historia?.fotosInicio || []);
-    this.aplicarFirma(historia?.firma);
+    aplicarHistoriaClinicaHistoria(this, historia);
+    this.mostrarFirmaPendiente();
+    this.sincronizarEdadConFechaNacimiento();
   }
 
   aplicarDatosPaciente(paciente: any): void {
-    if (!paciente) {
-      return;
-    }
-
-    this.aplicarCampos(paciente, [
-      'nombrePaciente', 'curp', 'sexo', 'edad', 'fechaNacimiento', 'domicilio', 'telefonoCasa',
-      'telefonoCelular', 'religion', 'ocupacion', 'escolaridad', 'estadoCivil', 'derechohabiente',
-      'medicoFamiliar', 'numeroMedico', 'ultimaConsulta'
-    ]);
+    aplicarDatosPacienteHistoria(this, paciente);
   }
 
   aplicarAntecedentes(antecedentes: any[]): void {
-    const heredofamiliares = antecedentes.filter((antecedente) =>
-      this.normalizarTexto(antecedente?.tipoAntecedentes).includes('heredofamiliares')
-    );
-    const personales = antecedentes.filter((antecedente) =>
-      this.normalizarTexto(antecedente?.tipoAntecedentes).includes('personales patologicos')
-    );
-
-    this.aplicarListaAntecedentes(this.antecedentesHeredofamiliaresList, heredofamiliares);
-    this.aplicarListaAntecedentes(this.antecedentesPersonales, personales);
+    aplicarAntecedentesHistoria(this, antecedentes);
   }
 
   aplicarListaAntecedentes(listaFormulario: any[], listaBackend: any[]): void {
-    listaFormulario.forEach((antecedenteFormulario, index) => {
-      const descripcion = this.normalizarTexto(antecedenteFormulario.descripcionAntecedentes);
-      const antecedenteBackend = listaBackend.find((antecedente) =>
-        this.normalizarTexto(antecedente?.descripcionAntecedentes) === descripcion
-      ) || listaBackend[index];
-
-      if (antecedenteBackend) {
-        antecedenteFormulario.respuesta = antecedenteBackend.respuesta || '';
-        antecedenteFormulario.detalle = antecedenteBackend.detalle || '';
-        antecedenteFormulario.curp = antecedenteBackend.curp || this.curp;
-      }
-    });
+    aplicarListaAntecedentesHistoria(listaFormulario, listaBackend, this.curp);
   }
 
   aplicarCampos(origen: any, campos: string[]): void {
-    if (!origen) {
-      return;
-    }
-
-    campos.forEach((campo) => {
-      if (origen[campo] !== undefined && origen[campo] !== null) {
-        (this as any)[campo] = origen[campo];
-      }
-    });
+    aplicarCamposHistoria(this, origen, campos);
   }
 
   aplicarFotos(fotos: any[]): void {
-    this.listaFotos = fotos.map((foto) => new Fotosinicio(foto.fotos || '', foto.curp || this.curp));
-    this.previews = this.listaFotos.map((foto) => foto.fotos).filter((foto) => !!foto);
+    aplicarFotosHistoria(this, fotos);
   }
 
   aplicarFirma(firma: any): void {
-    if (!firma?.firma) {
-      return;
-    }
-
-    this.firmaPendiente = firma.firma;
-    this.mostrarFirmaPendiente();
+    aplicarFirmaHistoria(this, firma);
   }
 
   mostrarFirmaPendiente(): void {
@@ -435,32 +442,52 @@ export class HistoriaClinica implements OnInit {
   }
 
   normalizarTexto(texto: string): string {
-    return (texto || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .trim();
+    return normalizarTextoHistoria(texto);
   }
 
-private validarDatosPaciente(): boolean {
-  const faltantes: string[] = [];
+  soloNumeros(event: KeyboardEvent): void {
+    const permitidas = [
+      'Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'
+    ];
 
-  if (!this.nombrePaciente?.trim()) faltantes.push('Nombre completo del paciente');
-  if (!this.curp?.trim()) faltantes.push('CURP');
-  if (!this.sexo?.trim()) faltantes.push('Sexo');
-  if (!this.edad) faltantes.push('Edad');
-  if (!this.fechaNacimiento) faltantes.push('Fecha de nacimiento');
-  if (!this.domicilio?.trim()) faltantes.push('Domicilio completo');
-  if (!this.telefonoCasa?.trim()) faltantes.push('Teléfono de casa/trabajo');
-  if (!this.telefonoCelular?.trim()) faltantes.push('Teléfono celular');
-  if (!this.religion?.trim()) faltantes.push('Religión');
-  if (!this.ocupacion?.trim()) faltantes.push('Ocupación');
-  if (!this.escolaridad?.trim()) faltantes.push('Escolaridad');
-  if (!this.estadoCivil?.trim()) faltantes.push('Estado civil');
-  if (!this.derechohabiente?.trim()) faltantes.push('Derechohabiente');
-  if (!this.medicoFamiliar?.trim()) faltantes.push('Nombre del médico familiar');
-  if (!this.numeroMedico?.trim()) faltantes.push('Teléfono del médico');
-  if (!this.ultimaConsulta?.trim()) faltantes.push('Fecha y motivo de la última consulta');
+    if (permitidas.includes(event.key) || (event.ctrlKey || event.metaKey)) {
+      return;
+    }
+
+    if (!/^\d$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  normalizarCurpInput(valor: string): string {
+    return (valor || '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '')
+      .slice(0, 18);
+  }
+
+  normalizarTelefonoInput(valor: string): string {
+    return (valor || '')
+      .replace(/\D/g, '')
+      .slice(0, 10);
+  }
+
+  normalizarEdadInput(valor: string): string {
+    return (valor || '')
+      .replace(/\D/g, '')
+      .slice(0, 3);
+  }
+
+  private validarDatosPaciente(): boolean {
+    const faltantes = obtenerFaltantesDatosPaciente(this);
+    const erroresFormato: string[] = [];
+
+    if (!esCurpValida(this.curp)) erroresFormato.push('CURP inválida');
+    if (!esEdadValida(this.edad)) erroresFormato.push('Edad inválida');
+    if (!esFechaLocalDateValida(this.fechaNacimiento)) erroresFormato.push('Fecha de nacimiento inválida');
+    if (!esTelefonoValido(this.telefonoCasa)) erroresFormato.push('Teléfono de casa/trabajo debe tener 10 dígitos');
+    if (!esTelefonoValido(this.telefonoCelular)) erroresFormato.push('Teléfono celular debe tener 10 dígitos');
+    if (this.numeroMedico && !esTelefonoValido(this.numeroMedico)) erroresFormato.push('Teléfono del médico debe tener 10 dígitos');
 
   if (faltantes.length > 0) {
     Swal.fire({
@@ -477,11 +504,28 @@ private validarDatosPaciente(): boolean {
     return false;
   }
 
+  if (erroresFormato.length > 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Formato inválido',
+      html: `
+        Corrige los siguientes campos:
+        <br><br>
+        ${erroresFormato.map(c => `• ${c}`).join('<br>')}
+      `,
+      confirmButtonText: 'Aceptar'
+    });
+
+    return false;
+  }
+
   return true;
 }
 
 
   addDatosPaciente() {
+    this.sincronizarEdadConFechaNacimiento();
+
     if (!this.validarDatosPaciente()) {
     return;
   }
@@ -603,10 +647,7 @@ private validarDatosPaciente(): boolean {
   }
 
   validarAntecedentes(lista: any[]): boolean {
-
-    const faltanRespuesta = lista.filter(
-      a => !a.respuesta || a.respuesta.trim() === ''
-    );
+    const faltanRespuesta = obtenerAntecedentesSinRespuesta(lista);
 
     if (faltanRespuesta.length > 0) {
 
@@ -628,11 +669,7 @@ private validarDatosPaciente(): boolean {
       return false;
     }
 
-    const faltanDetalle = lista.filter(
-      a =>
-        a.respuesta === 'Sí' &&
-        (!a.detalle || a.detalle.trim() === '')
-    );
+    const faltanDetalle = obtenerAntecedentesSinDetalle(lista);
 
     if (faltanDetalle.length > 0) {
 
@@ -667,32 +704,15 @@ private validarDatosPaciente(): boolean {
       return;
     }
 
-    const peticiones = this.antecedentesPersonales.map((antecedente) => {
-      return this.antecedentesService.upsertAntecedente({
+    guardarListaEnBloque({
+      lista: this.antecedentesPersonales.map((antecedente) => ({
         ...antecedente,
         curp: this.curp
-      });
-    });
-
-    forkJoin(peticiones).subscribe({
-      next: () => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Guardado correctamente',
-          text: 'Los antecedentes personales fueron guardados correctamente.',
-          timer: 2000,
-          showConfirmButton: false
-        });
-      },
-      error: (err) => {
-        console.error(err);
-
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Ocurrió un error al guardar la información.'
-        });
-      }
+      })),
+      guardar: (antecedente) => this.antecedentesService.upsertAntecedente(antecedente),
+      tituloExito: 'Guardado correctamente',
+      textoExito: 'Los antecedentes personales fueron guardados correctamente.',
+      textoError: 'Ocurrió un error al guardar la información.'
     });
   }
 
@@ -708,32 +728,15 @@ private validarDatosPaciente(): boolean {
       return;
     }
 
-    const peticiones = this.antecedentesHeredofamiliaresList.map((antecedente) => {
-      return this.antecedentesService.upsertAntecedente({
+    guardarListaEnBloque({
+      lista: this.antecedentesHeredofamiliaresList.map((antecedente) => ({
         ...antecedente,
         curp: this.curp
-      });
-    });
-
-    forkJoin(peticiones).subscribe({
-      next: () => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Guardado correctamente',
-          text: 'Los antecedentes heredofamiliares fueron guardados correctamente.',
-          timer: 2000,
-          showConfirmButton: false
-        });
-      },
-      error: (err) => {
-        console.error(err);
-
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Ocurrió un error al guardar la información.'
-        });
-      }
+      })),
+      guardar: (antecedente) => this.antecedentesService.upsertAntecedente(antecedente),
+      tituloExito: 'Guardado correctamente',
+      textoExito: 'Los antecedentes heredofamiliares fueron guardados correctamente.',
+      textoError: 'Ocurrió un error al guardar la información.'
     });
   }
 
@@ -805,59 +808,7 @@ private validarDatosPaciente(): boolean {
 
 
   private validarAntecedentesNoPatologicos(): boolean {
-
-    const faltantes: string[] = [];
-
-    if (!this.frecuenciaLavadoDientes?.trim())
-      faltantes.push('Frecuencia de lavado de dientes');
-
-    if (!this.usaAuxiliaresHigiene)
-      faltantes.push('Uso de auxiliares de higiene');
-
-    if (!this.grupoSanguineo?.trim())
-      faltantes.push('Grupo sanguíneo');
-
-    if (!this.factorRh?.trim())
-      faltantes.push('Factor RH');
-
-    if (!this.cartillaVacunacion)
-      faltantes.push('Cartilla de vacunación');
-
-    if (!this.esquemaCompleto)
-      faltantes.push('Esquema completo');
-
-    if (!this.antecedentesAlergicos)
-      faltantes.push('Antecedentes alérgicos');
-
-    if (!this.golosinas)
-      faltantes.push('Consumo de golosinas');
-
-    if (!this.tieneAdicciones)
-      faltantes.push('Adicciones');
-
-    if (!this.haSidoHospitalizado)
-      faltantes.push('Hospitalización');
-
-    if (!this.haSidoAnestesiado)
-      faltantes.push('Anestesia');
-
-    if (!this.haRecibidoTransfusion)
-      faltantes.push('Transfusiones');
-
-    if (!this.haRecibidoPerforaciones)
-      faltantes.push('Tatuajes o perforaciones');
-
-    if (!this.tieneIntervenciones)
-      faltantes.push('Intervenciones quirúrgicas');
-
-    if (!this.consumeMedicamento)
-      faltantes.push('Consume medicamento');
-
-    if (!this.discapacidad)
-      faltantes.push('Discapacidad');
-
-    if (!this.embarazo)
-      faltantes.push('Embarazo');
+    const faltantes = obtenerFaltantesAntecedentesNoPatologicos(this);
 
     if (faltantes.length > 0) {
       Swal.fire({
@@ -1003,96 +954,28 @@ private validarDatosPaciente(): boolean {
       this.parteCuerpo
     );
 
-    this.nopatologicosService.existenAntecedentesPorCurp(this.curp).subscribe({
-      next: (existe) => {
-
-        if (existe) {
-
-          this.nopatologicosService
-            .updateAntecedentesnoPatologicos(this.curp, antecedentesNoPatologicos)
-            .subscribe({
-              next: () => {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Guardado correctamente',
-                  text: 'Los antecedentes no patológicos fueron actualizados correctamente.',
-                  timer: 2000,
-                  showConfirmButton: false
-                });
-              },
-              error: (err) => {
-                console.error(err);
-
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: 'Ocurrió un error al actualizar los antecedentes no patológicos.'
-                });
-              }
-            });
-
-        } else {
-
-          this.nopatologicosService
-            .createAntecedentesnoPatologicos(antecedentesNoPatologicos)
-            .subscribe({
-              next: () => {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Guardado correctamente',
-                  text: 'Los antecedentes no patológicos fueron guardados correctamente.',
-                  timer: 2000,
-                  showConfirmButton: false
-                });
-              },
-              error: (err) => {
-                console.error(err);
-
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: 'Ocurrió un error al guardar los antecedentes no patológicos.'
-                });
-              }
-            });
-
-        }
-
-      },
-      error: (err) => {
-
-        console.error(err);
-
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No fue posible verificar si existen antecedentes no patológicos para este paciente.'
-        });
-
-      }
+    guardarSeccionPorExistencia({
+      existe: this.nopatologicosService.existenAntecedentesPorCurp(this.curp),
+      crear: this.nopatologicosService.createAntecedentesnoPatologicos(antecedentesNoPatologicos),
+      actualizar: this.nopatologicosService.updateAntecedentesnoPatologicos(this.curp, antecedentesNoPatologicos),
+      tituloExitoCrear: 'Guardado correctamente',
+      textoExitoCrear: 'Los antecedentes no patológicos fueron guardados correctamente.',
+      tituloExitoActualizar: 'Guardado correctamente',
+      textoExitoActualizar: 'Los antecedentes no patológicos fueron actualizados correctamente.',
+      textoErrorCreacion: 'Ocurrió un error al guardar los antecedentes no patológicos.',
+      textoErrorActualizacion: 'Ocurrió un error al actualizar los antecedentes no patológicos.',
+      textoErrorVerificacion: 'No fue posible verificar si existen antecedentes no patológicos para este paciente.'
     });
   }
 
   private validarSignosVitales(): boolean {
+    const faltantes = obtenerFaltantesSignosVitales(this);
 
-    const campos = [
-      { valor: this.temperatura, nombre: 'Temperatura' },
-      { valor: this.frecuenciaRespiratoria, nombre: 'Frecuencia respiratoria' },
-      { valor: this.tensionArterial, nombre: 'Tensión arterial' },
-      { valor: this.frecuenciaCardiaca, nombre: 'Frecuencia cardíaca' },
-      { valor: this.peso, nombre: 'Peso' },
-      { valor: this.talla, nombre: 'Talla' }
-    ];
-
-    const faltante = campos.find(
-      c => !c.valor || c.valor.toString().trim() === ''
-    );
-
-    if (faltante) {
+    if (faltantes.length > 0) {
       Swal.fire({
         icon: 'warning',
         title: 'Campo obligatorio',
-        text: `Debe capturar: ${faltante.nombre}`
+        text: `Debe capturar: ${faltantes.join(', ')}`
       });
       return false;
     }
@@ -1110,7 +993,6 @@ private validarDatosPaciente(): boolean {
       return;
     }
 
-
     const signosVitales = {
       temperatura: this.temperatura,
       frecuenciaRespiratoria: this.frecuenciaRespiratoria,
@@ -1121,114 +1003,22 @@ private validarDatosPaciente(): boolean {
       curp: this.curp
     };
 
-    this.signosvitalesService.existenSignosVitalesPorCurp(this.curp).subscribe({
-      next: (existe) => {
-
-        if (existe) {
-
-          this.signosvitalesService
-            .updateSignosVitales(this.curp, signosVitales)
-            .subscribe({
-              next: () => {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Actualizado',
-                  text: 'Los signos vitales fueron actualizados correctamente.',
-                  timer: 2000,
-                  showConfirmButton: false
-                });
-              },
-              error: (err) => {
-                console.error(err);
-
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: 'Ocurrió un error al actualizar los signos vitales.'
-                });
-              }
-            });
-
-        } else {
-
-          this.signosvitalesService
-            .createSignosVitales(signosVitales)
-            .subscribe({
-              next: () => {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Guardado',
-                  text: 'Los signos vitales fueron guardados correctamente.',
-                  timer: 2000,
-                  showConfirmButton: false
-                });
-              },
-              error: (err) => {
-                console.error(err);
-
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: 'Ocurrió un error al guardar los signos vitales.'
-                });
-              }
-            });
-
-        }
-
-      },
-      error: (err) => {
-
-        console.error(err);
-
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No fue posible verificar los signos vitales del paciente.'
-        });
-
-      }
+    guardarSeccionPorExistencia({
+      existe: this.signosvitalesService.existenSignosVitalesPorCurp(this.curp),
+      crear: this.signosvitalesService.createSignosVitales(signosVitales),
+      actualizar: this.signosvitalesService.updateSignosVitales(this.curp, signosVitales),
+      tituloExitoCrear: 'Guardado',
+      textoExitoCrear: 'Los signos vitales fueron guardados correctamente.',
+      tituloExitoActualizar: 'Actualizado',
+      textoExitoActualizar: 'Los signos vitales fueron actualizados correctamente.',
+      textoErrorCreacion: 'Ocurrió un error al guardar los signos vitales.',
+      textoErrorActualizacion: 'Ocurrió un error al actualizar los signos vitales.',
+      textoErrorVerificacion: 'No fue posible verificar los signos vitales del paciente.'
     });
   }
 
   private validarCabezaCuello(): boolean {
-    const faltantes: string[] = [];
-
-    const cabezaSeleccionada =
-      this.cabezaCuello.exostosis ||
-      this.cabezaCuello.endotosis;
-
-    const craneoSeleccionado =
-      this.cabezaCuello.dolicocefalico ||
-      this.cabezaCuello.mesocefalico ||
-      this.cabezaCuello.branquicefalico;
-
-    const caraSeleccionada =
-      this.cabezaCuello.asimetriaTransversal ||
-      this.cabezaCuello.asimetriaLongitudinal;
-
-    const perfilSeleccionado =
-      this.cabezaCuello.perfilConcavo ||
-      this.cabezaCuello.perfilConvexo ||
-      this.cabezaCuello.perfilRecto;
-
-    const pielSeleccionada =
-      this.cabezaCuello.pielNormal ||
-      this.cabezaCuello.pielPalida ||
-      this.cabezaCuello.pielCianotica ||
-      this.cabezaCuello.pielEnrojecida;
-
-    const musculosSeleccionado =
-      this.cabezaCuello.musculosHipotonicos ||
-      this.cabezaCuello.musculosHipertonicos ||
-      this.cabezaCuello.musculosEspasticos;
-
-    if (!cabezaSeleccionada) faltantes.push('Cabeza');
-    if (!craneoSeleccionado) faltantes.push('Cráneo');
-    if (!caraSeleccionada) faltantes.push('Cara / Asimetrías');
-    if (!perfilSeleccionado) faltantes.push('Perfil');
-    if (!pielSeleccionada) faltantes.push('Piel');
-    if (!musculosSeleccionado) faltantes.push('Músculos');
+    const faltantes = obtenerFaltantesCabezaCuello(this);
 
     if (faltantes.length > 0) {
       Swal.fire({
@@ -1284,79 +1074,22 @@ private validarDatosPaciente(): boolean {
       this.curp
     );
 
-    this.cabezacuelloService.existenCabezaCuelloPorCurp(this.curp).subscribe({
-      next: (existe) => {
-        if (existe) {
-          this.cabezacuelloService
-            .updateExploracionCabezaCuello(this.curp, cabezaCuello)
-            .subscribe({
-              next: () => {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Actualizado',
-                  text: 'Los datos de cabeza y cuello fueron actualizados correctamente.',
-                  timer: 2000,
-                  showConfirmButton: false
-                });
-              },
-              error: (err) => {
-                console.error(err);
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: 'Ocurrió un error al actualizar cabeza y cuello.'
-                });
-              }
-            });
-        } else {
-          this.cabezacuelloService
-            .createExploracionCabezaCuello(cabezaCuello)
-            .subscribe({
-              next: () => {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Guardado',
-                  text: 'Los datos de cabeza y cuello fueron guardados correctamente.',
-                  timer: 2000,
-                  showConfirmButton: false
-                });
-              },
-              error: (err) => {
-                console.error(err);
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: 'Ocurrió un error al guardar cabeza y cuello.'
-                });
-              }
-            });
-        }
-      },
-      error: (err) => {
-        console.error(err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo verificar si ya existe cabeza y cuello para este paciente.'
-        });
-      }
+    guardarSeccionPorExistencia({
+      existe: this.cabezacuelloService.existenCabezaCuelloPorCurp(this.curp),
+      crear: this.cabezacuelloService.createExploracionCabezaCuello(cabezaCuello),
+      actualizar: this.cabezacuelloService.updateExploracionCabezaCuello(this.curp, cabezaCuello),
+      tituloExitoCrear: 'Guardado',
+      textoExitoCrear: 'Los datos de cabeza y cuello fueron guardados correctamente.',
+      tituloExitoActualizar: 'Actualizado',
+      textoExitoActualizar: 'Los datos de cabeza y cuello fueron actualizados correctamente.',
+      textoErrorCreacion: 'Ocurrió un error al guardar cabeza y cuello.',
+      textoErrorActualizacion: 'Ocurrió un error al actualizar cabeza y cuello.',
+      textoErrorVerificacion: 'No se pudo verificar si ya existe cabeza y cuello para este paciente.'
     });
   }
 
   private validarEstomatognatico(): boolean {
-    const seleccionado =
-      this.estomatognatico.ruidos ||
-      this.estomatognatico.lateralidad ||
-      this.estomatognatico.apertura ||
-      this.estomatognatico.chasquidos ||
-      this.estomatognatico.crepitacion ||
-      this.estomatognatico.dificultadAbrirboca ||
-      this.estomatognatico.dolorAberturaLateralidad ||
-      this.estomatognatico.fatigaDolorMuscular ||
-      this.estomatognatico.disminuicionAbertura ||
-      this.estomatognatico.desviacionAberturaCierre;
-
-    if (!seleccionado) {
+    if (!tieneSeleccionEstomatognatico(this)) {
       Swal.fire({
         icon: 'warning',
         title: 'Datos incompletos',
@@ -1394,98 +1127,22 @@ private validarDatosPaciente(): boolean {
       this.curp
     );
 
-    this.estomatognaticoService.existenEstomatognaticoCurp(this.curp).subscribe({
-      next: (existe) => {
-        if (existe) {
-          this.estomatognaticoService
-            .updateEstomatognatico(this.curp, estomatognatico)
-            .subscribe({
-              next: () => {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Actualizado',
-                  text: 'Los datos del sistema estomatognático fueron actualizados correctamente.',
-                  timer: 2000,
-                  showConfirmButton: false
-                });
-              },
-              error: (err) => {
-                console.error(err);
-
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: 'Ocurrió un error al actualizar el sistema estomatognático.'
-                });
-              }
-            });
-        } else {
-          this.estomatognaticoService
-            .createEstomatognatico(estomatognatico)
-            .subscribe({
-              next: () => {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Guardado',
-                  text: 'Los datos del sistema estomatognático fueron guardados correctamente.',
-                  timer: 2000,
-                  showConfirmButton: false
-                });
-              },
-              error: (err) => {
-                console.error(err);
-
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: 'Ocurrió un error al guardar el sistema estomatognático.'
-                });
-              }
-            });
-        }
-      },
-      error: (err) => {
-        console.error(err);
-
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo verificar si ya existen datos del sistema estomatognático.'
-        });
-      }
+    guardarSeccionPorExistencia({
+      existe: this.estomatognaticoService.existenEstomatognaticoCurp(this.curp),
+      crear: this.estomatognaticoService.createEstomatognatico(estomatognatico),
+      actualizar: this.estomatognaticoService.updateEstomatognatico(this.curp, estomatognatico),
+      tituloExitoCrear: 'Guardado',
+      textoExitoCrear: 'Los datos del sistema estomatognático fueron guardados correctamente.',
+      tituloExitoActualizar: 'Actualizado',
+      textoExitoActualizar: 'Los datos del sistema estomatognático fueron actualizados correctamente.',
+      textoErrorCreacion: 'Ocurrió un error al guardar el sistema estomatognático.',
+      textoErrorActualizacion: 'Ocurrió un error al actualizar el sistema estomatognático.',
+      textoErrorVerificacion: 'No se pudo verificar si ya existen datos del sistema estomatognático.'
     });
   }
 
-
-
-
   private validarTejidosBlandos(): boolean {
-    const campos = [
-      { valor: this.ganglios, nombre: 'Ganglios' },
-      { valor: this.glandulasSalivales, nombre: 'Glándulas salivales' },
-      { valor: this.labioExterno, nombre: 'Labio externo' },
-      { valor: this.bordeBermellon, nombre: 'Borde bermellón' },
-      { valor: this.labioInterno, nombre: 'Labio interno' },
-      { valor: this.comisuras, nombre: 'Comisuras' },
-      { valor: this.carrillos, nombre: 'Carrillos' },
-      { valor: this.fondoDeSaco, nombre: 'Fondo de saco' },
-      { valor: this.frenillos, nombre: 'Frenillos' },
-      { valor: this.lenguaTercioMedio, nombre: 'Lengua tercio medio' },
-      { valor: this.paladarDuro, nombre: 'Paladar duro' },
-      { valor: this.paladarBlando, nombre: 'Paladar blando' },
-      { valor: this.istmoBucofaringe, nombre: 'Istmo bucofaríngeo' },
-      { valor: this.lenguaDorso, nombre: 'Lengua dorso' },
-      { valor: this.lenguaBordes, nombre: 'Lengua bordes' },
-      { valor: this.lenguaVentral, nombre: 'Lengua ventral' },
-      { valor: this.pisoBoca, nombre: 'Piso de la boca' },
-      { valor: this.dientes, nombre: 'Dientes' },
-      { valor: this.mucosaAlveolar, nombre: 'Mucosa del borde alveolar' },
-      { valor: this.encia, nombre: 'Encía' }
-    ];
-
-    const faltantes = campos.filter(
-      c => !c.valor || c.valor.toString().trim() === ''
-    );
+    const faltantes = obtenerFaltantesTejidosBlandos(this);
 
     if (faltantes.length > 0) {
       Swal.fire({
@@ -1543,85 +1200,27 @@ private validarDatosPaciente(): boolean {
       this.curp
     );
 
-    this.tejidosblandosService.existenTejidosBlandosPorCurp(this.curp).subscribe({
-      next: (existe) => {
-        if (existe) {
-          this.tejidosblandosService.updateTejidosBlandos(this.curp, tejidosBlandos).subscribe({
-            next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Actualizado',
-                text: 'Los datos de tejidos blandos fueron actualizados correctamente.',
-                timer: 2000,
-                showConfirmButton: false
-              });
-            },
-            error: (err) => {
-              console.error(err);
-
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al actualizar tejidos blandos.'
-              });
-            }
-          });
-        } else {
-          this.tejidosblandosService.createTejidosBlandos(tejidosBlandos).subscribe({
-            next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Guardado',
-                text: 'Los datos de tejidos blandos fueron guardados correctamente.',
-                timer: 2000,
-                showConfirmButton: false
-              });
-            },
-            error: (err) => {
-              console.error(err);
-
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al guardar tejidos blandos.'
-              });
-            }
-          });
-        }
-      },
-      error: (err) => {
-        console.error(err);
-
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo verificar si ya existen datos de tejidos blandos.'
-        });
-      }
+    guardarSeccionPorExistencia({
+      existe: this.tejidosblandosService.existenTejidosBlandosPorCurp(this.curp),
+      crear: this.tejidosblandosService.createTejidosBlandos(tejidosBlandos),
+      actualizar: this.tejidosblandosService.updateTejidosBlandos(this.curp, tejidosBlandos),
+      tituloExitoCrear: 'Guardado',
+      textoExitoCrear: 'Los datos de tejidos blandos fueron guardados correctamente.',
+      tituloExitoActualizar: 'Actualizado',
+      textoExitoActualizar: 'Los datos de tejidos blandos fueron actualizados correctamente.',
+      textoErrorCreacion: 'Ocurrió un error al guardar tejidos blandos.',
+      textoErrorActualizacion: 'Ocurrió un error al actualizar tejidos blandos.',
+      textoErrorVerificacion: 'No se pudo verificar si ya existen datos de tejidos blandos.'
     });
   }
+
   private validarTutor(): boolean {
-    const faltantes: string[] = [];
+    const faltantes = obtenerFaltantesTutor(this);
+    const erroresFormato: string[] = [];
 
-    if (!this.nombreTutor?.trim()) {
-      faltantes.push('Nombre del tutor');
-    }
-
-    if (!this.edadTutor) {
-      faltantes.push('Edad del tutor');
-    }
-
-    if (!this.domicilioTutor?.trim()) {
-      faltantes.push('Domicilio completo');
-    }
-
-    if (!this.telefonoCasaTutor?.trim()) {
-      faltantes.push('Teléfono de casa o trabajo');
-    }
-
-    if (!this.celularTutor?.trim()) {
-      faltantes.push('Teléfono celular');
-    }
+    if (!esEdadValida(this.edadTutor)) erroresFormato.push('Edad del tutor inválida');
+    if (!esTelefonoValido(this.telefonoCasaTutor)) erroresFormato.push('Teléfono de casa o trabajo del tutor debe tener 10 dígitos');
+    if (!esTelefonoValido(this.celularTutor)) erroresFormato.push('Teléfono celular del tutor debe tener 10 dígitos');
 
     if (faltantes.length > 0) {
       Swal.fire({
@@ -1631,6 +1230,21 @@ private validarDatosPaciente(): boolean {
         Complete los siguientes datos del tutor:
         <br><br>
         ${faltantes.map(c => `• ${c}`).join('<br>')}
+      `,
+        confirmButtonText: 'Aceptar'
+      });
+
+      return false;
+    }
+
+    if (erroresFormato.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Formato inválido',
+        html: `
+        Corrige los siguientes datos del tutor:
+        <br><br>
+        ${erroresFormato.map(c => `• ${c}`).join('<br>')}
       `,
         confirmButtonText: 'Aceptar'
       });
@@ -1665,75 +1279,22 @@ private validarDatosPaciente(): boolean {
       this.curp
     );
 
-    this.tutorService.existeTutorPorCurp(this.curp).subscribe({
-      next: (existe) => {
-        if (existe) {
-          this.tutorService.updateTutor(this.curp, tutor).subscribe({
-            next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Actualizado',
-                text: 'Los datos del tutor fueron actualizados correctamente.',
-                timer: 2000,
-                showConfirmButton: false
-              });
-            },
-            error: (err) => {
-              console.error(err);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al actualizar los datos del tutor.'
-              });
-            }
-          });
-        } else {
-          this.tutorService.createTutor(tutor).subscribe({
-            next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Guardado',
-                text: 'Los datos del tutor fueron guardados correctamente.',
-                timer: 2000,
-                showConfirmButton: false
-              });
-            },
-            error: (err) => {
-              console.error(err);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al guardar los datos del tutor.'
-              });
-            }
-          });
-        }
-      },
-      error: (err) => {
-        console.error(err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo verificar si ya existen datos del tutor.'
-        });
-      }
+    guardarSeccionPorExistencia({
+      existe: this.tutorService.existeTutorPorCurp(this.curp),
+      crear: this.tutorService.createTutor(tutor),
+      actualizar: this.tutorService.updateTutor(this.curp, tutor),
+      tituloExitoCrear: 'Guardado',
+      textoExitoCrear: 'Los datos del tutor fueron guardados correctamente.',
+      tituloExitoActualizar: 'Actualizado',
+      textoExitoActualizar: 'Los datos del tutor fueron actualizados correctamente.',
+      textoErrorCreacion: 'Ocurrió un error al guardar los datos del tutor.',
+      textoErrorActualizacion: 'Ocurrió un error al actualizar los datos del tutor.',
+      textoErrorVerificacion: 'No se pudo verificar si ya existen datos del tutor.'
     });
   }
 
   private validarDiagnosticoTratamiento(): boolean {
-    const faltantes: string[] = [];
-
-    if (!this.interpretacionRx?.trim()) {
-      faltantes.push('Interpretación RX');
-    }
-
-    if (!this.diagnostico?.trim()) {
-      faltantes.push('Diagnóstico');
-    }
-
-    if (!this.resumenTratamiento?.trim()) {
-      faltantes.push('Resumen del tratamiento');
-    }
+    const faltantes = obtenerFaltantesDiagnosticoTratamiento(this);
 
     if (faltantes.length > 0) {
       Swal.fire({
@@ -1774,74 +1335,22 @@ private validarDatosPaciente(): boolean {
       this.curp
     );
 
-    this.diagnosticotratamientoService.existenDiagnosticoTratamientoCurp(this.curp).subscribe({
-      next: (existe) => {
-        if (existe) {
-          this.diagnosticotratamientoService
-            .updateDiagnosticoTratamiento(this.curp, diagnostico)
-            .subscribe({
-              next: () => {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Actualizado',
-                  text: 'Los datos de diagnóstico y tratamiento fueron actualizados correctamente.',
-                  timer: 2000,
-                  showConfirmButton: false
-                });
-              },
-              error: (err) => {
-                console.error(err);
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: 'Ocurrió un error al actualizar diagnóstico y tratamiento.'
-                });
-              }
-            });
-        } else {
-          this.diagnosticotratamientoService
-            .createDiagnosticoTratamiento(diagnostico)
-            .subscribe({
-              next: () => {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Guardado',
-                  text: 'Los datos de diagnóstico y tratamiento fueron guardados correctamente.',
-                  timer: 2000,
-                  showConfirmButton: false
-                });
-              },
-              error: (err) => {
-                console.error(err);
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: 'Ocurrió un error al guardar diagnóstico y tratamiento.'
-                });
-              }
-            });
-        }
-      },
-      error: (err) => {
-        console.error(err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo verificar si ya existen datos de diagnóstico y tratamiento.'
-        });
-      }
+    guardarSeccionPorExistencia({
+      existe: this.diagnosticotratamientoService.existenDiagnosticoTratamientoCurp(this.curp),
+      crear: this.diagnosticotratamientoService.createDiagnosticoTratamiento(diagnostico),
+      actualizar: this.diagnosticotratamientoService.updateDiagnosticoTratamiento(this.curp, diagnostico),
+      tituloExitoCrear: 'Guardado',
+      textoExitoCrear: 'Los datos de diagnóstico y tratamiento fueron guardados correctamente.',
+      tituloExitoActualizar: 'Actualizado',
+      textoExitoActualizar: 'Los datos de diagnóstico y tratamiento fueron actualizados correctamente.',
+      textoErrorCreacion: 'Ocurrió un error al guardar diagnóstico y tratamiento.',
+      textoErrorActualizacion: 'Ocurrió un error al actualizar diagnóstico y tratamiento.',
+      textoErrorVerificacion: 'No se pudo verificar si ya existen datos de diagnóstico y tratamiento.'
     });
   }
+
   private validarEvolucion(): boolean {
-    const faltantes: string[] = [];
-
-    if (!this.fecha) {
-      faltantes.push('Fecha');
-    }
-
-    if (!this.comentarioControl?.trim()) {
-      faltantes.push('Evolución del paciente');
-    }
+    const faltantes = obtenerFaltantesEvolucion(this);
 
     if (faltantes.length > 0) {
       Swal.fire({
@@ -1881,58 +1390,17 @@ private validarDatosPaciente(): boolean {
       this.curp
     );
 
-    this.evolucionService.existenEvolucionPorCurp(this.curp).subscribe({
-      next: (existe) => {
-        if (existe) {
-          this.evolucionService.updateEvolucion(this.curp, evolucion).subscribe({
-            next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Actualizado',
-                text: 'Los datos de evolución fueron actualizados correctamente.',
-                timer: 2000,
-                showConfirmButton: false
-              });
-            },
-            error: (err) => {
-              console.error(err);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al actualizar la evolución.'
-              });
-            }
-          });
-        } else {
-          this.evolucionService.createEvolucion(evolucion).subscribe({
-            next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Guardado',
-                text: 'Los datos de evolución fueron guardados correctamente.',
-                timer: 2000,
-                showConfirmButton: false
-              });
-            },
-            error: (err) => {
-              console.error(err);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al guardar la evolución.'
-              });
-            }
-          });
-        }
-      },
-      error: (err) => {
-        console.error(err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo verificar si ya existen datos de evolución.'
-        });
-      }
+    guardarSeccionPorExistencia({
+      existe: this.evolucionService.existenEvolucionPorCurp(this.curp),
+      crear: this.evolucionService.createEvolucion(evolucion),
+      actualizar: this.evolucionService.updateEvolucion(this.curp, evolucion),
+      tituloExitoCrear: 'Guardado',
+      textoExitoCrear: 'Los datos de evolución fueron guardados correctamente.',
+      tituloExitoActualizar: 'Actualizado',
+      textoExitoActualizar: 'Los datos de evolución fueron actualizados correctamente.',
+      textoErrorCreacion: 'Ocurrió un error al guardar la evolución.',
+      textoErrorActualizacion: 'Ocurrió un error al actualizar la evolución.',
+      textoErrorVerificacion: 'No se pudo verificar si ya existen datos de evolución.'
     });
   }
 
@@ -1996,20 +1464,13 @@ private validarDatosPaciente(): boolean {
 
   fotosGuardadas = false;
   private validarFotosInicio(): boolean {
-    if (!this.curp || this.curp.trim() === '') {
-      Swal.fire({
-        icon: 'warning',
-        title: 'CURP faltante',
-        text: 'No se ha especificado la CURP del paciente.'
-      });
-      return false;
-    }
+    const faltantes = obtenerFaltantesFotosInicio(this);
 
-    if (!this.listaFotos || this.listaFotos.length === 0) {
+    if (faltantes.length > 0) {
       Swal.fire({
         icon: 'warning',
-        title: 'Imagen requerida',
-        text: 'Debe seleccionar al menos una foto del paciente.'
+        title: 'Campos obligatorios',
+        text: faltantes.join(', ')
       });
       return false;
     }
@@ -2054,78 +1515,7 @@ private validarDatosPaciente(): boolean {
   }
 
   validarHistoriaCompletaFront(): string[] {
-    const faltantes: string[] = [];
-
-    if (!this.curp || this.curp.trim() === '') {
-      faltantes.push('Datos del paciente');
-    }
-
-    if (!this.antecedentesPersonales?.length || !this.antecedentesHeredofamiliaresList?.length) {
-      faltantes.push('Antecedentes personales y heredofamiliares');
-    }
-
-    if (!this.frecuenciaLavadoDientes || !this.grupoSanguineo || !this.factorRh) {
-      faltantes.push('Antecedentes no patológicos');
-    }
-
-    if (!this.temperatura || !this.frecuenciaRespiratoria || !this.tensionArterial || !this.frecuenciaCardiaca || !this.peso || !this.talla) {
-      faltantes.push('Signos vitales');
-    }
-
-    if (
-      !this.cabezaCuello.exostosis &&
-      !this.cabezaCuello.endotosis &&
-      !this.cabezaCuello.dolicocefalico &&
-      !this.cabezaCuello.mesocefalico &&
-      !this.cabezaCuello.branquicefalico &&
-      !this.cabezaCuello.asimetriaTransversal &&
-      !this.cabezaCuello.asimetriaLongitudinal &&
-      !this.cabezaCuello.perfilConcavo &&
-      !this.cabezaCuello.perfilConvexo &&
-      !this.cabezaCuello.perfilRecto &&
-      !this.cabezaCuello.pielNormal &&
-      !this.cabezaCuello.pielPalida &&
-      !this.cabezaCuello.pielCianotica &&
-      !this.cabezaCuello.pielEnrojecida &&
-      !this.cabezaCuello.musculosHipotonicos &&
-      !this.cabezaCuello.musculosHipertonicos &&
-      !this.cabezaCuello.musculosEspasticos &&
-      !this.cabezaCuello.cadenaGanglionar
-    ) {
-      faltantes.push('Cabeza y cuello');
-    }
-
-    // if (
-    //   !this.estomatognatico.ruidos &&
-    //   !this.estomatognatico.lateralidad &&
-    //   !this.estomatognatico.apertura &&
-    //   !this.estomatognatico.chasquidos &&
-    //   !this.estomatognatico.crepitacion &&
-    //   !this.estomatognatico.dificultadAbrirboca &&
-    //   !this.estomatognatico.dolorAberturaLateralidad &&
-    //   !this.estomatognatico.fatigaDolorMuscular &&
-    //   !this.estomatognatico.disminuicionAbertura &&
-    //   !this.estomatognatico.desviacionAberturaCierre
-    // ) {
-    //   faltantes.push('Sistema estomatognático');
-    // }
-
-    if (!this.ganglios || !this.glandulasSalivales) {
-      faltantes.push('Tejidos blandos');
-    }
-
-    if (!this.diagnostico || !this.resumenTratamiento) {
-      faltantes.push('Diagnóstico y tratamiento');
-    }
-
-    if (!this.hayFotos()) {
-      faltantes.push('Fotografías');
-    }
-
-    if (!this.hayFirma()) {
-      faltantes.push('Firma');
-    }
-    return faltantes;
+    return obtenerFaltantesHistoriaCompletaFront(this);
   }
 
   hayFotos(): boolean {
@@ -2226,3 +1616,8 @@ private validarDatosPaciente(): boolean {
     });
   }
 }
+
+
+
+
+
