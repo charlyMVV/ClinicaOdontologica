@@ -83,15 +83,7 @@
                   <td>{{ hc.tipoHistoriaClinica?.descripcion }}</td>
                   <td>{{hc.estatusHistoriaClinica?.descripcion}}</td>
                   <td>{{ hc.fechaCreacion | date:'yyyy-MM-dd' }}</td>
-                  <td>
-                    <button *ngIf="hc.estatusHistoriaClinica?.clave == 'REVISION'" class="btn btn-success btn-sm btn-accion">
-                      ✔️ Aprobar
-                    </button>
-              
-                    <button *ngIf="hc.estatusHistoriaClinica?.clave == 'REVISION'" class="btn btn-danger btn-sm btn-accion">
-                      ❌ Rechazar
-                    </button>
-              
+                  <td>              
                     <button class="btn btn-primary btn-sm btn-accion" (click)="generarPdf(hc)">  🔍 Ver
                     </button>
                   </td>
